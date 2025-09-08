@@ -1,0 +1,4 @@
+displayName = TerrariaInGameWorldEditor
+internalName = TerrariaInGameWorldEditor
+author = whispo
+version = 0.1
