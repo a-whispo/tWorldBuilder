@@ -3,10 +3,14 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 
-namespace TerrariaInGameWorldEditor.UI.UIElements
+namespace TerrariaInGameWorldEditor.UI.UIElements.Button
 {
-    internal class TIGWEButton : UIImageButton
+    public class TIGWEButton : UIImageButton
     {
+        // events
+        public delegate void DrawSelfEventHandler(SpriteBatch spriteBatch);
+        public event DrawSelfEventHandler PostDrawingSelf;
+
         public string HoverText { get; set; } = null;
 
         public TIGWEButton(Asset<Texture2D> texture) : base(texture)
@@ -16,6 +20,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
+            PostDrawingSelf?.Invoke(spriteBatch);
             base.DrawSelf(spriteBatch);
             if (HoverText != null && IsMouseHovering)
             {

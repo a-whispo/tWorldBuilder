@@ -5,8 +5,9 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
+using TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable;
 
-namespace TerrariaInGameWorldEditor.UI.UIElements
+namespace TerrariaInGameWorldEditor.UI.UIElements.ButtonResizable
 {
     internal class TIGWEImageButtonResizeable : TIGWEImageResizeable
     {
@@ -41,7 +42,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements
 
         public void SetText(string text)
         {
-            this._text.SetText(text);
+            _text.SetText(text);
         }
     }
 }

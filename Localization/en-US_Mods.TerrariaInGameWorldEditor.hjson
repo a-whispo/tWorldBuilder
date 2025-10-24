@@ -1,1 +1,14 @@
-"Keybinds.Open Editor.DisplayName": Open  Editor
+Keybinds: {
+	"Open Editor.DisplayName": Open  Editor
+	"Special Key.DisplayName": Special  Key
+	"Key 1.DisplayName": Key 1
+	Delete.DisplayName: Delete
+	"Copy (Key 1 + selected key).DisplayName": Copy ( Key 1 + selected key)
+	"Paste (Key 1 + selected key).DisplayName": Paste ( Key 1 + selected key)
+	"Cut (Key 1 + selected key).DisplayName": Cut ( Key 1 + selected key)
+	"Undo (Key 1 + selected key).DisplayName": Undo ( Key 1 + selected key)
+	"Redo (Key 1 + selected key.DisplayName": Redo ( Key 1 + selected key
+	"Change Paste Corner (Key 1 + selected key).DisplayName": Change  Paste  Corner ( Key 1 + selected key)
+	"Rotate selection (Key 1 + selected key).DisplayName": Rotate selection ( Key 1 + selected key)
+	"Mirror selection (Key 1 + selected key).DisplayName": Mirror selection ( Key 1 + selected key)
+}

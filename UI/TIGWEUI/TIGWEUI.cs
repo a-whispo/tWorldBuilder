@@ -2,11 +2,13 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UI.UIElements;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
+using TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable;
 
-namespace TerrariaInGameWorldEditor.UI
+namespace TerrariaInGameWorldEditor.UI.TIGWEUI
 {
     internal class TIGWEUI : UIState
     {
@@ -17,7 +19,6 @@ namespace TerrariaInGameWorldEditor.UI
         public UserInterface UI { get; set; } = new UserInterface();
 
         // private
-        private TIGWEImageResizeable _titleBar;
         private TIGWEImageResizeable _body;
         private TIGWEButton _xButton;
 
@@ -26,20 +27,27 @@ namespace TerrariaInGameWorldEditor.UI
             base.OnInitialize();
 
             // default size
-            this.Height.Set(300, 0);
-            this.Width.Set(300, 0);
-
-            // title bar
-            _titleBar = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TitleBar"), 6, 4);
-            _titleBar.OnLeftMouseDown += DragStart;
-            _titleBar.OnLeftMouseUp += DragEnd;
-            Append(_titleBar);
+            Height.Set(300, 0);
+            Width.Set(300, 0);
 
             // main body
-            _body = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/UIBody"), 6, 4);
+            _body = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TIGWEUIBody"), 42, 2);
             _body.OnLeftMouseDown += DragStart;
             _body.OnLeftMouseUp += DragEnd;
             Append(_body);
+
+            _xButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/XButton"));
+            _xButton.SetVisibility(0.8f, 1f);
+            _xButton.Width.Set(26, 0f);
+            _xButton.Height.Set(26, 0f);
+            _xButton.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);
+            _xButton.Top.Set(6, 0f);
+            _xButton.OnLeftClick += (evt, listeningElement) =>
+            {
+                Visible = false;
+                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+            };
+            Append(_xButton);
         }
 
         protected virtual void DragEnd(UIMouseEvent evt, UIElement listeningElement)
@@ -55,7 +63,7 @@ namespace TerrariaInGameWorldEditor.UI
             Offset = ((int)evt.MousePosition.X - (int)Left.Pixels, (int)evt.MousePosition.Y - (int)Top.Pixels);
 
             // since we clicked the border we should also move it to the top
-            UIManager.MoveToTop(this);
+            TIGWEUISystem.MoveToTop(this);
         }
 
         public override void Update(GameTime gameTime)
@@ -66,15 +74,17 @@ namespace TerrariaInGameWorldEditor.UI
             if (IsDragging)
             {
                 // get bounds
-                Rectangle screenBounds = new Rectangle(0, 0, Main.screenWidth, Main.screenHeight);
-                var dimensions = this.GetDimensions();
+                int screenWidth = (int)(Main.screenWidth * Main.UIScale);
+                int screenHeight = (int)(Main.screenHeight * Main.UIScale);
+                Rectangle screenBounds = new Rectangle(0, 0, screenWidth, screenHeight);
+                var dimensions = GetDimensions();
 
                 // check so the midpoint of the UI is within the screen bounds
 
                 // check if we should clamp the x position to the screen bounds
                 if (!screenBounds.Contains((int)(Main.mouseX - Offset.Left + dimensions.Width / 2), (int)(dimensions.Y + dimensions.Height / 2)))
                 {
-                    Left.Set(Math.Clamp(Main.mouseX - Offset.Left, -dimensions.Width / 2, Main.screenWidth - dimensions.Width / 2), 0);
+                    Left.Set(Math.Clamp(Main.mouseX - Offset.Left, -dimensions.Width / 2, screenWidth - dimensions.Width / 2), 0);
                 }
                 else
                 {
@@ -84,7 +94,7 @@ namespace TerrariaInGameWorldEditor.UI
                 // check if we should clamp the y position to the screen bounds
                 if (!screenBounds.Contains((int)(dimensions.X + dimensions.Width / 2), (int)(Main.mouseY - Offset.Top + dimensions.Height / 2)))
                 {
-                    Top.Set(Math.Clamp(Main.mouseY - Offset.Top, -dimensions.Height / 2, Main.screenHeight - dimensions.Height / 2), 0);
+                    Top.Set(Math.Clamp(Main.mouseY - Offset.Top, -dimensions.Height / 2, screenHeight - dimensions.Height / 2), 0);
                 }
                 else
                 {
@@ -95,14 +105,14 @@ namespace TerrariaInGameWorldEditor.UI
             }
 
             // update title bar and body sizes and location to match resizes
-            _titleBar.Top.Set(0, 0);
-            _titleBar.Left.Set(0, 0);
-            _titleBar.Height.Set(28, 0);
-            _titleBar.Width.Set(this.Width.Pixels, 0);
-            _body.Top.Set(_titleBar.Height.Pixels, 0);
+            _body.Top.Set(0, 0);
             _body.Left.Set(0, 0);
-            _body.Height.Set(this.Height.Pixels - _titleBar.Height.Pixels, 0);
-            _body.Width.Set(this.Width.Pixels, 0);
+            _body.Height.Set(Height.Pixels, 0);
+            _body.Width.Set(Width.Pixels, 0);
+            _xButton.Height.Set(26, 0f);
+            _xButton.Width.Set(26, 0f);
+            _xButton.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);
+            _xButton.Top.Set(6, 0f);
         }
 
         // handle UserInterface states which determines visibility, this will pretty much only be called from UIManager when updating each TIGWEUIs UserInterface
@@ -113,7 +123,7 @@ namespace TerrariaInGameWorldEditor.UI
             // handle visibility and stuff
             if (Visible && UI.CurrentState == null)
             {
-                UIManager.MoveToTop(this);
+                TIGWEUISystem.MoveToTop(this);
                 UI.SetState(this);
                 UI.CurrentState.Activate();
             }
@@ -121,7 +131,6 @@ namespace TerrariaInGameWorldEditor.UI
             {
                 UI.SetState(null);
             }
-
             // update the UI
             UI.Update(gametime);
         }

@@ -2,9 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.UI;
 
-namespace TerrariaInGameWorldEditor.UI
+namespace TerrariaInGameWorldEditor.UI.UIElements
 {
-    static internal class UIUtils
+    static class UIElementsUtils
     {
         public static void DrawTexture2DWithDimensions(Texture2D texture, Rectangle dimensions, SpriteBatch spriteBatch, Color color = default, int cornerSize = 8, int barSize = 16)
         {
