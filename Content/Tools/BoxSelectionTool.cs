@@ -21,7 +21,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private int _oldHeight = 0;
 
         // hovering
-        private bool _hoveringAny => _hoveringLeft || _hoveringRight || _hoveringTop || _hoveringBottom;
+        public bool HoveringAny => _hoveringLeft || _hoveringRight || _hoveringTop || _hoveringBottom;
         private bool _hoveringRight = false;
         private bool _hoveringLeft = false;
         private bool _hoveringTop = false;
@@ -52,7 +52,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     DrawUtils.DrawMiscOptions(selection, TIGWEUISystem.Settings.ShowCenterLines, TIGWEUISystem.Settings.ShowMeasureLines);
 
                     // draw hovering side highlight
-                    if (_hoveringAny)
+                    if (HoveringAny)
                     {
                         SpriteBatch sb = Main.spriteBatch;
                         sb.End();
@@ -107,7 +107,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             // left click
             if (Main.mouseLeft && Main.mouseLeftRelease && !Main.LocalPlayer.mouseInterface)
             {
-                if (_hoveringAny)
+                if (HoveringAny)
                 {
                     // we are hovering over a side, allow changing only that axis
                     _canChangePoint2X = _hoveringLeft || _hoveringRight;

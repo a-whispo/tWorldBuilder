@@ -4,7 +4,10 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Terraria;
+using Terraria.DataStructures;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
@@ -75,11 +78,16 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     return;
                 }
 
-                // scale mouse position to account for UIScale before we update
-                // (update handles mouse input and hover events)
+                // temporarily adjust to make everything act as if the UI scale is 1f
                 Main.mouseX = (int)(Main.mouseX * Main.UIScale);
                 Main.mouseY = (int)(Main.mouseY * Main.UIScale);
+                float temp = Main.UIScale;
+                Main.UIScale = 1f;
+
                 MainScreenUI.Update(gameTime);
+
+                // restore the original UIScale
+                Main.UIScale = temp;
             }
             else
             {
@@ -108,7 +116,9 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                             // setup spritebatch if we havent yet
                             _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
 
-                            // temporarily set UIScale to 1f and draw our UI with that
+                            // temporarily adjust to make everything act as if the UI scale is 1f
+                            Main.mouseX = (int)(Main.mouseX * Main.UIScale);
+                            Main.mouseY = (int)(Main.mouseY * Main.UIScale);
                             float temp = Main.UIScale;
                             Main.UIScale = 1f;
 
@@ -205,6 +215,12 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                         CopyToClipboard(CurrentSelection);
                         Delete(CurrentSelection, true);
                     }
+                }
+
+                // de select current tool
+                if (Main.mouseRight && Main.mouseRightRelease)
+                {
+                    CurrentTool = null;
                 }
             }
 

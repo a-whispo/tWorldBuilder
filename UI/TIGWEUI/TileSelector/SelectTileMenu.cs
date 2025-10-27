@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
@@ -78,33 +79,36 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
             _grid.SetScrollbar(sb);
             Append(_grid);
 
-            // get all tiles from mods
-            for (int i = 0; i < ItemLoader.ItemCount; i++)
-            {
-                try
+            Task task = new Task(() => {
+                // get all tiles from mods
+                for (int i = 0; i < ItemLoader.ItemCount; i++)
                 {
-                    Item item = new Item(i);
-                    if (item.createTile != -1 || item.createWall != -1)
+                    try
                     {
-                        // add to selectable tiles
-                        _selectableTiles.Add(i);
-
-                        // add to the grid and add an event
-                        SelectTileItem tileItem = new SelectTileItem(i);
-                        _grid.Add(tileItem);
-                        tileItem.OnLeftClick += (evt, listeningElement) =>
+                        Item item = new Item(i);
+                        if (item.createTile != -1 || item.createWall != -1)
                         {
-                            EditorSystem.Local.SelectedTile = tileItem.GetAsTileCopy();
-                        };
+                            // add to selectable tiles
+                            _selectableTiles.Add(i);
+
+                            // add to the grid and add an event
+                            SelectTileItem tileItem = new SelectTileItem(i);
+                            _grid.Add(tileItem);
+                            tileItem.OnLeftClick += (evt, listeningElement) =>
+                            {
+                                EditorSystem.Local.SelectedTile = tileItem.GetAsTileCopy();
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex}");
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex}");
-                }
-            }
-            _grid.SortByTilePlacedTileType();
-            _searchBar.PlaceholderText = $"Search for tiles... [c/60ABE7:({_selectableTiles.Count})]";
+                _grid.SortByTilePlacedTileType();
+                _searchBar.PlaceholderText = $"Search for tiles... [c/60ABE7:({_selectableTiles.Count})]";
+            });
+            task.Start();
         }
 
         public override void Update(GameTime gameTime)

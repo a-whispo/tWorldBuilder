@@ -28,7 +28,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             get => _leftWidth;
             set
             {
-                _leftWidth = value;
+                _leftWidth = Math.Clamp(value, 34, Main.screenWidth / 4);
                 RecalculateSideDimensions();
             }
         }
@@ -38,7 +38,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             get => _rightWidth;
             set
             {
-                _rightWidth = value;
+                _rightWidth = Math.Clamp(value, 34, Main.screenWidth / 4);
                 RecalculateSideDimensions();
             }
         }
@@ -48,7 +48,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             get => _topHeight;
             set
             {
-                _topHeight = value;
+                _topHeight = Math.Clamp(value, 34, 34);
                 RecalculateSideDimensions();
             }
         }
@@ -58,7 +58,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             get => _bottomHeight;
             set
             {
-                _bottomHeight = value;
+                _bottomHeight = Math.Clamp(value, 34, Main.screenHeight / 4);
                 RecalculateSideDimensions();
             }
         }
@@ -71,19 +71,28 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private TIGWEImageResizeable _titleBar;
         private TIGWEImageResizeable _top;
         private TIGWEImageResizeable _innerBorder;
+
+        // resizing
+        public bool _isDraggingSide = false;
+        private bool _hoveringRight = false;
+        private bool _hoveringLeft = false;
+        private bool _hoveringTop = false;
+        private bool _hoveringBottom = false;
+        private delegate void RecalculateSidesHandler();
+        private event RecalculateSidesHandler OnRecalculateSides;
         #endregion
 
         public bool Visible = false;
-        TIGWEButton undoButton;
-        TIGWEButton redoButton;
+        private TIGWEButton _undoButton;
+        private TIGWEButton _redoButton;
 
         public override void OnInitialize()
         {
             base.OnInitialize();
             Left.Set(0, 0f);
             Top.Set(0, 0f);
-            Width.Set(Main.screenWidth * Main.UIScale, 0f);
-            Height.Set(Main.screenHeight * Main.UIScale, 0f);
+            Width.Set(Main.screenWidth * Main.UIScale, 1f);
+            Height.Set(Main.screenHeight * Main.UIScale, 1f);
 
             // main body
             _bottom = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/MainScreenColor"), 1, 1);
@@ -104,7 +113,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             LeftWidth = 130;
             RightWidth = 130;
             TopHeight = 34;
-            RecalculateSideDimensions();
 
             // misc
             TIGWEButton xButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/XButton"));
@@ -270,31 +278,31 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             saveTileButton.HoverText = "Save to palette";
             Append(saveTileButton);
 
-            undoButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Undo"));
-            undoButton.SetVisibility(0.8f, 1f);
-            undoButton.Width.Set(30, 0f);
-            undoButton.Height.Set(30, 0f);
-            undoButton.Left.Set(saveTileButton.Left.Pixels + saveTileButton.Width.Pixels + 2, 0f);
-            undoButton.Top.Set(42, 0f);
-            undoButton.HoverText = "Undo (Ctrl + Z)";
-            undoButton.OnLeftClick += (evt, listeningElement) =>
+            _undoButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Undo"));
+            _undoButton.SetVisibility(0.8f, 1f);
+            _undoButton.Width.Set(30, 0f);
+            _undoButton.Height.Set(30, 0f);
+            _undoButton.Left.Set(saveTileButton.Left.Pixels + saveTileButton.Width.Pixels + 2, 0f);
+            _undoButton.Top.Set(42, 0f);
+            _undoButton.HoverText = "Undo (Ctrl + Z)";
+            _undoButton.OnLeftClick += (evt, listeningElement) =>
             {
                 EditorSystem.Local.Undo();
             };
-            Append(undoButton);
+            Append(_undoButton);
 
-            redoButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Redo"));
-            redoButton.SetVisibility(0.8f, 1f);
-            redoButton.Width.Set(30, 0f);
-            redoButton.Height.Set(30, 0f);
-            redoButton.Left.Set(undoButton.Left.Pixels + undoButton.Width.Pixels + 2, 0f);
-            redoButton.Top.Set(42, 0f);
-            redoButton.HoverText = "Redo (Ctrl + Y)";
-            redoButton.OnLeftClick += (evt, listeningElement) =>
+            _redoButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Redo"));
+            _redoButton.SetVisibility(0.8f, 1f);
+            _redoButton.Width.Set(30, 0f);
+            _redoButton.Height.Set(30, 0f);
+            _redoButton.Left.Set(_undoButton.Left.Pixels + _undoButton.Width.Pixels + 2, 0f);
+            _redoButton.Top.Set(42, 0f);
+            _redoButton.HoverText = "Redo (Ctrl + Y)";
+            _redoButton.OnLeftClick += (evt, listeningElement) =>
             {
                 EditorSystem.Local.Redo();
             };
-            Append(redoButton);
+            Append(_redoButton);
 
             // loop through all the tools and add their buttons
             for (int i = 0; i < EditorSystem.Local.Tools.Count; i++)
@@ -328,6 +336,15 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 int row = (i - (i % perRow)) / perRow; // starts at 0
                 tool.ToggleToolButton.Left.Set(2 * (i - (row * perRow) + 1) + toolWidth * (i - (row * perRow)), 0f);
                 tool.ToggleToolButton.Top.Set(tileButton.Top.Pixels + ((toolHeight + 2) * ((i / perRow) + 1)), 0f);
+
+                int localIndex = i;
+                OnRecalculateSides += () =>
+                {
+                    int perRowLocal = ((LeftWidth - 2) / (toolWidth + 2));
+                    int rowLocal = (localIndex - (localIndex % perRowLocal)) / perRowLocal; // starts at 0
+                    tool.ToggleToolButton.Left.Set(2 * (localIndex - (rowLocal * perRowLocal) + 1) + toolWidth * (localIndex - (rowLocal * perRowLocal)), 0f);
+                    tool.ToggleToolButton.Top.Set(tileButton.Top.Pixels + ((toolHeight + 2) * ((localIndex / perRowLocal) + 1)), 0f);
+                };
                 Append(tool.ToggleToolButton);
             }
         }
@@ -336,7 +353,41 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         {
             base.Update(gameTime);
             // check if we're hovering the ui
-            Main.LocalPlayer.mouseInterface = !(_innerBorder.GetViewCullingArea().Contains((Main.MouseWorld.ToScreenPosition() * Main.UIScale).ToPoint()));
+            Main.LocalPlayer.mouseInterface = !(_innerBorder.GetViewCullingArea().Contains(new Point(Main.mouseX, Main.mouseY)));
+
+            // hovering sides
+            var dimensions = _innerBorder.GetDimensions();
+            if (!_isDraggingSide)
+            {
+                _hoveringRight = Math.Abs(Main.mouseX - dimensions.X - dimensions.Width) < 5f && Main.mouseY > dimensions.Y && Main.mouseY < dimensions.Y + dimensions.Height;
+                _hoveringLeft = Math.Abs(Main.mouseX - dimensions.X) < 5f && Main.mouseY > dimensions.Y && Main.mouseY < dimensions.Y + dimensions.Height;
+                _hoveringTop = Math.Abs(Main.mouseY - dimensions.Y) < 5f && Main.mouseX > dimensions.X && Main.mouseX < dimensions.X + dimensions.Width;
+                _hoveringBottom = Math.Abs(Main.mouseY - dimensions.Y - dimensions.Height) < 5f && Main.mouseX > dimensions.X && Main.mouseX < dimensions.X + dimensions.Width;
+            }
+            if (Main.mouseLeft && (_hoveringRight || _hoveringLeft || _hoveringTop || _hoveringBottom) || _isDraggingSide)
+            {
+                _isDraggingSide = true;
+                if (_hoveringRight)
+                {
+                    RightWidth = (int)(Width.Pixels - Main.mouseX);
+                }
+                if (_hoveringLeft)
+                {
+                    LeftWidth = (int)(Main.mouseX);
+                }
+                if (_hoveringTop)
+                {
+                    TopHeight = (int)(Main.mouseY - _titleBar.Height.Pixels);
+                }
+                if (_hoveringBottom)
+                {
+                    BottomHeight = (int)(Height.Pixels - Main.mouseY);
+                }
+            }
+            if (!Main.mouseLeft)
+            {
+                _isDraggingSide = false;
+            }
 
             // update tools
             EditorSystem.Local.CurrentTool?.Update();
@@ -348,22 +399,22 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             // update undo and redo buttons to match if we can undo or redo
             if (EditorSystem.Local.RedoHistory.Count > 0)
             {
-                redoButton.IgnoresMouseInteraction = false;
-                redoButton.SetVisibility(0.8f, 1f);
+                _redoButton.IgnoresMouseInteraction = false;
+                _redoButton.SetVisibility(0.8f, 1f);
             }
             else
             {
-                redoButton.IgnoresMouseInteraction = true;
-                redoButton.SetVisibility(0.6f, 0.6f);
+                _redoButton.IgnoresMouseInteraction = true;
+                _redoButton.SetVisibility(0.6f, 0.6f);
             }
             if (EditorSystem.Local.UndoHistory.Count > 0)
             {
-                undoButton.IgnoresMouseInteraction = false;
-                undoButton.SetVisibility(0.8f, 1f);
+                _undoButton.IgnoresMouseInteraction = false;
+                _undoButton.SetVisibility(0.8f, 1f);
             } else
             {
-                undoButton.IgnoresMouseInteraction = true;
-                undoButton.SetVisibility(0.6f, 0.6f);
+                _undoButton.IgnoresMouseInteraction = true;
+                _undoButton.SetVisibility(0.6f, 0.6f);
             }
         }
 
@@ -433,6 +484,10 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             _innerBorder.Height.Set(Height.Pixels - _top.Top.Pixels - _top.Height.Pixels - _bottom.Height.Pixels, 0f);
             _innerBorder.Left.Set(_left.Width.Pixels, 0f);
             _innerBorder.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
+
+            OnRecalculateSides?.Invoke();
+
+            Recalculate();
         }
     }
 }
