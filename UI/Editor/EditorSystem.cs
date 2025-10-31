@@ -4,14 +4,10 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Terraria;
-using Terraria.DataStructures;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
-using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Content;
 using TerrariaInGameWorldEditor.Content.Tools;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
@@ -24,12 +20,12 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public static EditorSystem Local;
 
         // ui
-        public static EditorUIState MainScreen;
-        public static UserInterface MainScreenUI;
+        private EditorUIState _mainScreen;
+        private UserInterface _mainScreenUI;
         private SpriteBatch _spriteBatch;
 
         // tools
-        public List<Tool> Tools = [ new BrushTool(), new TilePickerTool(), new MagicWandTool(), new LineTool(), new PaintBucketTool(), new ShapesTool(), new BoxSelectionTool(), new LassoTool() ];
+        public List<Tool> Tools = [ new BrushTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() ];
         private PasteTool _pasteTool = new PasteTool();
         public Tool CurrentTool; // current selected tool
         public Tool LastSelectionTool; // last used selection tool
@@ -53,9 +49,9 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void PostSetupContent()
         {
             base.PostSetupContent();
-            MainScreen = new EditorUIState();
-            MainScreen.Activate();
-            MainScreenUI = new UserInterface();
+            _mainScreen = new EditorUIState();
+            _mainScreen.Activate();
+            _mainScreenUI = new UserInterface();
 
             // for testing
             Tile tile = new Tile();
@@ -70,34 +66,41 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void UpdateUI(GameTime gameTime)
         {
             // update UI
-            if (MainScreen.Visible)
+            if (_mainScreen.Visible)
             {
-                if (MainScreenUI.CurrentState == null)
+                if (_mainScreenUI.CurrentState == null)
                 {
-                    MainScreenUI.SetState(MainScreen);
+                    _mainScreenUI.SetState(_mainScreen);
                     return;
                 }
 
                 // temporarily adjust to make everything act as if the UI scale is 1f
                 Main.mouseX = (int)(Main.mouseX * Main.UIScale);
                 Main.mouseY = (int)(Main.mouseY * Main.UIScale);
-                float temp = Main.UIScale;
+                int tempWidth = Main.screenWidth;
+                int tempHeight = Main.screenHeight;
+                float tempUIScale = Main.UIScale;
+                Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
+                Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
                 Main.UIScale = 1f;
 
-                MainScreenUI.Update(gameTime);
+                // do thing
+                _mainScreenUI.Update(gameTime);
 
-                // restore the original UIScale
-                Main.UIScale = temp;
+                // restore originals
+                Main.UIScale = tempUIScale;
+                Main.screenWidth = tempWidth;
+                Main.screenHeight = tempHeight;
             }
             else
             {
-                MainScreenUI.SetState(null);
+                _mainScreenUI.SetState(null);
             }
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // layer stuff
         {
-            if (MainScreen.Visible)
+            if (_mainScreen.Visible)
             {
                 // removes all layers except the cursor layer
                 layers.RemoveAll(layer =>
@@ -111,7 +114,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     $"{TerrariaInGameWorldEditor.MODNAME}: MainScreen",
                     delegate
                     {
-                        if (MainScreenUI.CurrentState != null)
+                        if (_mainScreenUI.CurrentState != null)
                         {
                             // setup spritebatch if we havent yet
                             _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
@@ -119,16 +122,22 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                             // temporarily adjust to make everything act as if the UI scale is 1f
                             Main.mouseX = (int)(Main.mouseX * Main.UIScale);
                             Main.mouseY = (int)(Main.mouseY * Main.UIScale);
-                            float temp = Main.UIScale;
+                            int tempWidth = Main.screenWidth;
+                            int tempHeight = Main.screenHeight;
+                            float tempUIScale = Main.UIScale;
+                            Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
+                            Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
                             Main.UIScale = 1f;
 
                             // start spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
                             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
-                            MainScreenUI.Draw(_spriteBatch, Main.gameTimeCache);
+                            _mainScreenUI.Draw(_spriteBatch, Main.gameTimeCache);
                             _spriteBatch.End();
 
-                            // restore the original UIScale
-                            Main.UIScale = temp;
+                            // restore originals
+                            Main.UIScale = tempUIScale;
+                            Main.screenWidth = tempWidth;
+                            Main.screenHeight = tempHeight;
                         }
                         return true;
                     },
@@ -140,25 +149,28 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public override void PostUpdateInput()
         {
-            // update current tool input if we have one
-            CurrentTool?.PostUpdateInput();
-
+            if (!Main.LocalPlayer.mouseInterface)
+            {
+                // update current tool input if we have one
+                CurrentTool?.PostUpdateInput();
+            }
+            
             // toggle the main screen visibility if the keybind is pressed
             if (Keybinds.OpenEditorMK.JustPressed)
             {
                 // close the ingame options window if its open
                 Main.ingameOptionsWindow = false;
-                MainScreen.Visible = !MainScreen.Visible;
+                _mainScreen.Visible = !_mainScreen.Visible;
 
                 // reset current tool when closing the main screen
-                if (!MainScreen.Visible)
+                if (!_mainScreen.Visible)
                 {
                     CurrentTool = null;
                 }
             }
 
             // remove current selection if escape is pressed
-            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape) && MainScreen.Visible)
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape) && _mainScreen.Visible)
             {
                 CurrentSelection.Clear();
                 if (CurrentTool?.GetType().BaseType == typeof(SelectionTool))

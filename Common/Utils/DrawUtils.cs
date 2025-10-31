@@ -1,12 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
+using TerrariaInGameWorldEditor.UI.Editor;
 
 namespace TerrariaInGameWorldEditor.Common.Utils
 {
@@ -243,7 +242,10 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                     Texture2D tileWallTex = ps.TryGetWallAndRequestIfNotReady(tileTc.WallType, tileTc.WallColor);
 
                     // get texture from spritesheet with help from frameX and frameY and draw it
-                    _spriteBatch.Draw(tileWallTex, boundsWall, new Rectangle(tileTc.WallFrameX, tileTc.WallFrameY, 32, 32), Color.White * 0.6f);
+                    if (tileWallTex != null)
+                    {
+                        _spriteBatch.Draw(tileWallTex, boundsWall, new Rectangle(tileTc.WallFrameX, tileTc.WallFrameY, 32, 32), Color.White * 0.6f);
+                    }
                 }
             }
 
@@ -253,7 +255,6 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 int drawX = (tile.Key.X - minX) * 16 + coordToDrawAt.X;
                 int drawY = (tile.Key.Y - minY) * 16 + coordToDrawAt.Y;
 
-                // check if its worth doing calculations
                 if (drawX > Main.screenWidth || drawX < 0 || drawY > Main.screenHeight || drawY < 0)
                 {
                     continue;

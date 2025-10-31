@@ -31,6 +31,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 _brush.Clear();
                 _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
             }
+            InfoText = $"Size: {_d}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)

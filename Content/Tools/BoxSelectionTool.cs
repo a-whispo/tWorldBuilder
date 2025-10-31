@@ -27,7 +27,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private bool _hoveringTop = false;
         private bool _hoveringBottom = false;
 
-        public BoxSelectionTool() : base("TerrariaInGameWorldEditor/UI/UIImages/SelectTool", "Box Selection Tool")
+        public BoxSelectionTool() : base("TerrariaInGameWorldEditor/UI/UIImages/SelectTool", "Box Selection")
         {
 
         }
@@ -78,16 +78,17 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     }
                 }
             }
-            DrawUtils.DrawTextAtMouse($"Mode: Selection \nWidth: {selection.Width} \nHeight: {selection.Height}");
+            InfoText = $"Width: {selection.Width}, Height: {selection.Height}";
         }
 
         public override void Update()
         {
+            Rectangle selection = new Rectangle(0, 0, 0, 0);
             if (_point2placed)
             {
                 // get what side we're hovering over
                 // working with zoom makes this a bit more complicated
-                Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
+                selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
                 selection = new Rectangle((int)(selection.X * 16 - (int)Main.screenPosition.X), (int)(selection.Y * 16 - (int)Main.screenPosition.Y), (int)(selection.Width * 16 * Main.GameZoomTarget), (int)(selection.Height * 16 * Main.GameZoomTarget));
                 Vector2 mouse = new Vector2((int)(Main.mouseX), (int)(Main.mouseY)); // mouse position
                 var newXY = Vector2.Transform(new Vector2((int)(selection.X), (int)(selection.Y)), Main.GameViewMatrix.ZoomMatrix);

@@ -27,7 +27,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private int _yDiff = 0;
         private int _xDiff = 0;
 
-        public LineTool() : base("TerrariaInGameWorldEditor/UI/UIImages/LineTool", "Line Tool")
+        public LineTool() : base("TerrariaInGameWorldEditor/UI/UIImages/LineTool", "Line")
         {
 
         }
@@ -61,6 +61,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 ToolUtils.Paste(_tilesInLine, new Point(_tilesInLine.GetMinX(), _tilesInLine.GetMinY()), true, TIGWEUISystem.Settings.ShouldUpdateDrawnTiles);
                 _tilesInLine.Clear();
             }
+
+            InfoText = $"Size: {_d}, Length: {_length + _d - 1}, Y difference: {_yDiff}, X difference: {_xDiff}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -75,7 +77,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             {
                 Console.WriteLine($"[{TerrariaInGameWorldEditor.MODNAME}] Error drawing line tool: {ex}");
             }
-            DrawUtils.DrawTextAtMouse($"Mode: Line\nSize: {_d} \nLength: {_length + _d - 1} \n Y difference: {_yDiff} \n X difference: {_xDiff}");
         }
 
         public override void PostUpdateInput()
@@ -133,6 +134,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         {
             // algorithm from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C#
             var tiles = ToolUtils.GetEllipseFilledTileCollection(width, width, EditorSystem.Local.SelectedTile).AsDictionary().ToList();
+
             _length = 0;
             int x0 = origin.X;
             int y0 = origin.Y;

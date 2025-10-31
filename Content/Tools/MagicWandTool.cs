@@ -28,6 +28,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             }
         }
 
+        public override void Update()
+        {
+            base.Update();
+            InfoText = $"Count: {Selection.Count}";
+        }
+
         public override void PostUpdateInput()
         {
             Main.blockMouse = true;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.ID;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
@@ -21,6 +22,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             TileCollection tc = new TileCollection();
             tc.TryAddTile(point, new TileCopy(Main.tile[point.X, point.Y]));
             DrawUtils.DrawTileCollectionOutline(tc, point, TIGWEUISystem.Settings.ToolColor);
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            InfoText = $"Target tile type: {(Main.tile[Player.tileTargetX, Player.tileTargetY].HasTile ? TileID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].TileType) : "Air")} (ID: {Main.tile[Player.tileTargetX, Player.tileTargetY].TileType}), Target wall type: {(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType != 0 ? WallID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType) : "None")} (ID: {Main.tile[Player.tileTargetX, Player.tileTargetY].WallType})";
         }
 
         public override void PostUpdateInput()

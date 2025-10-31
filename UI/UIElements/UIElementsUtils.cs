@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using Terraria.UI;
 
 namespace TerrariaInGameWorldEditor.UI.UIElements
@@ -18,7 +19,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements
             Point bottomRight = new Point(topLeft.X + dimensions.Width - cornerSize, topLeft.Y + dimensions.Height - cornerSize);
 
             // middle part
-            spriteBatch.Draw(texture, new Rectangle(topLeft.X + cornerSize, topLeft.Y + cornerSize, dimensions.Width - cornerSize * 2, dimensions.Height - cornerSize * 2), new Rectangle(cornerSize, cornerSize, barSize - 2, barSize - 2), color); // middle part
+            spriteBatch.Draw(texture, new Rectangle(topLeft.X + cornerSize, topLeft.Y + cornerSize, dimensions.Width - cornerSize * 2, dimensions.Height - cornerSize * 2), new Rectangle(cornerSize, cornerSize, Math.Max(barSize, 2), Math.Max(barSize, 2)), color); // middle part
 
             // corners
             spriteBatch.Draw(texture, new Rectangle(topLeft.X, topLeft.Y, cornerSize, cornerSize), new Rectangle(0, 0, cornerSize, cornerSize), color); // top left
@@ -37,13 +38,11 @@ namespace TerrariaInGameWorldEditor.UI.UIElements
 
         public static void DrawTexture(Texture2D texture, int width, int height, UIElement element, SpriteBatch spriteBatch)
         {
-            Color color = Color.White;
-
             // calculate bounds
             CalculatedStyle dimensions = element.GetDimensions();
 
             // draw the texture
-            spriteBatch.Draw(texture, new Rectangle((int)dimensions.X, (int)dimensions.Y, (int)dimensions.Width, (int)dimensions.Height), color);
+            spriteBatch.Draw(texture, new Rectangle((int)dimensions.X, (int)dimensions.Y, (int)dimensions.Width, (int)dimensions.Height), Color.White);
         }
     }
 }

@@ -1,10 +1,14 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Humanizer;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
+using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
@@ -28,7 +32,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             get => _leftWidth;
             set
             {
-                _leftWidth = Math.Clamp(value, 34, Main.screenWidth / 4);
+                _leftWidth = Math.Clamp(value, 34, Main.screenWidth / 8);
                 RecalculateSideDimensions();
             }
         }
@@ -38,7 +42,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             get => _rightWidth;
             set
             {
-                _rightWidth = Math.Clamp(value, 34, Main.screenWidth / 4);
+                _rightWidth = Math.Clamp(value, 50, Main.screenWidth / 8);
                 RecalculateSideDimensions();
             }
         }
@@ -58,7 +62,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             get => _bottomHeight;
             set
             {
-                _bottomHeight = Math.Clamp(value, 34, Main.screenHeight / 4);
+                _bottomHeight = Math.Clamp(value, 34, Main.screenHeight / 8);
                 RecalculateSideDimensions();
             }
         }
@@ -85,6 +89,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public bool Visible = false;
         private TIGWEButton _undoButton;
         private TIGWEButton _redoButton;
+        private UIText _toolInfoText;
+        private EditorPalette _palette;
 
         public override void OnInitialize()
         {
@@ -110,11 +116,11 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
             // some default bounds
             BottomHeight = 32;
-            LeftWidth = 130;
-            RightWidth = 130;
+            LeftWidth = 34;
+            RightWidth = 50;
             TopHeight = 34;
 
-            // misc
+            // x button
             TIGWEButton xButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/XButton"));
             xButton.SetVisibility(0.8f, 1f);
             xButton.Width.Set(30, 0f);
@@ -129,12 +135,13 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             xButton.HoverText = "Close";
             Append(xButton);
 
+            // settings button
             TIGWEButton settingsButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/SettingsButton"));
             settingsButton.SetVisibility(0.8f, 1f);
             settingsButton.Width.Set(30, 0f);
             settingsButton.Height.Set(30, 0f);
-            settingsButton.Left.Set(Width.Pixels - settingsButton.Width.Pixels - 2, 0f);
-            settingsButton.Top.Set(42, 0f);
+            settingsButton.Left.Set(2, 0f);
+            settingsButton.Top.Set(4, 0f);
             settingsButton.OnLeftClick += (evt, listeningElement) =>
             {
                 TIGWEUISystem.SettingsUI.Visible = !TIGWEUISystem.SettingsUI.Visible;
@@ -142,6 +149,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             settingsButton.HoverText = "Settings";
             Append(settingsButton);
 
+
+            // current selected tile (opens tile browser on click)
             TIGWEButton tileButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TileButton"));
             tileButton.SetVisibility(0.8f, 1f);
             tileButton.Width.Set(30, 0f);
@@ -164,7 +173,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                         TilePaintSystemV2 ps = Main.instance.TilePaintSystem;
                         Rectangle tileButtonRect = tileButton.GetDimensions().ToRectangle();
                         int x = tileButtonRect.X + tileButtonRect.Width / 2 - 16 / 2;
-                        int y = tileButtonRect.Y + +tileButtonRect.Height / 2 - 16 / 2;
+                        int y = tileButtonRect.Y + tileButtonRect.Height / 2 - 16 / 2;
 
                         // wall part
                         if (selectedTile.WallType != 0)
@@ -269,6 +278,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             };
             Append(tileButton);
 
+
+            // save tile to palette button
             TIGWEButton saveTileButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/SaveButton"));
             saveTileButton.SetVisibility(0.8f, 1f);
             saveTileButton.Width.Set(30, 0f);
@@ -276,8 +287,19 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             saveTileButton.Left.Set(tileButton.Left.Pixels + tileButton.Width.Pixels + 2, 0f);
             saveTileButton.Top.Set(42, 0f);
             saveTileButton.HoverText = "Save to palette";
+            saveTileButton.OnLeftClick += (evt, listeningElement) =>
+            {
+                PaletteItem item = new PaletteItem(EditorSystem.Local.SelectedTile);
+                item.OnLeftClick += (evt, listeningElement) =>
+                {
+                    EditorSystem.Local.SelectedTile = item.TileCopy;
+                };
+                _palette.AddItem(item);
+                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
+            };
             Append(saveTileButton);
 
+            // undo button
             _undoButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Undo"));
             _undoButton.SetVisibility(0.8f, 1f);
             _undoButton.Width.Set(30, 0f);
@@ -291,6 +313,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             };
             Append(_undoButton);
 
+            // redo button
             _redoButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Redo"));
             _redoButton.SetVisibility(0.8f, 1f);
             _redoButton.Width.Set(30, 0f);
@@ -304,6 +327,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             };
             Append(_redoButton);
 
+            UIGrid toolGrid = new UIGrid();
             // loop through all the tools and add their buttons
             for (int i = 0; i < EditorSystem.Local.Tools.Count; i++)
             {
@@ -332,28 +356,47 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 tool.ToggleToolButton.SetVisibility(0.8f, 1f);
                 tool.ToggleToolButton.Width.Set(toolWidth, 0f);
                 tool.ToggleToolButton.Height.Set(toolHeight, 0f);
-                int perRow = ((LeftWidth - 2) / (toolWidth + 2));
-                int row = (i - (i % perRow)) / perRow; // starts at 0
-                tool.ToggleToolButton.Left.Set(2 * (i - (row * perRow) + 1) + toolWidth * (i - (row * perRow)), 0f);
-                tool.ToggleToolButton.Top.Set(tileButton.Top.Pixels + ((toolHeight + 2) * ((i / perRow) + 1)), 0f);
-
-                int localIndex = i;
-                OnRecalculateSides += () =>
-                {
-                    int perRowLocal = ((LeftWidth - 2) / (toolWidth + 2));
-                    int rowLocal = (localIndex - (localIndex % perRowLocal)) / perRowLocal; // starts at 0
-                    tool.ToggleToolButton.Left.Set(2 * (localIndex - (rowLocal * perRowLocal) + 1) + toolWidth * (localIndex - (rowLocal * perRowLocal)), 0f);
-                    tool.ToggleToolButton.Top.Set(tileButton.Top.Pixels + ((toolHeight + 2) * ((localIndex / perRowLocal) + 1)), 0f);
-                };
-                Append(tool.ToggleToolButton);
+                toolGrid.Add(tool.ToggleToolButton);
             }
+            toolGrid.ListPadding = 2f;
+            toolGrid.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
+            toolGrid.Left.Set(2, 0f);
+            toolGrid.Width.Set(LeftWidth - 4, 0f);
+            toolGrid.Height.Set(0, 0.5f);
+            OnRecalculateSides += () =>
+            {
+                toolGrid.Width.Set(LeftWidth - 4, 0f);
+            };
+            Append(toolGrid);
+
+            // palette
+            _palette = new EditorPalette();
+            _palette.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
+            _palette.Left.Set(_right.Left.Pixels + 2, 0f);
+            _palette.Width.Set(RightWidth - 4, 0f);
+            OnRecalculateSides += () =>
+            {
+                _palette.Width.Set(RightWidth - 4, 0f);
+                _palette.Left.Set(_right.Left.Pixels + 2, 0f);
+            };
+            Append(_palette);
+
+            // text at the bottom with info about stuff
+            _toolInfoText = new UIText("");
+            _toolInfoText.Left.Set(_left.Width.Pixels + 4, 0f);
+            _toolInfoText.Top.Set(8, 0f);
+            _bottom.Append(_toolInfoText);
+
+            // update everything
+            RecalculateSideDimensions();
+            RecalculateSideDimensions();
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
             // check if we're hovering the ui
-            Main.LocalPlayer.mouseInterface = !(_innerBorder.GetViewCullingArea().Contains(new Point(Main.mouseX, Main.mouseY)));
+            Main.LocalPlayer.mouseInterface = !(_innerBorder.GetViewCullingArea().Contains(new Point(Main.mouseX, Main.mouseY))) || _isDraggingSide;
 
             // hovering sides
             var dimensions = _innerBorder.GetDimensions();
@@ -416,6 +459,10 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 _undoButton.IgnoresMouseInteraction = true;
                 _undoButton.SetVisibility(0.6f, 0.6f);
             }
+
+            _toolInfoText.SetText($"(X: {Player.tileTargetX}, Y: {Player.tileTargetY}) {EditorSystem.Local.CurrentTool?.InfoText}");
+            _toolInfoText.Left.Set(LeftWidth + 4, 0f);
+            _toolInfoText.Recalculate();
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -438,7 +485,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.CurrentSelection, new Point(EditorSystem.Local.CurrentSelection.GetMinX(), EditorSystem.Local.CurrentSelection.GetMinY()), TIGWEUISystem.Settings.ToolColor);
                 }
             }
-            
+
             // draw the ui on top
             base.Draw(spriteBatch);
 
@@ -447,7 +494,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             {
                 Rectangle dimensions = EditorSystem.Local.CurrentTool.ToggleToolButton.GetViewCullingArea();
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + 2, dimensions.Y, dimensions.Width - 4, 2), new Color(166, 105, 22));
-                spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + + dimensions.Width - 2, dimensions.Y + 2, 2, dimensions.Height - 4), new Color(166, 105, 22));
+                spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + +dimensions.Width - 2, dimensions.Y + 2, 2, dimensions.Height - 4), new Color(166, 105, 22));
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + 2, dimensions.Y + dimensions.Height - 2, dimensions.Width - 4, 2), new Color(227, 167, 43));
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X, dimensions.Y + 2, 2, dimensions.Height - 4), new Color(227, 167, 43));
             }
@@ -455,6 +502,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public void RecalculateSideDimensions()
         {
+            // resize sides
             _bottom.Width.Set(0, 1f);
             _bottom.Height.Set(BottomHeight, 0f);
             _bottom.Left.Set(0, 0f);
@@ -486,7 +534,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             _innerBorder.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
 
             OnRecalculateSides?.Invoke();
-
             Recalculate();
         }
     }

@@ -36,6 +36,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             DrawUtils.DrawMiscOptions(selection, TIGWEUISystem.Settings.ShowCenterLines, TIGWEUISystem.Settings.ShowMeasureLines);
         }
 
+        public override void Update()
+        {
+            base.Update();
+            InfoText = $"Count: {EditorSystem.Local.Clipboard.Count}";
+        }
+
         public override void PostUpdateInput()
         {
             Main.blockMouse = true;

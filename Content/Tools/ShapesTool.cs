@@ -28,7 +28,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         }
         private Mode mode = Mode.CircleFilled;
 
-        public ShapesTool() : base("TerrariaInGameWorldEditor/UI/UIImages/ShapesTool", "Shapes Tool")
+        public ShapesTool() : base("TerrariaInGameWorldEditor/UI/UIImages/ShapesTool", "Shapes")
         {
 
         }
@@ -77,7 +77,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     _point2placed = false;
                 }
             }
-            //DrawUtils.DrawTextAtMouse($"Mode: Shapes \nType: {mode} (Swap with the arrow keys)\nSize: {d} \nWidth: {selection.Width} \nHeight: {selection.Height}");
+            InfoText = $"Shape type: {mode}, Size: {_d}, Width: {selection.Width}, Height: {selection.Height}";
         }
 
         public override void PostUpdateInput()

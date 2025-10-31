@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
+using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.UIElements.Scrollbar;
@@ -128,7 +129,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                 }
                 else
                 {
-                    if (_grid.isSearching)
+                    if (_grid.IsSearching)
                     {
                         _grid.ExitSearch();
                     }

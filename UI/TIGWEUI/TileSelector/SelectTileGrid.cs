@@ -11,15 +11,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 {
     internal class SelectTileGrid : UIGrid
     {
-        public bool isSearching = false;
-        public List<UIElement> allItems = new List<UIElement>();
+        public bool IsSearching = false;
+        public List<UIElement> AllItems = new List<UIElement>();
 
         public override void Add(UIElement item)
         {
             base.Add(item);
-            if (!allItems.Contains(item))
+            if (!AllItems.Contains(item))
             {
-                allItems.Add(item);
+                AllItems.Add(item);
             }
         }
 
@@ -28,9 +28,9 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
             base.AddRange(items);
             foreach (UIElement item in items)
             {
-                if (!allItems.Contains(item))
+                if (!AllItems.Contains(item))
                 {
-                    allItems.Add(item);
+                    AllItems.Add(item);
                 }
             }
             SortByTilePlacedTileType();
@@ -38,13 +38,13 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 
         public void SearchFor(string searchTerm)
         {
-            isSearching = true;
+            IsSearching = true;
 
             // list of matching items
-            List<SelectTileItem> matchingItems = new List<SelectTileItem>(allItems.Count);
+            List<SelectTileItem> matchingItems = new List<SelectTileItem>(AllItems.Count);
 
             // go over all our possible items
-            foreach (SelectTileItem item in allItems)
+            foreach (SelectTileItem item in AllItems)
             {
                 // check if the item matches the search term and if its a file (we dont want to display folders when searching)
                 if (item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) // if it contains the seatch term add it to items that should show up
@@ -67,9 +67,9 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
         {
             // clear all our current items so we can add the ones that should be visible
             Clear();
-            isSearching = false;
+            IsSearching = false;
 
-            AddRange(allItems);
+            AddRange(AllItems);
 
             // recalculate
             Recalculate();

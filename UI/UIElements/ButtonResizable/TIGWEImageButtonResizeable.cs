@@ -16,6 +16,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ButtonResizable
 
         public TIGWEImageButtonResizeable(Asset<Texture2D> texture) : base(texture)
         {
+            OverrideSamplerState = SamplerState.PointClamp;
             _text.Left.Set(10, 0);
             _text.Top.Set(7, 0);
             _text.IgnoresMouseInteraction = true;

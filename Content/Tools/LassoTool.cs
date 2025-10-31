@@ -14,7 +14,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
     {
         private bool _isSelecting = false;
 
-        public LassoTool() : base("TerrariaInGameWorldEditor/UI/UIImages/BrushTool", "Lasso Tool")
+        public LassoTool() : base("TerrariaInGameWorldEditor/UI/UIImages/LassoTool", "Lasso")
         {
 
         }
@@ -35,6 +35,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             {
                 DrawUtils.DrawTileCollectionOutline(Selection, new Point(Selection.GetMinX(), Selection.GetMinY()), TIGWEUISystem.Settings.ToolColor);
             }
+
+            InfoText = $"Count: {Selection.Count}";
         }
 
         private TileCollection CalculateTilesInLine(Point origin, Point endpoint)

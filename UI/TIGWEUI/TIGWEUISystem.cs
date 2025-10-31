@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector;
 
@@ -121,8 +120,8 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                     $"{TerrariaInGameWorldEditor.MODNAME}: UI",
                     delegate
                     {
-                        // only bother drawing stuff if the editor ui is visible
-                        if (EditorSystem.MainScreen.Visible)
+                    // only bother drawing stuff if the editor ui is visible
+                    if (layers.FindIndex((layer) => layer.Name.Equals($"{TerrariaInGameWorldEditor.MODNAME}: MainScreen")) > 0)
                         {
                             // go over all the UIs
                             foreach (TIGWEUI state in _states)
@@ -132,8 +131,12 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                                     // setup spritebatch if we havent yet
                                     _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
 
-                                    // temporarily set UIScale to 1f and draw our UI with that
-                                    float temp = Main.UIScale;
+                                    // temporarily adjust to make everything act as if the UI scale is 1f
+                                    int tempWidth = Main.screenWidth;
+                                    int tempHeight = Main.screenHeight;
+                                    float tempUIScale = Main.UIScale;
+                                    Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
+                                    Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
                                     Main.UIScale = 1f;
 
                                     // start a new spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
@@ -141,8 +144,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                                     state.UI.Draw(_spriteBatch, Main.gameTimeCache);
                                     _spriteBatch.End();
 
-                                    // restore the original UIScale
-                                    Main.UIScale = temp;
+                                    // restore originals
+                                    Main.UIScale = tempUIScale;
+                                    Main.screenWidth = tempWidth;
+                                    Main.screenHeight = tempHeight;
                                 }
                             }
                         }

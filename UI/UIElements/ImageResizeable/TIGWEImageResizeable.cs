@@ -2,18 +2,17 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.Common.Utils;
 
 namespace TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable
 {
     internal class TIGWEImageResizeable : UIElement
     {
-        public int CornerSize { get; set; }
-        public int BarSize { get; set; }
-        public bool ShouldResize { get; set; }
-        public Color Color { get; set; } = Color.White;
-        public Asset<Texture2D> Texture { get; set; }
-        public Asset<Texture2D> TextureHover { get; set; }
+        public int CornerSize;
+        public int BarSize;
+        public bool ShouldResize;
+        public Color Color = Color.White;
+        public Asset<Texture2D> Texture;
+        public Asset<Texture2D> TextureHover;
 
         public TIGWEImageResizeable(Asset<Texture2D> texture, int cornerSize = 8, int barSize = 16, bool shouldResize = true)
         {
@@ -22,31 +21,19 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable
             CornerSize = cornerSize;
             BarSize = barSize;
             ShouldResize = shouldResize;
+            OverrideSamplerState = SamplerState.PointClamp;
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            if (IsMouseHovering) // draw textures
+            // draw textures
+            if (ShouldResize)
             {
-                if (ShouldResize)
-                {
-                    UIElementsUtils.DrawTexture2DWithDimensions(TextureHover.Value, GetDimensions().ToRectangle(), spriteBatch, Color, CornerSize, BarSize);
-                }
-                else
-                {
-                    UIElementsUtils.DrawTexture(TextureHover.Value, (int)Width.Pixels, (int)Height.Pixels, this, spriteBatch);
-                }
+                UIElementsUtils.DrawTexture2DWithDimensions(IsMouseHovering ? TextureHover.Value : Texture.Value, GetDimensions().ToRectangle(), spriteBatch, Color, CornerSize, BarSize);
             }
             else
             {
-                if (ShouldResize)
-                {
-                    UIElementsUtils.DrawTexture2DWithDimensions(Texture.Value, GetDimensions().ToRectangle(), spriteBatch, Color, CornerSize, BarSize);
-                }
-                else
-                {
-                    UIElementsUtils.DrawTexture(Texture.Value, (int)Width.Pixels, (int)Height.Pixels, this, spriteBatch);
-                }
+                UIElementsUtils.DrawTexture(IsMouseHovering ? TextureHover.Value : Texture.Value, (int)Width.Pixels, (int)Height.Pixels, this, spriteBatch);
             }
         }
     }
