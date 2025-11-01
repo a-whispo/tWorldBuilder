@@ -1,9 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.GameInput;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
@@ -31,7 +33,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 _brush.Clear();
                 _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
             }
-            InfoText = $"Size: {_d}";
+            InfoText = $"[c/EAD87A:Size:] {_d}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -112,6 +114,24 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     // paste
                     ToolUtils.Paste(_brush, new Point(point.X - width, point.Y - height), false, TIGWEUISystem.Settings.ShouldUpdateDrawnTiles);
                 }
+            }
+
+            // change brush size with mouse wheel
+            if (Keybinds.Key1MK.Current || Keybinds.Key1MK.GetAssignedKeys().Count < 1)
+            {
+                PlayerInput.LockVanillaMouseScroll($"{TerrariaInGameWorldEditor.MODNAME}/Brush");
+                if (PlayerInput.ScrollWheelDelta > 0)
+                {
+                    _d += (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift) ? 10 : 1);
+                }
+                if (PlayerInput.ScrollWheelDelta < 0)
+                {
+                    if (_d >= 2)
+                    {
+                        _d -= (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift) ? 10 : 1);
+                    }
+                }
+                _d = Math.Max(_d, 1);
             }
         }
     }

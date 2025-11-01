@@ -78,7 +78,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     }
                 }
             }
-            InfoText = $"Width: {selection.Width}, Height: {selection.Height}";
+            InfoText = $"[c/EAD87A:Width:] {selection.Width}, [c/EAD87A:Height:] {selection.Height}";
         }
 
         public override void Update()

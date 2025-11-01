@@ -31,7 +31,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public override void Update()
         {
             base.Update();
-            InfoText = $"Count: {Selection.Count}";
+            InfoText = $"[c/EAD87A:Count:] {Selection.Count}";
         }
 
         public override void PostUpdateInput()

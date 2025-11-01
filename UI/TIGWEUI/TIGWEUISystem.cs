@@ -35,7 +35,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             foreach (TIGWEUI state in _states.ToArray())
             {
                 // check if mouse is hovering over ui
-                if (state.IsMouseHovering)
+                if (state.IsMouseHovering || state.IsDragging)
                 {
                     Main.LocalPlayer.mouseInterface = true;
                 }

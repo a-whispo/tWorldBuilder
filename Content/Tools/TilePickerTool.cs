@@ -27,7 +27,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public override void Update()
         {
             base.Update();
-            InfoText = $"Target tile type: {(Main.tile[Player.tileTargetX, Player.tileTargetY].HasTile ? TileID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].TileType) : "Air")} (ID: {Main.tile[Player.tileTargetX, Player.tileTargetY].TileType}), Target wall type: {(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType != 0 ? WallID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType) : "None")} (ID: {Main.tile[Player.tileTargetX, Player.tileTargetY].WallType})";
+            InfoText = $"[c/EAD87A:Target Tile Type:] {(Main.tile[Player.tileTargetX, Player.tileTargetY].HasTile ? TileID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].TileType) : "Air")} ([c/EAD87A:ID:] {Main.tile[Player.tileTargetX, Player.tileTargetY].TileType}), [c/EAD87A:Target Wall Type:] {(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType != 0 ? WallID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType) : "None")} ([c/EAD87A:ID:] {Main.tile[Player.tileTargetX, Player.tileTargetY].WallType})";
         }
 
         public override void PostUpdateInput()

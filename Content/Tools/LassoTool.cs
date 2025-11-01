@@ -36,7 +36,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 DrawUtils.DrawTileCollectionOutline(Selection, new Point(Selection.GetMinX(), Selection.GetMinY()), TIGWEUISystem.Settings.ToolColor);
             }
 
-            InfoText = $"Count: {Selection.Count}";
+            InfoText = $"[c/EAD87A:Count:] {Selection.Count}";
         }
 
         private TileCollection CalculateTilesInLine(Point origin, Point endpoint)

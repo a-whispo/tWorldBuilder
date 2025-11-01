@@ -149,12 +149,9 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public override void PostUpdateInput()
         {
-            if (!Main.LocalPlayer.mouseInterface)
-            {
-                // update current tool input if we have one
-                CurrentTool?.PostUpdateInput();
-            }
-            
+            // update input for the ui
+            _mainScreen.PostUpdateInput();
+
             // toggle the main screen visibility if the keybind is pressed
             if (Keybinds.OpenEditorMK.JustPressed)
             {

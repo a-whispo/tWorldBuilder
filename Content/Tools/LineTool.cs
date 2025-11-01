@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Linq;
 using Terraria;
@@ -62,7 +63,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 _tilesInLine.Clear();
             }
 
-            InfoText = $"Size: {_d}, Length: {_length + _d - 1}, Y difference: {_yDiff}, X difference: {_xDiff}";
+            InfoText = $"[c/EAD87A:Size:] {_d}, [c/EAD87A:Length:] {_length + _d - 1}, [c/EAD87A:Y Difference:] {_yDiff}, [c/EAD87A:X Difference:] {_xDiff}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -118,15 +119,16 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 PlayerInput.LockVanillaMouseScroll($"{TerrariaInGameWorldEditor.MODNAME}/Line");
                 if (PlayerInput.ScrollWheelDelta > 0)
                 {
-                    _d++;
+                    _d += (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift) ? 10 : 1);
                 }
                 if (PlayerInput.ScrollWheelDelta < 0)
                 {
                     if (_d >= 2)
                     {
-                        _d--;
+                        _d -= (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift) ? 10 : 1);
                     }
                 }
+                _d = Math.Max(_d, 1);
             }
         }
 

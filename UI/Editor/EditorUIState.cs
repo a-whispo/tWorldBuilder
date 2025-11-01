@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -428,11 +429,16 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             RecalculateSideDimensions();
         }
 
-        public override void Update(GameTime gameTime)
+        public void PostUpdateInput()
         {
-            base.Update(gameTime);
             // check if we're hovering the ui
-            Main.LocalPlayer.mouseInterface = !(_innerBorder.GetViewCullingArea().Contains(new Point(Main.mouseX, Main.mouseY))) || _isDraggingSide;
+            Main.LocalPlayer.mouseInterface = !(_innerBorder.GetViewCullingArea().Contains(new Point(Main.mouseX, Main.mouseY))) || _isDraggingSide || Main.LocalPlayer.mouseInterface;
+
+            if (!Main.LocalPlayer.mouseInterface)
+            {
+                // update current tool input if we have one
+                EditorSystem.Local.CurrentTool?.PostUpdateInput();
+            }
 
             // hovering sides
             var dimensions = _innerBorder.GetDimensions();
@@ -443,7 +449,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 _hoveringTop = Math.Abs(Main.mouseY - dimensions.Y) < 5f && Main.mouseX > dimensions.X && Main.mouseX < dimensions.X + dimensions.Width;
                 _hoveringBottom = Math.Abs(Main.mouseY - dimensions.Y - dimensions.Height) < 5f && Main.mouseX > dimensions.X && Main.mouseX < dimensions.X + dimensions.Width;
             }
-            if (Main.mouseLeft && (_hoveringRight || _hoveringLeft || _hoveringTop || _hoveringBottom) || _isDraggingSide)
+            if (Main.mouseLeft && Main.mouseLeftRelease && (_hoveringRight || _hoveringLeft || _hoveringTop || _hoveringBottom) || _isDraggingSide)
             {
                 _isDraggingSide = true;
                 if (_hoveringRight)
@@ -467,7 +473,11 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             {
                 _isDraggingSide = false;
             }
+        }
 
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
             // update tools
             EditorSystem.Local.CurrentTool?.Update();
             if (EditorSystem.Local.CurrentTool?.GetType().BaseType == typeof(SelectionTool))
@@ -496,7 +506,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 _undoButton.SetVisibility(0.6f, 0.6f);
             }
 
-            _toolInfoText.SetText($"(X: {Player.tileTargetX}, Y: {Player.tileTargetY}) {EditorSystem.Local.CurrentTool?.InfoText}");
+            _toolInfoText.SetText($"([c/EAD87A:X:] {Player.tileTargetX}, [c/EAD87A:Y:] {Player.tileTargetY}) {EditorSystem.Local.CurrentTool?.InfoText}");
             _toolInfoText.Left.Set(LeftWidth + 4, 0f);
             _toolInfoText.Recalculate();
         }
