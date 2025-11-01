@@ -11,6 +11,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
     {
         private TIGWEImageResizeable _border;
         private UIGrid _paletteGrid;
+        public bool IsDeletingItems = false;
+        public bool AutoResizeHeight = false;
 
         public EditorPalette()
         {
@@ -41,14 +43,22 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             Append(_paletteGrid);
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        public override void Recalculate()
         {
             // update sizes
             _border.Width.Set(Width.Pixels, 0f);
             _border.Height.Set(Height.Pixels, 0f);
             _paletteGrid.Width.Set(_border.Width.Pixels - 16, 0f);
             _paletteGrid.Height.Set(_border.Height.Pixels - 16, 0f);
-            Height.Set(_paletteGrid.Count > 0 ? _paletteGrid._items[^1].Top.Pixels + _paletteGrid._items[^1].Height.Pixels + _paletteGrid.Top.Pixels + 8 : 16, 0f);
+            if (AutoResizeHeight)
+            {
+                Height.Set(_paletteGrid.Count > 0 ? _paletteGrid._items[^1].Top.Pixels + _paletteGrid._items[^1].Height.Pixels + _paletteGrid.Top.Pixels + 8 : 12, 0f);
+            }
+            base.Recalculate();
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
             Recalculate();
             base.Draw(spriteBatch);
         }
@@ -56,6 +66,21 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public void AddItem(PaletteItem item)
         {
             _paletteGrid.Add(item);
+            Recalculate();
+        }
+
+        public void RemoveItem(PaletteItem item)
+        {
+            if (_paletteGrid._items.Count > 0)
+            {
+                _paletteGrid.Remove(item);
+                Recalculate();
+            }
+        }
+
+        public void ClearItems()
+        {
+            _paletteGrid.Clear();
             Recalculate();
         }
     }

@@ -10,7 +10,6 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.Button
         // events
         public delegate void DrawSelfEventHandler(SpriteBatch spriteBatch);
         public event DrawSelfEventHandler PostDrawingSelf;
-
         public string HoverText { get; set; } = null;
 
         public TIGWEButton(Asset<Texture2D> texture) : base(texture)

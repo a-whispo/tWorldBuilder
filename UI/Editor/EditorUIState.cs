@@ -1,8 +1,6 @@
-﻿using Humanizer;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -91,6 +89,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private TIGWEButton _redoButton;
         private UIText _toolInfoText;
         private EditorPalette _palette;
+        private TIGWEButton _paletteDeleteButton;
 
         public override void OnInitialize()
         {
@@ -280,13 +279,13 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
 
             // save tile to palette button
-            TIGWEButton saveTileButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/SaveButton"));
+            TIGWEButton saveTileButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/AddButton"));
             saveTileButton.SetVisibility(0.8f, 1f);
             saveTileButton.Width.Set(30, 0f);
             saveTileButton.Height.Set(30, 0f);
             saveTileButton.Left.Set(tileButton.Left.Pixels + tileButton.Width.Pixels + 2, 0f);
             saveTileButton.Top.Set(42, 0f);
-            saveTileButton.HoverText = "Save to palette";
+            saveTileButton.HoverText = "Add to current palette";
             saveTileButton.OnLeftClick += (evt, listeningElement) =>
             {
                 PaletteItem item = new PaletteItem(EditorSystem.Local.SelectedTile);
@@ -295,6 +294,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     EditorSystem.Local.SelectedTile = item.TileCopy;
                 };
                 _palette.AddItem(item);
+                _palette.Recalculate();
+                RecalculateSideDimensions();
                 SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
             };
             Append(saveTileButton);
@@ -369,17 +370,53 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             };
             Append(toolGrid);
 
-            // palette
+            // palette (wow this sucks)
             _palette = new EditorPalette();
             _palette.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
             _palette.Left.Set(_right.Left.Pixels + 2, 0f);
             _palette.Width.Set(RightWidth - 4, 0f);
+            _palette.AutoResizeHeight = true;
             OnRecalculateSides += () =>
             {
                 _palette.Width.Set(RightWidth - 4, 0f);
                 _palette.Left.Set(_right.Left.Pixels + 2, 0f);
             };
             Append(_palette);
+            // buttons for palette
+            _paletteDeleteButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/DeleteButton"));
+            _paletteDeleteButton.HoverText = "Delete";
+            _paletteDeleteButton.Width.Set(30, 0f);
+            _paletteDeleteButton.Height.Set(30, 0f);
+            _paletteDeleteButton.SetVisibility(0.8f, 1f);
+            _paletteDeleteButton.OnLeftClick += (evt, listeningElement) =>
+            {
+                _palette.IsDeletingItems = !_palette.IsDeletingItems;
+                _paletteDeleteButton.HoverText = _palette.IsDeletingItems ? "Finish Deleting" : "Delete";                
+            };
+            TIGWEButton paletteClearButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/ClearButton"));
+            paletteClearButton.HoverText = "Clear";
+            paletteClearButton.Width.Set(30, 0f);
+            paletteClearButton.Height.Set(30, 0f);
+            paletteClearButton.SetVisibility(0.8f, 1f);
+            paletteClearButton.OnLeftClick += (evt, listeningElement) =>
+            {
+                if (!_palette.IsDeletingItems)
+                {
+                    _palette.ClearItems();
+                }
+            };
+            UIGrid paletteButtonGrid = new UIGrid();
+            paletteButtonGrid.Height.Set(200, 0f);
+            paletteButtonGrid.Left.Set(10, 0f);
+            paletteButtonGrid.ListPadding = 2f;
+            paletteButtonGrid.Add(_paletteDeleteButton);
+            paletteButtonGrid.Add(paletteClearButton);
+            OnRecalculateSides += () =>
+            {
+                paletteButtonGrid.Top.Set(_palette.Top.Pixels + _palette.Height.Pixels + 2, 0f);
+                paletteButtonGrid.Width.Set(RightWidth - 20, 0f);
+            };
+            _right.Append(paletteButtonGrid);
 
             // text at the bottom with info about stuff
             _toolInfoText = new UIText("");
@@ -388,7 +425,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             _bottom.Append(_toolInfoText);
 
             // update everything
-            RecalculateSideDimensions();
             RecalculateSideDimensions();
         }
 
@@ -467,6 +503,9 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public override void Draw(SpriteBatch spriteBatch)
         {
+            // should maybe not do this every frame but whatever
+            RecalculateSideDimensions();
+
             if (EditorSystem.Local.CurrentTool != null)
             {
                 // draw tools
@@ -493,6 +532,15 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             if (EditorSystem.Local.CurrentTool != null)
             {
                 Rectangle dimensions = EditorSystem.Local.CurrentTool.ToggleToolButton.GetViewCullingArea();
+                spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + 2, dimensions.Y, dimensions.Width - 4, 2), new Color(166, 105, 22));
+                spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + +dimensions.Width - 2, dimensions.Y + 2, 2, dimensions.Height - 4), new Color(166, 105, 22));
+                spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + 2, dimensions.Y + dimensions.Height - 2, dimensions.Width - 4, 2), new Color(227, 167, 43));
+                spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X, dimensions.Y + 2, 2, dimensions.Height - 4), new Color(227, 167, 43));
+            }
+            // draw gold outline if we're deleting palette items
+            if (_palette.IsDeletingItems)
+            {
+                Rectangle dimensions = _paletteDeleteButton.GetViewCullingArea();
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + 2, dimensions.Y, dimensions.Width - 4, 2), new Color(166, 105, 22));
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + +dimensions.Width - 2, dimensions.Y + 2, 2, dimensions.Height - 4), new Color(166, 105, 22));
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + 2, dimensions.Y + dimensions.Height - 2, dimensions.Width - 4, 2), new Color(227, 167, 43));
