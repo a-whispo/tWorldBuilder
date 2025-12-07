@@ -6,6 +6,7 @@ using Terraria;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -23,17 +24,15 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public override void Draw(SpriteBatch spriteBatch)
         {
             // dont draw anything if we dont have a clipboard
-            if (EditorSystem.Local.Clipboard.Count == 0)
+            if (EditorSystem.Local.Clipboard.Count != 0)
             {
-                return;
-            }
-
-            // paste preview
-            Rectangle selection = GetCurrentSelectionRectangle();
-            Color color = TIGWEUISystem.Settings.ToolColor;
-            DrawUtils.DrawTileCollection(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), TIGWEUISystem.Settings.ShouldPasteTiles, TIGWEUISystem.Settings.ShouldPasteWalls, TIGWEUISystem.Settings.ShouldPasteLiquid, TIGWEUISystem.Settings.ShouldPasteWires);
-            DrawUtils.DrawRectangleOutline(new Rectangle(selection.X, selection.Y, selection.Width + 1, selection.Height + 1), color);
-            DrawUtils.DrawMiscOptions(selection, TIGWEUISystem.Settings.ShowCenterLines, TIGWEUISystem.Settings.ShowMeasureLines);
+                // paste preview
+                Rectangle selection = GetCurrentSelectionRectangle();
+                Color color = TIGWESettings.ToolColor;
+                DrawUtils.DrawTileCollection(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), TIGWESettings.ShouldPasteTiles, TIGWESettings.ShouldPasteWalls, TIGWESettings.ShouldPasteLiquid, TIGWESettings.ShouldPasteWires);
+                DrawUtils.DrawRectangleOutline(new Rectangle(selection.X, selection.Y, selection.Width + 1, selection.Height + 1), color);
+                DrawUtils.DrawMiscOptions(selection, TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
+            }  
         }
 
         public override void Update()

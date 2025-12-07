@@ -5,6 +5,7 @@ using Terraria;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -48,8 +49,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 if (Selection.Count > 0 || !_point2placed)
                 {
                     selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
-                    DrawUtils.DrawRectangleOutline(selection, TIGWEUISystem.Settings.ToolColor);
-                    DrawUtils.DrawMiscOptions(selection, TIGWEUISystem.Settings.ShowCenterLines, TIGWEUISystem.Settings.ShowMeasureLines);
+                    DrawUtils.DrawRectangleOutline(selection, TIGWESettings.ToolColor);
+                    DrawUtils.DrawMiscOptions(selection, TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
 
                     // draw hovering side highlight
                     if (HoveringAny)

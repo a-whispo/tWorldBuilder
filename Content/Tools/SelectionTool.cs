@@ -2,7 +2,7 @@
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
-    internal class SelectionTool : Tool
+    internal abstract class SelectionTool : Tool
     {
         public TileCollection Selection { get; } = new TileCollection();
 

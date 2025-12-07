@@ -32,10 +32,11 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             colorText.Top.Set(52, 0);
             Append(colorText);
             TIGWEColorPicker toolColorPicker = new TIGWEColorPicker();
-            TIGWEUISystem.Settings.ToolColor = toolColorPicker.GetColor();
+            toolColorPicker.DrawScale = 1f;
+            TIGWESettings.ToolColor = toolColorPicker.GetColor();
             toolColorPicker.OnColorChanged += (color) =>
             {
-                TIGWEUISystem.Settings.ToolColor = color;
+                TIGWESettings.ToolColor = color;
             };
             toolColorPicker.Top.Set(72, 0);
             toolColorPicker.Left.Set(12, 0);
@@ -59,10 +60,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             pasteTilesText.Top.Set(15, 0);
             pasteOptions.Append(pasteTilesText);
             TIGWECheckBox pasteTilesCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteTiles = pasteTilesCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteTiles = pasteTilesCheckBox.IsChecked;
             pasteTilesCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteTiles = isChecked;
+                TIGWESettings.ShouldPasteTiles = isChecked;
             };
             pasteTilesCheckBox.Left.Set(10, 0);
             pasteTilesCheckBox.Top.Set(11, 0);
@@ -74,10 +75,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             pasteWallsText.Top.Set(51, 0);
             pasteOptions.Append(pasteWallsText);
             TIGWECheckBox pasteWallsCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteWalls = pasteWallsCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteWalls = pasteWallsCheckBox.IsChecked;
             pasteWallsCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteWalls = isChecked;
+                TIGWESettings.ShouldPasteWalls = isChecked;
             };
             pasteWallsCheckBox.Left.Set(10, 0);
             pasteWallsCheckBox.Top.Set(47, 0);
@@ -89,10 +90,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             pasteLiquidText.Top.Set(87, 0);
             pasteOptions.Append(pasteLiquidText);
             TIGWECheckBox pasteLiquidCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteLiquid = pasteLiquidCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteLiquid = pasteLiquidCheckBox.IsChecked;
             pasteLiquidCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteLiquid = isChecked;
+                TIGWESettings.ShouldPasteLiquid = isChecked;
             };
             pasteLiquidCheckBox.Left.Set(10, 0);
             pasteLiquidCheckBox.Top.Set(83, 0);
@@ -104,10 +105,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             pasteWireText.Top.Set(15, 0);
             pasteOptions.Append(pasteWireText);
             TIGWECheckBox pasteWireCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteWires = pasteWireCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteWires = pasteWireCheckBox.IsChecked;
             pasteWireCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteWires = isChecked;
+                TIGWESettings.ShouldPasteWires = isChecked;
             };
             pasteWireCheckBox.Left.Set(110, 0);
             pasteWireCheckBox.Top.Set(11, 0);
@@ -131,10 +132,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             linesText.Top.Set(15, 0);
             otherOptions.Append(linesText);
             TIGWECheckBox linesCheckBox = new TIGWECheckBox();
-            TIGWEUISystem.Settings.ShowCenterLines = linesCheckBox.IsChecked;
+            TIGWESettings.ShowCenterLines = linesCheckBox.IsChecked;
             linesCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShowCenterLines = isChecked;
+                TIGWESettings.ShowCenterLines = isChecked;
             };
             linesCheckBox.Left.Set(10, 0);
             linesCheckBox.Top.Set(10, 0);
@@ -146,10 +147,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             measureText.Top.Set(50, 0);
             otherOptions.Append(measureText);
             TIGWECheckBox measureCheckBox = new TIGWECheckBox();
-            TIGWEUISystem.Settings.ShowMeasureLines = measureCheckBox.IsChecked;
+            TIGWESettings.ShowMeasureLines = measureCheckBox.IsChecked;
             measureCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShowMeasureLines = isChecked;
+                TIGWESettings.ShowMeasureLines = isChecked;
             };
             measureCheckBox.Left.Set(10, 0);
             measureCheckBox.Top.Set(45, 0);
@@ -161,10 +162,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             pasteOnAirText.Top.Set(85, 0);
             otherOptions.Append(pasteOnAirText);
             TIGWECheckBox pasteOnAirCheckBox = new TIGWECheckBox();
-            TIGWEUISystem.Settings.ShouldOnlyPasteOnAir = pasteOnAirCheckBox.IsChecked;
+            TIGWESettings.ShouldOnlyPasteOnAir = pasteOnAirCheckBox.IsChecked;
             pasteOnAirCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldOnlyPasteOnAir = isChecked;
+                TIGWESettings.ShouldOnlyPasteOnAir = isChecked;
             };
             pasteOnAirCheckBox.Left.Set(10, 0);
             pasteOnAirCheckBox.Top.Set(80, 0);
@@ -176,10 +177,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             pasteAirText.Top.Set(120, 0);
             otherOptions.Append(pasteAirText);
             TIGWECheckBox pasteAirCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteAir = pasteAirCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteAir = pasteAirCheckBox.IsChecked;
             pasteAirCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteAir = isChecked;
+                TIGWESettings.ShouldPasteAir = isChecked;
             };
             pasteAirCheckBox.Left.Set(10, 0);
             pasteAirCheckBox.Top.Set(115, 0);
@@ -191,10 +192,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             updateDrawnTilesText.Top.Set(155, 0);
             otherOptions.Append(updateDrawnTilesText);
             TIGWECheckBox updateDrawnTilesCheckBox = new TIGWECheckBox();
-            TIGWEUISystem.Settings.ShouldUpdateDrawnTiles = updateDrawnTilesCheckBox.IsChecked;
+            TIGWESettings.ShouldUpdateDrawnTiles = updateDrawnTilesCheckBox.IsChecked;
             updateDrawnTilesCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldUpdateDrawnTiles = isChecked;
+                TIGWESettings.ShouldUpdateDrawnTiles = isChecked;
             };
             updateDrawnTilesCheckBox.HoverText = "[c/EAD87A:Note:] Also updates tiles around where you draw.\nTiles larger than 1x1 often break from this, be careful.";
             updateDrawnTilesCheckBox.Left.Set(10, 0);
@@ -219,10 +220,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             onTilesText.Top.Set(15, 0);
             pasteOnOptions.Append(onTilesText);
             TIGWECheckBox onTilesCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteOnTiles = onTilesCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteOnTiles = onTilesCheckBox.IsChecked;
             onTilesCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteOnTiles = isChecked;
+                TIGWESettings.ShouldPasteOnTiles = isChecked;
             };
             onTilesCheckBox.Left.Set(10, 0);
             onTilesCheckBox.Top.Set(10, 0);
@@ -234,10 +235,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             onWallsText.Top.Set(50, 0);
             pasteOnOptions.Append(onWallsText);
             TIGWECheckBox onWallsCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteOnWalls = onWallsCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteOnWalls = onWallsCheckBox.IsChecked;
             onWallsCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteOnWalls = isChecked;
+                TIGWESettings.ShouldPasteOnWalls = isChecked;
             };
             onWallsCheckBox.Left.Set(10, 0);
             onWallsCheckBox.Top.Set(46, 0);
@@ -249,10 +250,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             onLiquidText.Top.Set(86, 0);
             pasteOnOptions.Append(onLiquidText);
             TIGWECheckBox onLiquidCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteOnLiquid = onLiquidCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteOnLiquid = onLiquidCheckBox.IsChecked;
             onLiquidCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteOnLiquid = isChecked;
+                TIGWESettings.ShouldPasteOnLiquid = isChecked;
             };
             onLiquidCheckBox.Left.Set(10, 0);
             onLiquidCheckBox.Top.Set(82, 0);
@@ -264,10 +265,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             onAirText.Top.Set(122, 0);
             pasteOnOptions.Append(onAirText);
             TIGWECheckBox OnAirCheckBox = new TIGWECheckBox(true);
-            TIGWEUISystem.Settings.ShouldPasteOnAir = OnAirCheckBox.IsChecked;
+            TIGWESettings.ShouldPasteOnAir = OnAirCheckBox.IsChecked;
             OnAirCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWEUISystem.Settings.ShouldPasteOnAir = isChecked;
+                TIGWESettings.ShouldPasteOnAir = isChecked;
             };
             OnAirCheckBox.Left.Set(10, 0);
             OnAirCheckBox.Top.Set(118, 0);

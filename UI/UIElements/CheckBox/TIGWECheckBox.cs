@@ -70,7 +70,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.CheckBox
         public override void LeftClick(UIMouseEvent evt)
         {
             IsChecked = !IsChecked;
-            OnCheckedChanged.Invoke(IsChecked);
+            OnCheckedChanged?.Invoke(IsChecked);
             MouseOver(evt); // update texture
         }
     }

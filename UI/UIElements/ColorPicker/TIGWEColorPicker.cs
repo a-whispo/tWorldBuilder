@@ -17,6 +17,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ColorPicker
     {
         public delegate void OnColorChangedHandler(Color color);
         public event OnColorChangedHandler OnColorChanged;
+        public float DrawScale;
 
         private UIElement _colorPane;
         private UIImage _colorDot;
@@ -31,6 +32,8 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ColorPicker
 
         public TIGWEColorPicker()
         {
+            DrawScale = Main.UIScale;
+
             // set width and height
             Width.Set(350, 0);
             Height.Set(120, 0);
@@ -84,11 +87,9 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ColorPicker
             hex.Top.Set(50, 0);
             hex.Left.Set(149, 0);
             Append(hex);
-            _hexTextField = new TIGWETextField("", 6, 40);
+            _hexTextField = new TIGWETextField("", 6);
+            _hexTextField.TextOffsetLeft = 40;
             _hexTextField.CanFocus = false;
-            _hexTextField.Texture = ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/ColorPicker/HexTextField");
-            _hexTextField.TextureHover = ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/ColorPicker/HexTextFieldHover");
-            _hexTextField.ShouldResize = false;
             _hexTextField.Width.Set(150, 0);
             _hexTextField.Height.Set(32, 0);
             _hexTextField.Top.Set(43, 0);
@@ -287,13 +288,13 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ColorPicker
 
             // need to start a new spritebatch with nonpremultiplied blendstate to properly draw the gradient
             spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Matrix.CreateScale(1));
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Matrix.CreateScale(DrawScale));
             // draw gradient
             spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/ColorPicker/Gradient"), new Rectangle(bounds.X + 6, bounds.Y + 6, bounds.Width - 11, bounds.Height - 11), Color.White);
 
             // start normal spritebatch again
             spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Matrix.CreateScale(1)); // make sure to go back to the normal spritebatch
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Matrix.CreateScale(DrawScale)); // make sure to go back to the normal spritebatch
 
             // draw all children like border and dot after so they appear on top
             base.DrawChildren(spriteBatch);

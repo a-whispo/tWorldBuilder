@@ -5,6 +5,7 @@ using System.Linq;
 using Terraria;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Common.Utils
 {
@@ -64,15 +65,15 @@ namespace TerrariaInGameWorldEditor.Common.Utils
 
                 // temporary copy of the tile we want to paste
                 TileCopy temp = new TileCopy(tile.Value.GetAsTile());
-                if ((TIGWEUISystem.Settings.ShouldOnlyPasteOnAir && Main.tile[x, y].LiquidAmount == 0 && Main.tile[x, y].WallType == 0 && !Main.tile[x, y].HasTile) || !TIGWEUISystem.Settings.ShouldOnlyPasteOnAir)
+                if ((TIGWESettings.ShouldOnlyPasteOnAir && Main.tile[x, y].LiquidAmount == 0 && Main.tile[x, y].WallType == 0 && !Main.tile[x, y].HasTile) || !TIGWESettings.ShouldOnlyPasteOnAir)
                 {
                     // check what we should paste on
-                    if ((TIGWEUISystem.Settings.ShouldPasteOnTiles && Main.tile[x, y].HasTile) || (TIGWEUISystem.Settings.ShouldPasteOnWalls && Main.tile[x, y].WallType != 0) || (TIGWEUISystem.Settings.ShouldPasteOnLiquid && Main.tile[x, y].LiquidAmount > 0) || (TIGWEUISystem.Settings.ShouldPasteOnAir && (!Main.tile[x, y].HasTile && Main.tile[x, y].TileType == 0 && Main.tile[x, y].WallType == 0 && Main.tile[x, y].LiquidAmount == 0)))
+                    if ((TIGWESettings.ShouldPasteOnTiles && Main.tile[x, y].HasTile) || (TIGWESettings.ShouldPasteOnWalls && Main.tile[x, y].WallType != 0) || (TIGWESettings.ShouldPasteOnLiquid && Main.tile[x, y].LiquidAmount > 0) || (TIGWESettings.ShouldPasteOnAir && (!Main.tile[x, y].HasTile && Main.tile[x, y].TileType == 0 && Main.tile[x, y].WallType == 0 && Main.tile[x, y].LiquidAmount == 0)))
                     {
                         // paste liquid
-                        if (TIGWEUISystem.Settings.ShouldPasteLiquid)
+                        if (TIGWESettings.ShouldPasteLiquid)
                         {
-                            if ((!TIGWEUISystem.Settings.ShouldPasteAir && tile.Value.LiquidAmount != 0) || TIGWEUISystem.Settings.ShouldPasteAir)
+                            if ((!TIGWESettings.ShouldPasteAir && tile.Value.LiquidAmount != 0) || TIGWESettings.ShouldPasteAir)
                             {
                                 ((Tile)(Main.tile[x, y])).LiquidType = temp.LiquidType;
                                 Main.tile[x, y].LiquidAmount = temp.LiquidAmount; // set liquid
@@ -80,9 +81,9 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                         }
 
                         // paste walls
-                        if (TIGWEUISystem.Settings.ShouldPasteWalls)
+                        if (TIGWESettings.ShouldPasteWalls)
                         {
-                            if ((!TIGWEUISystem.Settings.ShouldPasteAir && tile.Value.WallType != 0) || TIGWEUISystem.Settings.ShouldPasteAir)
+                            if ((!TIGWESettings.ShouldPasteAir && tile.Value.WallType != 0) || TIGWESettings.ShouldPasteAir)
                             {
                                 // get some temporary values
                                 temp.CopyWallData(tile.Value.GetAsTile());
@@ -101,9 +102,9 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                         }
 
                         // paste tiles
-                        if (TIGWEUISystem.Settings.ShouldPasteTiles)
+                        if (TIGWESettings.ShouldPasteTiles)
                         {
-                            if ((!TIGWEUISystem.Settings.ShouldPasteAir && tile.Value.HasTile) || TIGWEUISystem.Settings.ShouldPasteAir)
+                            if ((!TIGWESettings.ShouldPasteAir && tile.Value.HasTile) || TIGWESettings.ShouldPasteAir)
                             {
                                 // get some temporary values
                                 byte liquidAmount = Main.tile[x, y].LiquidAmount;
@@ -136,9 +137,9 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                         }
 
                         // paste wire stuff
-                        if (TIGWEUISystem.Settings.ShouldPasteWires)
+                        if (TIGWESettings.ShouldPasteWires)
                         {
-                            if ((!TIGWEUISystem.Settings.ShouldPasteAir && (tile.Value.HasWire || tile.Value.HasActuator)) || TIGWEUISystem.Settings.ShouldPasteAir)
+                            if ((!TIGWESettings.ShouldPasteAir && (tile.Value.HasWire || tile.Value.HasActuator)) || TIGWESettings.ShouldPasteAir)
                             {
                                 // get some temporary values
                                 temp.CopyWireData(tile.Value.GetAsTile());

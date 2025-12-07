@@ -11,7 +11,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 {
     internal class SelectTileGrid : UIGrid
     {
-        public bool IsSearching = false;
         public List<UIElement> AllItems = new List<UIElement>();
 
         public override void Add(UIElement item)
@@ -38,8 +37,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 
         public void SearchFor(string searchTerm)
         {
-            IsSearching = true;
-
             // list of matching items
             List<SelectTileItem> matchingItems = new List<SelectTileItem>(AllItems.Count);
 
@@ -55,23 +52,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 
             // clear and add matching items
             Clear();
-            AddRange(matchingItems);
+            if (!searchTerm.Equals(""))
+            {
+                AddRange(matchingItems);
+            } else
+            {
+                AddRange(AllItems);
+            }
 
             // recalculate and stuff
-            Recalculate();
-            RecalculateChildren();
-            SortByTilePlacedTileType();
-        }
-
-        public void ExitSearch()
-        {
-            // clear all our current items so we can add the ones that should be visible
-            Clear();
-            IsSearching = false;
-
-            AddRange(AllItems);
-
-            // recalculate
             Recalculate();
             RecalculateChildren();
             SortByTilePlacedTileType();

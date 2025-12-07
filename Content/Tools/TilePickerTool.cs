@@ -6,6 +6,7 @@ using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -21,7 +22,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             Point point = new Point(Player.tileTargetX, Player.tileTargetY);
             TileCollection tc = new TileCollection();
             tc.TryAddTile(point, new TileCopy(Main.tile[point.X, point.Y]));
-            DrawUtils.DrawTileCollectionOutline(tc, point, TIGWEUISystem.Settings.ToolColor);
+            DrawUtils.DrawTileCollectionOutline(tc, point, TIGWESettings.ToolColor);
         }
 
         public override void Update()

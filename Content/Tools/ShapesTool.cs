@@ -8,6 +8,9 @@ using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
+using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -20,7 +23,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private bool _point2placed = false;
 
         private int _d = 4;
-        private KeyboardState _oldState;
         private enum Mode
         {
             Rectangle,
@@ -28,11 +30,50 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             Circle,
             CircleFilled
         }
-        private Mode mode = Mode.CircleFilled;
+        private Mode mode = Mode.Rectangle;
+        private TIGWENumberField _sizeField;
+        private TIGWEDropDown _modeDropDown;
 
         public ShapesTool() : base("TerrariaInGameWorldEditor/UI/UIImages/ShapesTool", "Shapes")
         {
+            // settings
+            // mode
+            _modeDropDown = new TIGWEDropDown(["Rectangle", "Filled Rectangle", "Circle", "Filled Circle"]);
+            _modeDropDown.ShowDropDownButton = true;
+            _modeDropDown.SetDefaultOption("Rectangle");
+            _modeDropDown.OnOptionChanged += (string optionText) =>
+            {
+                switch (optionText)
+                {
+                    case "Rectangle":
+                        mode = Mode.Rectangle;
+                        break;
+                    case "Filled Rectangle":
+                        mode = Mode.RectangleFilled;
+                        break;
+                    case "Circle":
+                        mode = Mode.Circle;
+                        break;
+                    case "Filled Circle":
+                        mode = Mode.CircleFilled;
+                        break;
+                }
+            };
+            _modeDropDown.Height.Set(26, 0f);
+            _modeDropDown.Width.Set(170, 0f);
+            Settings.Add(("Shape type:", _modeDropDown));
 
+            // size
+            _sizeField = new TIGWENumberField(4, 200, 1);
+            _d = 4;
+            _sizeField.OnValueChanged += (int newValue) =>
+            {
+                _d = _sizeField.GetValue();
+            };
+            _sizeField.Width.Set(60, 0);
+            _sizeField.Height.Set(26, 0);
+            _sizeField.ShowButtons = true;
+            Settings.Add(("Size:", _sizeField));
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -48,7 +89,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
                 selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
                 selection = new Rectangle(selection.X, selection.Y, selection.Width, selection.Height);
-                Color color = TIGWEUISystem.Settings.ToolColor;
+                Color color = TIGWESettings.ToolColor;
 
                 TileCollection tiles;
                 switch (mode)
@@ -71,15 +112,15 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
                 DrawUtils.DrawTileCollection(tiles, new Point(selection.X, selection.Y));
                 DrawUtils.DrawTileCollectionOutline(tiles, new Point(selection.X, selection.Y), color);
-                DrawUtils.DrawMiscOptions(selection, TIGWEUISystem.Settings.ShowCenterLines, TIGWEUISystem.Settings.ShowMeasureLines);
+                DrawUtils.DrawMiscOptions(selection, TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
                 if (_point2placed)
                 {
-                    ToolUtils.Paste(tiles, new Point(selection.X, selection.Y), true, TIGWEUISystem.Settings.ShouldUpdateDrawnTiles);
+                    ToolUtils.Paste(tiles, new Point(selection.X, selection.Y), true, TIGWESettings.ShouldUpdateDrawnTiles);
                     _point1placed = false;
                     _point2placed = false;
                 }
             }
-            InfoText = $"[c/EAD87A:Shape type:] {mode}, [c/EAD87A:Size:] {_d}, [c/EAD87A:Width:] {selection.Width}, [c/EAD87A:Height:] {selection.Height}";
+            InfoText = $"[c/EAD87A:Shape type:] {mode}, [c/EAD87A:Width:] {selection.Width}, [c/EAD87A:Height:] {selection.Height}";
         }
 
         public override void PostUpdateInput()
@@ -111,46 +152,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 _point2placed = false;
             }
 
-            // check arrow keys input // swap mode with left/right
-            KeyboardState currentState = Keyboard.GetState();
-            if (currentState.IsKeyDown(Keys.Left) && _oldState.IsKeyUp(Keys.Left))
-            {
-                switch (mode)
-                {
-                    case Mode.Rectangle:
-                        mode = Mode.RectangleFilled;
-                        break;
-                    case Mode.RectangleFilled:
-                        mode = Mode.Circle;
-                        break;
-                    case Mode.Circle:
-                        mode = Mode.CircleFilled;
-                        break;
-                    case Mode.CircleFilled:
-                        mode = Mode.Rectangle;
-                        break;
-                }
-            }
-            if (currentState.IsKeyDown(Keys.Right) && _oldState.IsKeyUp(Keys.Right))
-            {
-                switch (mode)
-                {
-                    case Mode.Rectangle:
-                        mode = Mode.CircleFilled;
-                        break;
-                    case Mode.RectangleFilled:
-                        mode = Mode.Rectangle;
-                        break;
-                    case Mode.Circle:
-                        mode = Mode.RectangleFilled;
-                        break;
-                    case Mode.CircleFilled:
-                        mode = Mode.Circle;
-                        break;
-                }
-            }
-            _oldState = Keyboard.GetState();
-
             // change size with mouse wheel
             if (Keybinds.Key1MK.Current || Keybinds.Key1MK.GetAssignedKeys().Count < 1)
             {
@@ -166,7 +167,11 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         _d -= (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift) ? 10 : 1);
                     }
                 }
-                _d = Math.Max(_d, 1);
+                if (PlayerInput.ScrollWheelDelta != 0)
+                {
+                    _d = Math.Max(_d, 1);
+                    _sizeField.SetValue(_d);
+                }
             }
         }
 

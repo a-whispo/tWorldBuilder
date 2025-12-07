@@ -11,6 +11,7 @@ using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Content;
 using TerrariaInGameWorldEditor.Content.Tools;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.UI.Editor
 {
@@ -27,7 +28,16 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         // tools
         public List<Tool> Tools = [ new BrushTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() ];
         private PasteTool _pasteTool = new PasteTool();
-        public Tool CurrentTool; // current selected tool
+        private Tool _currentTool;
+        public Tool CurrentTool { // current selected tool
+            get {
+                return _currentTool;
+            }
+            set {
+                _currentTool = value;
+                _mainScreen.RecalculateToolSettings();
+            }
+        }
         public Tool LastSelectionTool; // last used selection tool
 
         // editing
@@ -71,6 +81,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 if (_mainScreenUI.CurrentState == null)
                 {
                     _mainScreenUI.SetState(_mainScreen);
+                    TIGWEUISystem.Local.ShouldRenderUI = true;
                     return;
                 }
 
@@ -95,6 +106,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             else
             {
                 _mainScreenUI.SetState(null);
+                TIGWEUISystem.Local.ShouldRenderUI = false;
             }
         }
 
@@ -150,7 +162,10 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void PostUpdateInput()
         {
             // update input for the ui
-            _mainScreen.PostUpdateInput();
+            if (_mainScreen.Visible)
+            {
+                _mainScreen.PostUpdateInput();
+            }
 
             // toggle the main screen visibility if the keybind is pressed
             if (Keybinds.OpenEditorMK.JustPressed)
@@ -158,12 +173,12 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 // close the ingame options window if its open
                 Main.ingameOptionsWindow = false;
                 _mainScreen.Visible = !_mainScreen.Visible;
+            }
 
-                // reset current tool when closing the main screen
-                if (!_mainScreen.Visible)
-                {
-                    CurrentTool = null;
-                }
+            // reset current tool if window is closed
+            if (!_mainScreen.Visible)
+            {
+                CurrentTool = null;
             }
 
             // remove current selection if escape is pressed
@@ -241,6 +256,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     Delete(CurrentSelection, true); // delete
                 }
             }
+
             base.PostUpdateInput();
         }
 
@@ -300,19 +316,20 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 tileColl.TryAddTile(new Point(x, y), new TileCopy(Main.tile[x, y]));
 
                 // will only delete walls
-                if (TIGWEUISystem.Settings.ShouldPasteWalls)
+                if (TIGWESettings.ShouldPasteWalls)
                 {
-                    Main.tile[x, y].WallType = 0; // pretty much deletes the wall
+                    Main.tile[x, y].WallType = 0;
                 }
 
                 // will only delete tiles
-                if (TIGWEUISystem.Settings.ShouldPasteTiles)
+                if (TIGWESettings.ShouldPasteTiles)
                 {
-                    Framing.GetTileSafely(x, y).ClearTile();
+                    ((Tile)Main.tile[x, y]).HasTile = false;
+                    Main.tile[x, y].TileType = 0;
                 }
 
                 // deletes liquid
-                if (TIGWEUISystem.Settings.ShouldPasteLiquid)
+                if (TIGWESettings.ShouldPasteLiquid)
                 {
                     Main.tile[x, y].LiquidAmount = 0;
                 }

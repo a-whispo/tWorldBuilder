@@ -7,6 +7,7 @@ using Terraria;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -27,13 +28,13 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 var selectionArray = Selection.AsDictionary().ToArray();
                 Vector2 pointLast = new Vector2(selectionArray[selectionArray.Count() - 1].Key.X * 16 - Main.screenPosition.X + 8, selectionArray[selectionArray.Count() - 1].Key.Y * 16 - Main.screenPosition.Y + 8);
                 Vector2 pointFirst = new Vector2(selectionArray[0].Key.X * 16 - Main.screenPosition.X + 8, selectionArray[0].Key.Y * 16 - Main.screenPosition.Y + 8);
-                DrawUtils.DrawLine(pointLast, pointFirst, color: TIGWEUISystem.Settings.ToolColor);
+                DrawUtils.DrawLine(pointLast, pointFirst, color: TIGWESettings.ToolColor);
             }
 
             // draw the selection
             if (Selection.Count > 0)
             {
-                DrawUtils.DrawTileCollectionOutline(Selection, new Point(Selection.GetMinX(), Selection.GetMinY()), TIGWEUISystem.Settings.ToolColor);
+                DrawUtils.DrawTileCollectionOutline(Selection, new Point(Selection.GetMinX(), Selection.GetMinY()), TIGWESettings.ToolColor);
             }
 
             InfoText = $"[c/EAD87A:Count:] {Selection.Count}";

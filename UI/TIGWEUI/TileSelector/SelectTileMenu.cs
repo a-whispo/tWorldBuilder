@@ -42,11 +42,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
             Append(_menuText);
 
             // search bar
-            _searchBar = new TIGWETextField($"Search for tiles... [c/60ABE7:({_selectableTiles.Count})]", 100, 8, 3);
+            _searchBar = new TIGWETextField($"Search for tiles... [c/60ABE7:({_selectableTiles.Count})]", 100);
             _searchBar.Width.Set(250, 0);
             _searchBar.Height.Set(26, 0);
             _searchBar.Top.Set(51, 0);
             _searchBar.Left.Set(36, 0);
+            _searchBar.OnTextChanged += (string newText) =>
+            {
+                _grid.SearchFor(newText);
+            };
             Append(_searchBar);
             UIImageButton searchIcon = new UIImageButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/TIGWEUI/TileSelector/Search"));
             searchIcon.SetHoverImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/TIGWEUI/TileSelector/SearchHover"));
@@ -110,31 +114,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                 _searchBar.PlaceholderText = $"Search for tiles... [c/60ABE7:({_selectableTiles.Count})]";
             });
             task.Start();
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            // searchbar
-            if (_searchBar != null)
-            {
-                if (_searchBar.HasText())
-                {
-                    if (!_searchTerm.Equals(_searchBar.GetText()))
-                    {
-                        _grid.SearchFor(_searchBar.GetText());
-                        _searchTerm = _searchBar.GetText();
-                    }
-                }
-                else
-                {
-                    if (_grid.IsSearching)
-                    {
-                        _grid.ExitSearch();
-                    }
-                }
-            }
         }
 
         private void CloseMenu(UIMouseEvent evt, UIElement listeningElement)

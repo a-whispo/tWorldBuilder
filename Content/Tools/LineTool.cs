@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.CodeAnalysis.Options;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -8,33 +9,83 @@ using Terraria.GameInput;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
+using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
     internal class LineTool : Tool
     {
         // points
-        private static Point _point1;
-        private static bool _point1placed = false;
-        private static Point _point2;
-        private static bool _point2placed = false;
+        private Point _point1;
+        private bool _point1placed = false;
+        private Point _point2;
+        private bool _point2placed = false;
 
-        private static TileCollection _tilesInLine = new TileCollection();
-        private Point _lastPos;
-        private int _lastd = 4;
+        private TileCollection _brush = new TileCollection();
+        private TileCollection _tilesInLine = new TileCollection();
         private int _d = 4;
         private int _length = 0;
         private int _yDiff = 0;
         private int _xDiff = 0;
+        private enum LineMode
+        {
+            SelectedTile,
+            Clipboard
+        }
+        private LineMode _mode;
+        private TIGWENumberField _sizeField;
+        private TIGWEDropDown _modeDropDown;
 
         public LineTool() : base("TerrariaInGameWorldEditor/UI/UIImages/LineTool", "Line")
         {
+            // settings
+            // mode
+            _modeDropDown = new TIGWEDropDown(["Selected Tile", "Clipboard"]);
+            _modeDropDown.ShowDropDownButton = true;
+            _modeDropDown.SetDefaultOption("Selected Tile");
+            _modeDropDown.OnOptionChanged += (string optionText) =>
+            {
+                if (optionText.Equals("Selected Tile"))
+                {
+                    // reset reference of clipboard
+                    _brush = new TileCollection();
+                    _mode = LineMode.SelectedTile;
+                }
+                else if (optionText.Equals("Clipboard"))
+                {
+                    // set to reference of clipboard
+                    _brush = EditorSystem.Local.Clipboard;
+                    _mode = LineMode.Clipboard;
+                }
+            };
+            _modeDropDown.Height.Set(26, 0f);
+            _modeDropDown.Width.Set(140, 0f);
+            Settings.Add(("Mode:", _modeDropDown));
 
+            // size
+            _sizeField = new TIGWENumberField(4, 200, 1);
+            _d = 4;
+            _sizeField.OnValueChanged += (int newValue) =>
+            {
+                _d = _sizeField.GetValue();
+            };
+            _sizeField.Width.Set(60, 0);
+            _sizeField.Height.Set(26, 0);
+            _sizeField.ShowButtons = true;
+            Settings.Add(("Size:", _sizeField));
         }
 
         public override void Update()
         {
+            // update brush if in selected tile mode and either size changed or selected tile changed
+            if (_mode == LineMode.SelectedTile && (_d != _brush.GetWidth() + 1 || _brush.AsDictionary().ToList()[0].Value != EditorSystem.Local.SelectedTile))
+            {
+                _brush.Clear();
+                _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
+            }
+
             // have the mouse act as point 1 while point 1 isnt placed
             if (!_point1placed)
             {
@@ -46,38 +97,16 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 _point2 = new Point(Player.tileTargetX, Player.tileTargetY);
             }
 
-            // only update line when needed
-            if (_point2placed || _lastPos != Utils.ToTileCoordinates(Main.MouseWorld.ToVector2D()) || _lastd != _d || _tilesInLine.Count == 0 || _tilesInLine.AsDictionary().ToList()[0].Value != EditorSystem.Local.SelectedTile)
-            {
-                _lastPos = Utils.ToTileCoordinates(Main.MouseWorld.ToVector2D());
-                _lastd = _d;
-                _tilesInLine.Clear(); // clear so we can calculate what the line would look like
-                CalculateTilesInLine(_point1, _point2, _d);
-            }
-
-            if (_point2placed)
-            {
-                _point1placed = false;
-                _point2placed = false;
-                ToolUtils.Paste(_tilesInLine, new Point(_tilesInLine.GetMinX(), _tilesInLine.GetMinY()), true, TIGWEUISystem.Settings.ShouldUpdateDrawnTiles);
-                _tilesInLine.Clear();
-            }
-
-            InfoText = $"[c/EAD87A:Size:] {_d}, [c/EAD87A:Length:] {_length + _d - 1}, [c/EAD87A:Y Difference:] {_yDiff}, [c/EAD87A:X Difference:] {_xDiff}";
+            InfoText = $"[c/EAD87A:Y Difference:] {_yDiff}, [c/EAD87A:X Difference:] {_xDiff}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            try
-            {
-                // if point 2 isnt placed yet, show a preview of what it would look like if it was placed
-                DrawUtils.DrawTileCollection(_tilesInLine, new Point(_tilesInLine.GetMinX(), _tilesInLine.GetMinY()));
-                DrawUtils.DrawTileCollectionOutline(_tilesInLine, new Point(_tilesInLine.GetMinX(), _tilesInLine.GetMinY()), TIGWEUISystem.Settings.ToolColor);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[{TerrariaInGameWorldEditor.MODNAME}] Error drawing line tool: {ex}");
-            }
+            // update line
+            _tilesInLine = CalculateTilesInLine(_point1, _point2, _brush.ToNormalized());
+            Point point = new Point(_tilesInLine.GetMinX() - _brush.GetWidth() / 2, _tilesInLine.GetMinY() - _brush.GetHeight() / 2);
+            DrawUtils.DrawTileCollection(_tilesInLine, point);
+            DrawUtils.DrawTileCollectionOutline(_tilesInLine, point, TIGWESettings.ToolColor);
         }
 
         public override void PostUpdateInput()
@@ -94,10 +123,15 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
                 else
                 {
-                    if (!_point2placed)
+                    if (!_point2placed && _brush.Count > 0)
                     {
-                        _point2 = new Point(Player.tileTargetX, Player.tileTargetY);
-                        _point2placed = true;
+                        // update line and paste
+                        _point2placed = true; // setting this to true makes the line algo calculate the full line
+                        _tilesInLine = CalculateTilesInLine(_point1, new Point(Player.tileTargetX, Player.tileTargetY), _brush.ToNormalized());
+                        ToolUtils.Paste(_tilesInLine, new Point(_tilesInLine.GetMinX() - _brush.GetWidth() / 2, _tilesInLine.GetMinY() - _brush.GetHeight() / 2), true, TIGWESettings.ShouldUpdateDrawnTiles);
+                        _tilesInLine.Clear();
+                        _point1placed = false;
+                        _point2placed = false;
                     }
                 }
             }
@@ -128,14 +162,19 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         _d -= (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift) ? 10 : 1);
                     }
                 }
-                _d = Math.Max(_d, 1);
+                if (PlayerInput.ScrollWheelDelta != 0)
+                {
+                    _d = Math.Max(_d, 1);
+                    _sizeField.SetValue(_d);
+                }
             }
         }
 
-        private void CalculateTilesInLine(Point origin, Point endpoint, int width)
+        private TileCollection CalculateTilesInLine(Point origin, Point endpoint, TileCollection brush)
         {
             // algorithm from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C#
-            var tiles = ToolUtils.GetEllipseFilledTileCollection(width, width, EditorSystem.Local.SelectedTile).AsDictionary().ToList();
+            var brushList = brush.AsDictionary().ToList();
+            TileCollection tc = new TileCollection();
 
             _length = 0;
             int x0 = origin.X;
@@ -154,9 +193,9 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 // check if its worth doing calculations, if we havnt placed point 2 yet, if we have placed point 2 we obviously want to check where we should place all the tiles
                 if (_point2placed || !((((x0 * 16) + 64) < (Main.screenPosition.X - 32) || ((x0 * 16) - 64) > (Main.screenPosition.X + Main.screenWidth) || ((y0 * 16) + 64) < (Main.screenPosition.Y) || ((y0 * 16) - 64) > (Main.screenPosition.Y + Main.screenHeight))))
                 {
-                    for (int i = 0; i < tiles.Count; i++)
+                    for (int i = 0; i < brushList.Count; i++)
                     {
-                        _tilesInLine.TryAddTile(new Point(x0 + tiles[i].Key.X, y0 + tiles[i].Key.Y), tiles[i].Value);
+                        tc.TryAddTile(new Point(x0 + brushList[i].Key.X, y0 + brushList[i].Key.Y), brushList[i].Value);
                     }
                 }
                 if (x0 == x1 && y0 == y1)
@@ -173,6 +212,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     err += dx; y0 += sy;
                 }
             }
+
+            return tc;
         }
     }
 }

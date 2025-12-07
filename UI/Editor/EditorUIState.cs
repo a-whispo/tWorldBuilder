@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -13,6 +12,7 @@ using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Content.Tools;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable;
 
@@ -91,6 +91,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private UIText _toolInfoText;
         private EditorPalette _palette;
         private TIGWEButton _paletteDeleteButton;
+        private UIElement _toolSettings;
 
         public override void OnInitialize()
         {
@@ -144,7 +145,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             settingsButton.Top.Set(4, 0f);
             settingsButton.OnLeftClick += (evt, listeningElement) =>
             {
-                TIGWEUISystem.SettingsUI.Visible = !TIGWEUISystem.SettingsUI.Visible;
+                TIGWEUISystem.Local.SettingsUI.Visible = !TIGWEUISystem.Local.SettingsUI.Visible;
             };
             settingsButton.HoverText = "Settings";
             Append(settingsButton);
@@ -160,7 +161,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             tileButton.HoverText = "Tile Browser";
             tileButton.OnLeftClick += (evt, listeningElement) =>
             {
-                TIGWEUISystem.SelectTileUI.Visible = !TIGWEUISystem.SelectTileUI.Visible;
+                TIGWEUISystem.Local.SelectTileUI.Visible = !TIGWEUISystem.Local.SelectTileUI.Visible;
             };
             // draw the selected tile
             tileButton.PostDrawingSelf += (SpriteBatch spriteBatch) =>
@@ -329,8 +330,16 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             };
             Append(_redoButton);
 
+            // tool settings
+            _toolSettings = new UIElement();
+            _toolSettings.Top.Set(42, 0f);
+            _toolSettings.Left.Set(_redoButton.Left.Pixels + _redoButton.Width.Pixels + 30, 0f);
+            _toolSettings.Width.Set(0, 1f);
+            _toolSettings.Height.Set(0, 1f);
+            Append(_toolSettings);
+
             UIGrid toolGrid = new UIGrid();
-            // loop through all the tools and add their buttons
+            // loop through all the tools and add everything
             for (int i = 0; i < EditorSystem.Local.Tools.Count; i++)
             {
                 Tool tool = EditorSystem.Local.Tools[i];
@@ -345,14 +354,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     }
 
                     // toggle tool
-                    if (EditorSystem.Local.CurrentTool == tool)
-                    {
-                        EditorSystem.Local.CurrentTool = null;
-                    } 
-                    else
-                    {
-                        EditorSystem.Local.CurrentTool = tool;
-                    }
+                    EditorSystem.Local.CurrentTool = EditorSystem.Local.CurrentTool == tool ? null : tool;
                     SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
                 };
                 tool.ToggleToolButton.SetVisibility(0.8f, 1f);
@@ -522,7 +524,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 // draw selection outline if we're not using a selection tool
                 if (EditorSystem.Local.CurrentTool.GetType().BaseType != typeof(SelectionTool) && EditorSystem.Local.CurrentSelection != null)
                 {
-                    DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.CurrentSelection, new Point(EditorSystem.Local.CurrentSelection.GetMinX(), EditorSystem.Local.CurrentSelection.GetMinY()), TIGWEUISystem.Settings.ToolColor);
+                    DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.CurrentSelection, new Point(EditorSystem.Local.CurrentSelection.GetMinX(), EditorSystem.Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
                 }
 
                 // otherwise the selection tool will handle drawing the outline itself
@@ -531,7 +533,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             {
                 if (EditorSystem.Local.CurrentSelection?.Count > 0)
                 {
-                    DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.CurrentSelection, new Point(EditorSystem.Local.CurrentSelection.GetMinX(), EditorSystem.Local.CurrentSelection.GetMinY()), TIGWEUISystem.Settings.ToolColor);
+                    DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.CurrentSelection, new Point(EditorSystem.Local.CurrentSelection.GetMinX(), EditorSystem.Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
                 }
             }
 
@@ -555,6 +557,23 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + +dimensions.Width - 2, dimensions.Y + 2, 2, dimensions.Height - 4), new Color(166, 105, 22));
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X + 2, dimensions.Y + dimensions.Height - 2, dimensions.Width - 4, 2), new Color(227, 167, 43));
                 spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(dimensions.X, dimensions.Y + 2, 2, dimensions.Height - 4), new Color(227, 167, 43));
+            }
+        }
+
+        public void RecalculateToolSettings()
+        {
+            _toolSettings.RemoveAllChildren();
+            if (EditorSystem.Local.CurrentTool != null)
+            {
+                ToolSetting previousSetting = null;
+                foreach ((string, UIElement) setting in EditorSystem.Local.CurrentTool.Settings)
+                {
+                    ToolSetting toolSetting = new ToolSetting(setting.Item1, setting.Item2);
+                    toolSetting.Top.Set(2, 0f);
+                    toolSetting.Left.Set(previousSetting != null ? previousSetting.Width.Pixels + previousSetting.Left.Pixels + 30 : 0, 0f);
+                    previousSetting = toolSetting;
+                    _toolSettings.Append(toolSetting);
+                }
             }
         }
 

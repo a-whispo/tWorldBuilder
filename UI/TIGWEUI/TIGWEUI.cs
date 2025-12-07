@@ -12,19 +12,28 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
 {
     internal class TIGWEUI : UIState
     {
+        // events
+        public delegate void OnClickEventHandler();
+        public event OnClickEventHandler OnClick;
+
+        public delegate void OnShowEventHandler();
+        public event OnShowEventHandler OnShow;
+
         // public
-        public bool Visible { get; set; } = false;
-        public bool IsDragging { get; set; } = false;
-        public (int Left, int Top) Offset { get; set; }
-        public UserInterface UI { get; set; } = new UserInterface();
+        public bool Visible = false;
+        public bool IsDragging = false;
+        public (int Left, int Top) Offset;
 
         // private
+        private UserInterface _UI;
         private TIGWEImageResizeable _body;
         private TIGWEButton _xButton;
 
         public override void OnInitialize()
         {
             base.OnInitialize();
+
+            _UI = new UserInterface();
 
             // default size
             Height.Set(300, 0);
@@ -62,13 +71,18 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             IsDragging = true;
             Offset = ((int)evt.MousePosition.X - (int)Left.Pixels, (int)evt.MousePosition.Y - (int)Top.Pixels);
 
-            // since we clicked the border we should also move it to the top
-            TIGWEUISystem.MoveToTop(this);
+            OnClick.Invoke();
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            // check if mouse is hovering over ui
+            if (IsMouseHovering || IsDragging)
+            {
+                Main.LocalPlayer.mouseInterface = true;
+            }
 
             // update left and right offsets when dragging
             if (IsDragging)
@@ -115,24 +129,29 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             _xButton.Top.Set(6, 0f);
         }
 
-        // handle UserInterface states which determines visibility, this will pretty much only be called from UIManager when updating each TIGWEUIs UserInterface
-        // the UserInterface will then set its state, if its not null it will update the UIState (which is the overriden Update method), which will then update the UI elements
-        // in hindsight its probably kinda weird to make it like this
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        {
+            _UI.Draw(spriteBatch, gameTime);
+        }
+
         public void UpdateUI(GameTime gametime)
         {
             // handle visibility and stuff
-            if (Visible && UI.CurrentState == null)
+            if (Visible && _UI.CurrentState == null)
             {
-                TIGWEUISystem.MoveToTop(this);
-                UI.SetState(this);
-                UI.CurrentState.Activate();
+                OnShow.Invoke();
+                _UI.SetState(this);
             }
-            if (!Visible && UI.CurrentState == this)
+            if (!Visible && _UI.CurrentState == this)
             {
-                UI.SetState(null);
+                _UI.SetState(null);
             }
-            // update the UI
-            UI.Update(gametime);
+
+            if (Visible)
+            {
+                // update the UI
+                _UI.Update(gametime);
+            }
         }
     }
 }

@@ -6,17 +6,35 @@ using Terraria;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.CheckBox;
+using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
     internal class PaintBucketTool : Tool
     {
         private int _tileCap = 10000;
+        private TIGWENumberField _tileCapField;
+        private TIGWECheckBox _fillCornersCheckBox;
 
         public PaintBucketTool() : base("TerrariaInGameWorldEditor/UI/UIImages/PaintBucketTool", "Paint Bucket")
         {
+            // settings
+            // tile cap
+            _tileCapField = new TIGWENumberField(_tileCap, minValue: 1);
+            _tileCapField.OnValueChanged += (int newValue) =>
+            {
+                _tileCap = _tileCapField.GetValue();
+            };
+            _tileCapField.Width.Set(120, 0);
+            _tileCapField.Height.Set(26, 0);
+            _tileCapField.ShowButtons = true;
+            Settings.Add(("Fill tile cap:", _tileCapField));
 
+            // fill tiles connected at corners
+            _fillCornersCheckBox = new TIGWECheckBox(false);
+            Settings.Add(("Fill tiles connected at corners:", _fillCornersCheckBox));
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -24,7 +42,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             Point point = new Point(Player.tileTargetX, Player.tileTargetY);
             TileCollection tc = new TileCollection();
             tc.TryAddTile(point, new TileCopy(Main.tile[point.X, point.Y]));
-            DrawUtils.DrawTileCollectionOutline(tc, point, TIGWEUISystem.Settings.ToolColor);
+            DrawUtils.DrawTileCollectionOutline(tc, point, TIGWESettings.ToolColor);
         }
 
         public override void PostUpdateInput()
@@ -49,113 +67,106 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
                 // new action so we can undo this later if we want to
                 TileCollection tileColl = new TileCollection();
-                try
+
+                bool IsMatch(Point coords)
                 {
-                    // go until we hit the tilecap or cant find any more tiles that we want to replace
-                    while (queue.Count > 0 && count < _tileCap)
+                    bool inSelection = ((EditorSystem.Local.CurrentSelection?.ContainsCoord(coords)) ?? false) || EditorSystem.Local.CurrentSelection?.Count == 0;
+                    if (!inSelection)
                     {
-                        // get the coordinates at the tile in the first index
-                        Point coords = queue.Dequeue();
-
-                        // if we clicked a wall
-                        if ((Main.tile[coords.X, coords.Y].WallType == clickedTile.WallType) && (!Main.tile[coords.X, coords.Y].HasTile && !clickedTile.HasTile) && (((EditorSystem.Local.CurrentSelection?.ContainsCoord(coords)) ?? false) || EditorSystem.Local.CurrentSelection?.Count == 0))
-                        {
-                            // if we dont already have it added, add it
-                            if (tileColl.TryAddTile(coords, new TileCopy(Main.tile[coords.X, coords.Y])))
-                            {
-                                count++;
-                            }
-
-                            // add the tiles up, down, left and right to tiles we want to check
-                            if (Main.tile[coords.X + 1, coords.Y].WallType == clickedTile.WallType && !tileColl.ContainsCoord(new Point(coords.X + 1, coords.Y)) && !queue.Contains(new Point(coords.X + 1, coords.Y)))
-                            {
-                                queue.Enqueue(new Point(coords.X + 1, coords.Y));
-                            }
-                            if (Main.tile[coords.X - 1, coords.Y].WallType == clickedTile.WallType && !tileColl.ContainsCoord(new Point(coords.X - 1, coords.Y)) && !queue.Contains(new Point(coords.X - 1, coords.Y)))
-                            {
-                                queue.Enqueue(new Point(coords.X - 1, coords.Y));
-                            }
-                            if (Main.tile[coords.X, coords.Y + 1].WallType == clickedTile.WallType && !tileColl.ContainsCoord(new Point(coords.X, coords.Y + 1)) && !queue.Contains(new Point(coords.X, coords.Y + 1)))
-                            {
-                                queue.Enqueue(new Point(coords.X, coords.Y + 1));
-                            }
-                            if (Main.tile[coords.X, coords.Y - 1].WallType == clickedTile.WallType && !tileColl.ContainsCoord(new Point(coords.X, coords.Y - 1)) && !queue.Contains(new Point(coords.X, coords.Y - 1)))
-                            {
-                                queue.Enqueue(new Point(coords.X, coords.Y - 1));
-                            }
-                        }
-                        else
-                        {
-                            // if the tile type matches the tiletype of the tile we clicked at then that means we want to add it
-                            if (Main.tile[coords.X, coords.Y].TileType == clickedTile.TileType && Main.tile[coords.X, coords.Y].HasTile == clickedTile.HasTile && (((EditorSystem.Local.CurrentSelection?.ContainsCoord(coords)) ?? false) || EditorSystem.Local.CurrentSelection?.Count == 0))
-                            {
-                                // if we dont already have it added, add it
-                                if (tileColl.TryAddTile(coords, new TileCopy(Main.tile[coords.X, coords.Y])))
-                                {
-                                    count++;
-                                }
-
-                                // add the tiles up, down, left and right to tiles we want to check
-                                if (Main.tile[coords.X + 1, coords.Y].TileType == clickedTile.TileType && !tileColl.ContainsCoord(new Point(coords.X + 1, coords.Y)) && !queue.Contains(new Point(coords.X + 1, coords.Y)))
-                                {
-                                    queue.Enqueue(new Point(coords.X + 1, coords.Y));
-                                }
-                                if (Main.tile[coords.X - 1, coords.Y].TileType == clickedTile.TileType && !tileColl.ContainsCoord(new Point(coords.X - 1, coords.Y)) && !queue.Contains(new Point(coords.X - 1, coords.Y)))
-                                {
-                                    queue.Enqueue(new Point(coords.X - 1, coords.Y));
-                                }
-                                if (Main.tile[coords.X, coords.Y + 1].TileType == clickedTile.TileType && !tileColl.ContainsCoord(new Point(coords.X, coords.Y + 1)) && !queue.Contains(new Point(coords.X, coords.Y + 1)))
-                                {
-                                    queue.Enqueue(new Point(coords.X, coords.Y + 1));
-                                }
-                                if (Main.tile[coords.X, coords.Y - 1].TileType == clickedTile.TileType && !tileColl.ContainsCoord(new Point(coords.X, coords.Y - 1)) && !queue.Contains(new Point(coords.X, coords.Y - 1)))
-                                {
-                                    queue.Enqueue(new Point(coords.X, coords.Y - 1));
-                                }
-                            }
-                        }
+                        return false;
                     }
 
-                    // if we didnt hit the cap, fill all the tiles with the selected tile
-                    if (count < _tileCap)
+                    Tile tile = Main.tile[coords.X, coords.Y];
+                    // if we clicked a wall and the tile matches
+                    if (tile.WallType == clickedTile.WallType && !tile.HasTile && !clickedTile.HasTile)
                     {
-                        // go over all the tile we want to change
-                        foreach (var tile in tileColl.AsDictionary())
+                        return true;
+                    }
+                    // if we clicked a tile and the tile matches
+                    if (tile.TileType == clickedTile.TileType && tile.HasTile && clickedTile.HasTile)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+
+                // go until we hit the tilecap or cant find any more tiles that we want to replace
+                while (queue.Count > 0 && count <= _tileCap)
+                {
+                    // get the coordinates at the tile in the first index
+                    Point coords = queue.Dequeue();
+
+                    if (IsMatch(coords))
+                    {
+                        // if we dont already have it added, add it
+                        if (tileColl.TryAddTile(coords, new TileCopy(Main.tile[coords.X, coords.Y])))
                         {
-                            int x = tile.Key.X;
-                            int y = tile.Key.Y;
-
-                            Main.tile[tile.Key.X, tile.Key.Y].CopyFrom(EditorSystem.Local.SelectedTile.GetAsTile());
-
-                            // update tiles
-                            if (TIGWEUISystem.Settings.ShouldUpdateDrawnTiles)
-                            {
-                                // squareframe but with noBreak
-                                // update tiles
-                                bool isTileFrameImportant = Main.tileFrameImportant[EditorSystem.Local.SelectedTile.TileType];
-                                WorldGen.TileFrame(x, y, true, !isTileFrameImportant);
-                                WorldGen.TileFrame(x + 1, y, true, !isTileFrameImportant);
-                                WorldGen.TileFrame(x - 1, y, true, !isTileFrameImportant);
-                                WorldGen.TileFrame(x, y + 1, true, !isTileFrameImportant);
-                                WorldGen.TileFrame(x, y - 1, true, !isTileFrameImportant);
-                                WorldGen.TileFrame(x + 1, y + 1, true, !isTileFrameImportant);
-                                WorldGen.TileFrame(x - 1, y + 1, true, !isTileFrameImportant);
-                                WorldGen.TileFrame(x - 1, y - 1, true, !isTileFrameImportant);
-                                WorldGen.TileFrame(x + 1, y - 1, true, !isTileFrameImportant);
-                            }
+                            count++;
                         }
 
-                        // add the information about the tiles we changed to our undo history so we can undo later
-                        EditorSystem.Local.UndoHistory.Add(tileColl);
-                    }
-                    else
-                    {
-                        //Main.NewText($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] Area too big to fill. Current cap is: {_tileCap}");
+                        // tiles to check
+                        List<Point> directions = [
+                            new Point(coords.X + 1, coords.Y),
+                            new Point(coords.X - 1, coords.Y),
+                            new Point(coords.X, coords.Y + 1),
+                            new Point(coords.X, coords.Y - 1)
+                        ];
+                        if (_fillCornersCheckBox.IsChecked)
+                        {
+                            directions.AddRange(new List<Point>
+                            {
+                                new Point(coords.X + 1, coords.Y + 1),
+                                new Point(coords.X - 1, coords.Y + 1),
+                                new Point(coords.X - 1, coords.Y - 1),
+                                new Point(coords.X + 1, coords.Y - 1)
+                            });
+                        }
+
+                        foreach (Point direction in directions)
+                        {
+                            if (!tileColl.ContainsCoord(direction) && !queue.Contains(direction))
+                            {
+                                queue.Enqueue(direction);
+                            }
+                        }
                     }
                 }
-                catch (Exception e)
+
+                // if we didnt hit the cap, fill all the tiles with the selected tile
+                if (count < _tileCap)
                 {
-                    //Main.NewText($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] Unknown error, area is probably too big to fill. Current cap is: {_tileCap}");
+                    // go over all the tile we want to change
+                    foreach (var tile in tileColl.AsDictionary())
+                    {
+                        int x = tile.Key.X;
+                        int y = tile.Key.Y;
+
+                        Main.tile[tile.Key.X, tile.Key.Y].CopyFrom(EditorSystem.Local.SelectedTile.GetAsTile());
+
+                        // update tiles
+                        if (TIGWESettings.ShouldUpdateDrawnTiles)
+                        {
+                            // squareframe but with noBreak
+                            // update tiles
+                            bool isTileFrameImportant = Main.tileFrameImportant[EditorSystem.Local.SelectedTile.TileType];
+                            WorldGen.TileFrame(x, y, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x + 1, y, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x - 1, y, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x, y + 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x, y - 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x + 1, y + 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x - 1, y + 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x - 1, y - 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x + 1, y - 1, true, !isTileFrameImportant);
+                        }
+                    }
+
+                    // add the information about the tiles we changed to our undo history so we can undo later
+                    EditorSystem.Local.UndoHistory.Add(tileColl);
+                }
+                else
+                {
+                    //Main.NewText($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] Area too big to fill. Current cap is: {_tileCap}");
                 }
             }
         }
