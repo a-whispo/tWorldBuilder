@@ -7,12 +7,12 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable
 {
     internal class TIGWEImageResizeable : UIElement
     {
-        public int CornerSize;
-        public int BarSize;
-        public bool ShouldResize;
-        public Color Color = Color.White;
-        public Asset<Texture2D> Texture;
-        public Asset<Texture2D> TextureHover;
+        public int CornerSize { get; set; }
+        public int BarSize { get; set; }
+        public bool ShouldResize { get; set; }
+        public Color Color { get; set; } = Color.White;
+        public Asset<Texture2D> Texture { get; set; }
+        public Asset<Texture2D> TextureHover { get; set; }
 
         public TIGWEImageResizeable(Asset<Texture2D> texture, int cornerSize = 8, int barSize = 16, bool shouldResize = true)
         {

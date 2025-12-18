@@ -12,8 +12,8 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DropDown
 {
     internal class TIGWEDropDown : UIElement
     {
-        public delegate void OnOptionChangedEventHandler(string optionText);
-        public event OnOptionChangedEventHandler OnOptionChanged;
+        public delegate void OptionChangedEventHandler(string optionText);
+        public event OptionChangedEventHandler OnOptionChanged;
         public string SelectedOption { get { return _selectedOption.GetText(); } }
         public bool ShowDropDownButton { set { Append(_dropDownButton); } get { return HasChild(_dropDownButton); } } // just visual, only looks good with a height of 26 though
 

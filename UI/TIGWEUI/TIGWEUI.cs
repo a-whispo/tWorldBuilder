@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.UI.UIElements.Button;
@@ -13,26 +14,24 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
     internal class TIGWEUI : UIState
     {
         // events
-        public delegate void OnClickEventHandler();
-        public event OnClickEventHandler OnClick;
-
-        public delegate void OnShowEventHandler();
-        public event OnShowEventHandler OnShow;
+        public delegate void ShowEventHandler();
+        public event ShowEventHandler OnShow;
 
         // public
-        public bool Visible = false;
-        public bool IsDragging = false;
-        public (int Left, int Top) Offset;
+        public bool Visible { get; set; } = false;
+        public bool IsDragging { get; set; } = false;
+        public string Title { get { return _titleText.Text; } set { _titleText.SetText(value); } }
 
         // private
         private UserInterface _UI;
         private TIGWEImageResizeable _body;
         private TIGWEButton _xButton;
+        private UIText _titleText;
+        private (int Left, int Top) _offset;
 
         public override void OnInitialize()
         {
             base.OnInitialize();
-
             _UI = new UserInterface();
 
             // default size
@@ -41,10 +40,27 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
 
             // main body
             _body = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TIGWEUIBody"), 42, 2);
-            _body.OnLeftMouseDown += DragStart;
-            _body.OnLeftMouseUp += DragEnd;
+            _body.OnLeftMouseDown += (_, _) =>
+            {
+                // set dragging to true and grab the offset from the mouse position
+                IsDragging = true;
+                _offset = (Main.mouseX - (int)Left.Pixels, Main.mouseY - (int)Top.Pixels);
+            };
+            _body.OnLeftMouseUp += (_, _) =>
+            {
+                // stop dragging when letting go
+                IsDragging = false;
+            };
             Append(_body);
 
+            // title text
+            _titleText = new UIText("Title");
+            _titleText.Left.Set(12, 0);
+            _titleText.Top.Set(12, 0);
+            _titleText.IgnoresMouseInteraction = true;
+            Append(_titleText);
+
+            // x button
             _xButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/XButton"));
             _xButton.SetVisibility(0.8f, 1f);
             _xButton.Width.Set(26, 0f);
@@ -57,21 +73,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                 SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
             };
             Append(_xButton);
-        }
-
-        protected virtual void DragEnd(UIMouseEvent evt, UIElement listeningElement)
-        {
-            // stop dragging when letting go
-            IsDragging = false;
-        }
-
-        protected virtual void DragStart(UIMouseEvent evt, UIElement listeningElement)
-        {
-            // set dragging to true and grab the offset from the mouse position
-            IsDragging = true;
-            Offset = ((int)evt.MousePosition.X - (int)Left.Pixels, (int)evt.MousePosition.Y - (int)Top.Pixels);
-
-            OnClick.Invoke();
         }
 
         public override void Update(GameTime gameTime)
@@ -96,26 +97,24 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                 // check so the midpoint of the UI is within the screen bounds
 
                 // check if we should clamp the x position to the screen bounds
-                if (!screenBounds.Contains((int)(Main.mouseX - Offset.Left + dimensions.Width / 2), (int)(dimensions.Y + dimensions.Height / 2)))
+                if (!screenBounds.Contains((int)(Main.mouseX - _offset.Left + dimensions.Width / 2), (int)(dimensions.Y + dimensions.Height / 2)))
                 {
-                    Left.Set(Math.Clamp(Main.mouseX - Offset.Left, -dimensions.Width / 2, screenWidth - dimensions.Width / 2), 0);
+                    Left.Set(Math.Clamp(Main.mouseX - _offset.Left, -dimensions.Width / 2, screenWidth - dimensions.Width / 2), 0);
                 }
                 else
                 {
-                    Left.Set(Main.mouseX - Offset.Left, 0);
+                    Left.Set(Main.mouseX - _offset.Left, 0);
                 }
 
                 // check if we should clamp the y position to the screen bounds
-                if (!screenBounds.Contains((int)(dimensions.X + dimensions.Width / 2), (int)(Main.mouseY - Offset.Top + dimensions.Height / 2)))
+                if (!screenBounds.Contains((int)(dimensions.X + dimensions.Width / 2), (int)(Main.mouseY - _offset.Top + dimensions.Height / 2)))
                 {
-                    Top.Set(Math.Clamp(Main.mouseY - Offset.Top, -dimensions.Height / 2, screenHeight - dimensions.Height / 2), 0);
+                    Top.Set(Math.Clamp(Main.mouseY - _offset.Top, -dimensions.Height / 2, screenHeight - dimensions.Height / 2), 0);
                 }
                 else
                 {
-                    Top.Set(Main.mouseY - Offset.Top, 0);
+                    Top.Set(Main.mouseY - _offset.Top, 0);
                 }
-
-                Recalculate();
             }
 
             // update title bar and body sizes and location to match resizes

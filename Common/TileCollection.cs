@@ -8,7 +8,7 @@ namespace TerrariaInGameWorldEditor.Common
     public class TileCollection : TagSerializable
     {
         // deserializer for the tagcompound
-        public static Func<TagCompound, TileCollection> DESERIALIZER = s => DeserializeData(s);
+        public static Func<TagCompound, TileCollection> DESERIALIZER { get; set; } = s => DeserializeData(s);
 
         // tiles stored
         private Dictionary<Point, TileCopy> _tiles = new Dictionary<Point, TileCopy>();

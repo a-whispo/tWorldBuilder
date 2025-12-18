@@ -20,6 +20,15 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 {
     public class EditorUIState : UIState
     {
+        public bool Visible { get; set; } = false;
+
+        private TIGWEButton _undoButton;
+        private TIGWEButton _redoButton;
+        private UIText _toolInfoText;
+        private EditorPalette _palette;
+        private TIGWEButton _paletteDeleteButton;
+        private UIElement _toolSettings;
+
         #region Side Dimensions
         private int _leftWidth;
         private int _rightWidth;
@@ -76,22 +85,14 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private TIGWEImageResizeable _innerBorder;
 
         // resizing
-        public bool _isDraggingSide = false;
+        private bool _isDraggingSide = false;
         private bool _hoveringRight = false;
         private bool _hoveringLeft = false;
         private bool _hoveringTop = false;
         private bool _hoveringBottom = false;
-        private delegate void RecalculateSidesHandler();
-        private event RecalculateSidesHandler OnRecalculateSides;
+        private delegate void RecalculateSidesEventHandler();
+        private event RecalculateSidesEventHandler OnRecalculateSides;
         #endregion
-
-        public bool Visible = false;
-        private TIGWEButton _undoButton;
-        private TIGWEButton _redoButton;
-        private UIText _toolInfoText;
-        private EditorPalette _palette;
-        private TIGWEButton _paletteDeleteButton;
-        private UIElement _toolSettings;
 
         public override void OnInitialize()
         {
@@ -150,6 +151,19 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             settingsButton.HoverText = "Settings";
             Append(settingsButton);
 
+            // blueprints button
+            TIGWEButton blueprintsButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/BlueprintsButton"));
+            blueprintsButton.SetVisibility(0.8f, 1f);
+            blueprintsButton.Width.Set(30, 0f);
+            blueprintsButton.Height.Set(30, 0f);
+            blueprintsButton.Left.Set(settingsButton.Left.Pixels + settingsButton.Width.Pixels + 2, 0f);
+            blueprintsButton.Top.Set(4, 0f);
+            blueprintsButton.OnLeftClick += (evt, listeningElement) =>
+            {
+                TIGWEUISystem.Local.BlueprintsUI.Visible = !TIGWEUISystem.Local.BlueprintsUI.Visible;
+            };
+            blueprintsButton.HoverText = "Blueprints";
+            Append(blueprintsButton);
 
             // current selected tile (opens tile browser on click)
             TIGWEButton tileButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TileButton"));
@@ -164,7 +178,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 TIGWEUISystem.Local.SelectTileUI.Visible = !TIGWEUISystem.Local.SelectTileUI.Visible;
             };
             // draw the selected tile
-            tileButton.PostDrawingSelf += (SpriteBatch spriteBatch) =>
+            tileButton.OnPreDrawSelf += (SpriteBatch spriteBatch) =>
             {
                 try
                 {
@@ -348,7 +362,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 tool.ToggleToolButton.OnLeftClick += (evt, listeningElement) =>
                 {
                     // reset selection if we already reset our selection by pressing escape or selecting another tool
-                    if (tool.GetType().BaseType == typeof(SelectionTool) && EditorSystem.Local.CurrentSelection != ((SelectionTool)tool).Selection)
+                    if (tool is SelectionTool selectionTool && EditorSystem.Local.CurrentSelection != selectionTool.Selection)
                     {
                         ((SelectionTool)tool).Selection.Clear();
                     }
@@ -482,7 +496,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             base.Update(gameTime);
             // update tools
             EditorSystem.Local.CurrentTool?.Update();
-            if (EditorSystem.Local.CurrentTool?.GetType().BaseType == typeof(SelectionTool))
+            if (EditorSystem.Local.CurrentTool is SelectionTool)
             {
                 EditorSystem.Local.CurrentSelection = ((SelectionTool)EditorSystem.Local.CurrentTool).Selection;
             }
@@ -522,7 +536,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             {
                 // draw tools
                 // draw selection outline if we're not using a selection tool
-                if (EditorSystem.Local.CurrentTool.GetType().BaseType != typeof(SelectionTool) && EditorSystem.Local.CurrentSelection != null)
+                if (EditorSystem.Local.CurrentTool is SelectionTool && EditorSystem.Local.CurrentSelection != null)
                 {
                     DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.CurrentSelection, new Point(EditorSystem.Local.CurrentSelection.GetMinX(), EditorSystem.Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
                 }

@@ -18,7 +18,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
     internal class EditorSystem : ModSystem
     {
         // local instance
-        public static EditorSystem Local;
+        public static EditorSystem Local { get; private set; }
 
         // ui
         private EditorUIState _mainScreen;
@@ -26,7 +26,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private SpriteBatch _spriteBatch;
 
         // tools
-        public List<Tool> Tools = [ new BrushTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() ];
+        public List<Tool> Tools { get; } = new List<Tool> { new BrushTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() };
         private PasteTool _pasteTool = new PasteTool();
         private Tool _currentTool;
         public Tool CurrentTool { // current selected tool
@@ -38,17 +38,15 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 _mainScreen.RecalculateToolSettings();
             }
         }
-        public Tool LastSelectionTool; // last used selection tool
 
         // editing
-        public TileCollection Clipboard = new TileCollection(); // current clipboard
-        public bool IsPasting = false; // are we currently pasting
-        public TileCollection CurrentSelection = new TileCollection(); // current selection
-        public TileCopy SelectedTile; // current selected tile
+        public TileCollection Clipboard { get; set; } = new TileCollection(); // current clipboard
+        public TileCollection CurrentSelection { get; set; } = new TileCollection(); // current selection
+        public TileCopy SelectedTile { get; set; } // current selected tile
 
         // redo undo
-        public List<TileCollection> UndoHistory = new List<TileCollection>();
-        public List<TileCollection> RedoHistory = new List<TileCollection>();
+        public List<TileCollection> UndoHistory { get; set; } = new List<TileCollection>();
+        public List<TileCollection> RedoHistory { get; set; } = new List<TileCollection>();
 
         public override void OnModLoad()
         {
@@ -185,7 +183,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape) && _mainScreen.Visible)
             {
                 CurrentSelection.Clear();
-                if (CurrentTool?.GetType().BaseType == typeof(SelectionTool))
+                if (CurrentTool is SelectionTool)
                 {
                     ((SelectionTool)CurrentTool).Selection.Clear();
                 }

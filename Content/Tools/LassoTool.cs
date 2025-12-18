@@ -1,12 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Content.Tools

@@ -9,11 +9,11 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.CheckBox
 {
     internal class TIGWECheckBox : UIImageButton
     {
-        public delegate void OnCheckedChangedHandler(bool isChecked);
-        public event OnCheckedChangedHandler OnCheckedChanged;
+        public delegate void CheckedChangedEventHandler(bool isChecked);
+        public event CheckedChangedEventHandler OnCheckedChanged;
+        public string HoverText { get; set; }
+        public bool IsChecked { get; set; }
 
-        public string HoverText = null;
-        public bool IsChecked;
         private static Asset<Texture2D> _texture = ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/CheckBox/CheckBoxUnchecked");
 
         public TIGWECheckBox(bool isChecked = false) : base(_texture)

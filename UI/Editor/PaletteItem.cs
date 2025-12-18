@@ -10,7 +10,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 {
     internal class PaletteItem : TIGWEButton
     {
-        public TileCopy TileCopy;
+        public TileCopy TileCopy { get; private set; }
 
         public PaletteItem(TileCopy tileCopy) : base(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/PaletteItem"))
         {

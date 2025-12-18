@@ -8,9 +8,9 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.Button
     public class TIGWEButton : UIImageButton
     {
         // events
-        public delegate void DrawSelfEventHandler(SpriteBatch spriteBatch);
-        public event DrawSelfEventHandler PostDrawingSelf;
-        public string HoverText { get; set; } = null;
+        public delegate void PreDrawSelfEventHandler(SpriteBatch spriteBatch);
+        public event PreDrawSelfEventHandler OnPreDrawSelf;
+        public string HoverText { get; set; }
 
         public TIGWEButton(Asset<Texture2D> texture) : base(texture)
         {
@@ -19,7 +19,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.Button
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            PostDrawingSelf?.Invoke(spriteBatch);
+            OnPreDrawSelf?.Invoke(spriteBatch);
             base.DrawSelf(spriteBatch);
             if (HoverText != null && IsMouseHovering)
             {

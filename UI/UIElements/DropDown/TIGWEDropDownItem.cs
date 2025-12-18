@@ -12,6 +12,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DropDown
         public string Text => _dropDownText.Text;
         public int TextOffsetLeft { get { return (int)_dropDownText.Left.Pixels; } set { _dropDownText.Left.Set(value, 0f); } }
         public int TextOffsetTop { get { return (int)_dropDownText.Top.Pixels; } set { _dropDownText.Top.Set(value, 0f); } }
+
         private static Asset<Texture2D> texture = ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture");
         private UIText _dropDownText;
 

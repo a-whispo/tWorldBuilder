@@ -5,7 +5,6 @@ using Terraria.ID;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Content.Tools

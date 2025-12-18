@@ -15,18 +15,16 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
 {
     public class TIGWENumberField : UIElement
     {
-        public int MinValue = int.MinValue;
-        public int MaxValue = int.MaxValue;
-        public int Step = 1;
-        public bool IsFocused = false;
-        public bool CanFocus = true;
-        public delegate void OnTextChangedEventHandler(int newValue);
-        public event OnTextChangedEventHandler OnValueChanged;
+        public delegate void TextChangedEventHandler(int newValue);
+        public event TextChangedEventHandler OnValueChanged;
+        public int MinValue { get; set; } = int.MinValue;
+        public int MaxValue { get; set; } = int.MaxValue;
+        public int Step { get; set; } = 1;
+        public bool IsFocused { get; set; } = false;
+        public bool CanFocus { get; set; } = true;
         public int TextOffsetLeft { get { return (int)_tfText.Left.Pixels; } set { _tfText.Left.Set(value, 0f); } }
         public int TextOffsetTop { get { return (int)_tfText.Top.Pixels; } set { _tfText.Top.Set(value, 0f); } }
-
-        // only really looks good if the height is 26
-        public bool ShowButtons = false;
+        public bool ShowButtons { get; set; } = false; // only really looks good if the height is 26
 
         private int _currentValue = 0;
         private UIText _tfText;

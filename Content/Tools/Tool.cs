@@ -8,9 +8,9 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 {
     public abstract class Tool
     {
-        public TIGWEButton ToggleToolButton;
-        public string InfoText = "";
-        public List<(string, UIElement)> Settings = new List<(string, UIElement)>();
+        public TIGWEButton ToggleToolButton { get; set; }
+        public string InfoText { get; set; } = "";
+        public List<(string, UIElement)> Settings { get; set; } = new List<(string, UIElement)>();
 
         public Tool(string iconPath, string hoverText)
         {

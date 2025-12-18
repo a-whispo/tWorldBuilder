@@ -14,14 +14,13 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 {
     internal class SelectTileItem : UIElement
     {
-        public int ItemId;
-        public int CreateTile;
-        public int CreateWall;
-        public int PlaceStyle;
-        public string Name;
-        public int TileWidth;
-        public int TileHeight;
-        public bool HasItem;
+        public string Name { get; set; }
+        public int ItemId { get; set; }
+
+        private int _createTile;
+        private int _createWall;
+        private int _placeStyle;
+        private bool _hasItem;
 
         private TIGWEImageResizeable _texture;
         private Texture2D _itemTexture;
@@ -35,11 +34,11 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                 Item item = new Item((int)itemId);
                 Name = item.Name;
                 this.ItemId = (int)itemId;
-                CreateTile = item.createTile;
-                CreateWall = item.createWall;
-                PlaceStyle = item.placeStyle;
+                _createTile = item.createTile;
+                _createWall = item.createWall;
+                _placeStyle = item.placeStyle;
                 _itemTexture = TextureAssets.Item[(int)itemId].Value;
-                HasItem = true;
+                _hasItem = true;
             }
 
             // set width and height
@@ -108,11 +107,11 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                 Item item = new Item(itemId);
                 Name = item.Name;
                 this.ItemId = itemId;
-                CreateTile = item.createTile;
-                CreateWall = item.createWall;
-                PlaceStyle = item.placeStyle;
+                _createTile = item.createTile;
+                _createWall = item.createWall;
+                _placeStyle = item.placeStyle;
                 _itemTexture = TextureAssets.Item[itemId].Value;
-                HasItem = true;
+                _hasItem = true;
             }
             catch (Exception ex)
             {
@@ -122,26 +121,26 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 
         public TileCopy GetAsTileCopy()
         {
-            if (HasItem)
+            if (_hasItem)
             {
                 try
                 {
                     Tile tile = new Tile();
-                    if (CreateTile != -1)
+                    if (_createTile != -1)
                     {
                         // important
-                        tile.TileType = (ushort)CreateTile;
+                        tile.TileType = (ushort)_createTile;
                         tile.HasTile = true;
                         tile.WallType = 0;
 
-                        var tileObjectData = (TileObjectData.GetTileData(CreateTile, PlaceStyle, 0) ?? TileObjectData.GetTileData(CreateTile, 0, 0)) ?? null;
+                        var tileObjectData = (TileObjectData.GetTileData(_createTile, _placeStyle, 0) ?? TileObjectData.GetTileData(_createTile, 0, 0)) ?? null;
                         if (tileObjectData != null)
                         {
                             // calculate tileframex and tileframey
                             if (tileObjectData.StyleHorizontal)
                             {
                                 // get values
-                                int x = (short)(tileObjectData.CoordinateFullWidth * PlaceStyle * tileObjectData.StyleMultiplier);
+                                int x = (short)(tileObjectData.CoordinateFullWidth * _placeStyle * tileObjectData.StyleMultiplier);
                                 int y = 0;
 
                                 if (tileObjectData.StyleWrapLimit != 0)
@@ -165,7 +164,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                             else
                             {
                                 int x = 0;
-                                int y = (short)(tileObjectData.CoordinateFullHeight * PlaceStyle * tileObjectData.StyleMultiplier);
+                                int y = (short)(tileObjectData.CoordinateFullHeight * _placeStyle * tileObjectData.StyleMultiplier);
 
                                 if (tileObjectData.StyleWrapLimit != 0)
                                 {
@@ -190,7 +189,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                             int tempY = Main.maxTilesY - 10;
 
                             // place temp tile
-                            WorldGen.PlaceTile(tempX, tempY, CreateTile, true, false, -1, PlaceStyle);
+                            WorldGen.PlaceTile(tempX, tempY, _createTile, true, false, -1, _placeStyle);
 
                             // get tileframey and tileframex
                             TileCopy tc = new TileCopy(Main.tile[tempX, tempY]);
@@ -203,7 +202,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                     }
                     else
                     {
-                        tile.WallType = (ushort)CreateWall;
+                        tile.WallType = (ushort)_createWall;
                         Main.instance.LoadWall(tile.WallType);
                         tile.WallColor = 0;
                         tile.TileType = 0;

@@ -9,10 +9,11 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 {
     internal class EditorPalette : UIElement
     {
+        public bool IsDeletingItems { get; set; } = false;
+        public bool AutoResizeHeight { get; set; } = false;
+
         private TIGWEImageResizeable _border;
         private UIGrid _paletteGrid;
-        public bool IsDeletingItems = false;
-        public bool AutoResizeHeight = false;
 
         public EditorPalette()
         {

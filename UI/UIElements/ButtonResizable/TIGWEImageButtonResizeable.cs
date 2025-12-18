@@ -11,16 +11,11 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ButtonResizable
 {
     internal class TIGWEImageButtonResizeable : TIGWEImageResizeable
     {
-        public string HoverText = null;
-        private UIText _text = new UIText("");
+        public string HoverText { get; set; }
 
         public TIGWEImageButtonResizeable(Asset<Texture2D> texture) : base(texture)
         {
-            OverrideSamplerState = SamplerState.PointClamp;
-            _text.Left.Set(10, 0);
-            _text.Top.Set(7, 0);
-            _text.IgnoresMouseInteraction = true;
-            Append(_text);
+            
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
@@ -39,11 +34,6 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ButtonResizable
             {
                 SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
             }
-        }
-
-        public void SetText(string text)
-        {
-            _text.SetText(text);
         }
     }
 }

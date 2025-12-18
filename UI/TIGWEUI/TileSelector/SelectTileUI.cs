@@ -1,24 +1,18 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
-using Terraria.ModLoader.UI.Elements;
-using Terraria.UI;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.UIElements.Scrollbar;
 using TerrariaInGameWorldEditor.UI.UIElements.TextField;
 
 namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 {
-    internal class SelectTileMenu : TIGWEUI
+    internal class SelectTileUI : TIGWEUI
     {
-        private string _searchTerm = "";
-        private TIGWETextField _searchBar;
-        private SelectTileGrid _grid = null;
         private List<int> _selectableTiles = new List<int>();
 
         public override void OnInitialize()
@@ -33,33 +27,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
             }
             Width.Set(700, 0);
             Height.Set(440, 0);
-
-            // text
-            UIText _menuText = new UIText("Tile Browser");
-            _menuText.Left.Set(15, 0);
-            _menuText.Top.Set(15, 0);
-            _menuText.IgnoresMouseInteraction = true;
-            Append(_menuText);
-
-            // search bar
-            _searchBar = new TIGWETextField($"Search for tiles... [c/60ABE7:({_selectableTiles.Count})]", 100);
-            _searchBar.Width.Set(250, 0);
-            _searchBar.Height.Set(26, 0);
-            _searchBar.Top.Set(51, 0);
-            _searchBar.Left.Set(36, 0);
-            _searchBar.OnTextChanged += (string newText) =>
-            {
-                _grid.SearchFor(newText);
-            };
-            Append(_searchBar);
-            UIImageButton searchIcon = new UIImageButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/TIGWEUI/TileSelector/Search"));
-            searchIcon.SetHoverImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/TIGWEUI/TileSelector/SearchHover"));
-            searchIcon.Width.Set(26, 0);
-            searchIcon.Height.Set(26, 0);
-            searchIcon.Top.Set(51, 0);
-            searchIcon.Left.Set(289, 0);
-            searchIcon.SetVisibility(0.7f, 1);
-            Append(searchIcon);
+            Title = "Tile Selector";
 
             // show only 16x16 (pixels)
             UIText only16x16Text = new UIText("[c/EAD87A:Note:] Will default to the top left part on \ntiles bigger than 1x1. Might not always work.");
@@ -68,20 +36,37 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
             only16x16Text.IgnoresMouseInteraction = true;
             Append(only16x16Text);
 
+            // search bar
+            TIGWETextField _searchBar = new TIGWETextField($"Search for tiles... [c/60ABE7:({_selectableTiles.Count})]", 100);
+            _searchBar.Width.Set(250, 0);
+            _searchBar.Height.Set(26, 0);
+            _searchBar.Top.Set(51, 0);
+            _searchBar.Left.Set(36, 0);
+            Append(_searchBar);
+            UIImageButton searchIcon = new UIImageButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Search"));
+            searchIcon.SetHoverImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/SearchHover"));
+            searchIcon.Width.Set(26, 0);
+            searchIcon.Height.Set(26, 0);
+            searchIcon.Top.Set(51, 0);
+            searchIcon.Left.Set(289, 0);
+            searchIcon.SetVisibility(0.7f, 1);
+            Append(searchIcon);
+
             // scrollbar
-            TIGWEScrollbar sb = new TIGWEScrollbar(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/TIGWEUI/TileSelector/Texture"), ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/TIGWEUI/TileSelector/Scrollbar"));
+            TIGWEScrollbar sb = new TIGWEScrollbar(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"), ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Scrollbar"));
             sb.Height.Set(336, 0);
             sb.Left.Set(12, 0);
             sb.Top.Set(88, 0);
             Append(sb);
 
             // grid
-            _grid = new SelectTileGrid();
+            SelectTileGrid _grid = new SelectTileGrid();
             _grid.Height.Set(332, 0);
             _grid.Width.Set(650, 0);
             _grid.Left.Set(46, 0);
             _grid.Top.Set(90, 0);
             _grid.SetScrollbar(sb);
+            _grid.SetSearchBar(_searchBar);
             Append(_grid);
 
             Task task = new Task(() => {
@@ -114,11 +99,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                 _searchBar.PlaceholderText = $"Search for tiles... [c/60ABE7:({_selectableTiles.Count})]";
             });
             task.Start();
-        }
-
-        private void CloseMenu(UIMouseEvent evt, UIElement listeningElement)
-        {
-            Visible = false;
         }
     }
 }

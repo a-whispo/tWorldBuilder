@@ -11,6 +11,13 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 {
     internal class BoxSelectionTool : SelectionTool
     {
+        // hovering
+        public bool HoveringAny => _hoveringLeft || _hoveringRight || _hoveringTop || _hoveringBottom;
+        private bool _hoveringRight = false;
+        private bool _hoveringLeft = false;
+        private bool _hoveringTop = false;
+        private bool _hoveringBottom = false;
+
         // points
         private Point _point1;
         private bool _point1placed = false;
@@ -20,13 +27,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private bool _canChangePoint2Y = true;
         private int _oldWidth = 0;
         private int _oldHeight = 0;
-
-        // hovering
-        public bool HoveringAny => _hoveringLeft || _hoveringRight || _hoveringTop || _hoveringBottom;
-        private bool _hoveringRight = false;
-        private bool _hoveringLeft = false;
-        private bool _hoveringTop = false;
-        private bool _hoveringBottom = false;
 
         public BoxSelectionTool() : base("TerrariaInGameWorldEditor/UI/UIImages/SelectTool", "Box Selection")
         {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector;
 
@@ -15,8 +16,9 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         public bool ShouldRenderUI = true;
 
         // states
-        public SelectTileMenu SelectTileUI;
+        public SelectTileUI SelectTileUI;
         public SettingsUI SettingsUI;
+        public BlueprintsUI BlueprintsUI;
         private List<TIGWEUI> _states = [];
         private SpriteBatch _spriteBatch;
 
@@ -29,10 +31,12 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         public override void PostSetupContent()
         {
             base.PostSetupContent();
-            SelectTileUI = new SelectTileMenu();
+            SelectTileUI = new SelectTileUI();
             SettingsUI = new SettingsUI();
+            BlueprintsUI = new BlueprintsUI();
             RegisterUI(SelectTileUI);
             RegisterUI(SettingsUI);
+            RegisterUI(BlueprintsUI);
         }
 
         public void RegisterUI(TIGWEUI ui)
@@ -42,9 +46,12 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             {
                 MoveToTop(ui);
             };
-            ui.OnClick += () =>
+            ui.OnLeftMouseDown += (_, _) =>
             {
-                MoveToTop(ui);
+                if (IsMouseHoveringState(ui))
+                {
+                    MoveToTop(ui);
+                }
             };
             _states.Add(ui);
         }
@@ -91,34 +98,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             _states.Add(temp);
         }
 
-        public override void PostUpdateInput()
-        {
-            base.PostUpdateInput();
-
-            // on click
-            if (Main.mouseLeft && Main.mouseLeftRelease)
-            {
-                foreach (TIGWEUI state in _states)
-                {
-                    if (IsMouseHoveringState(state))
-                    {
-                        MoveToTop(state);
-                        break;
-                    }
-                }
-            }
-        }
-
         private bool IsMouseHoveringState(UIState stateToCheck)
         {
             for (int i = _states.Count - 1; i >= 0; i--)
             {
-                if (_states[i].GetDimensions().ToRectangle().Contains(Main.mouseX, Main.mouseY) && _states[i] == stateToCheck)
+                if (_states[i].GetDimensions().ToRectangle().Contains(Main.mouseX, Main.mouseY))
                 {
-                    return true;
+                    return _states[i] == stateToCheck;
                 }
             }
-
             return false;
         }
 

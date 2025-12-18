@@ -15,9 +15,9 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ColorPicker
 {
     internal class TIGWEColorPicker : UIElement
     {
-        public delegate void OnColorChangedHandler(Color color);
-        public event OnColorChangedHandler OnColorChanged;
-        public float DrawScale;
+        public delegate void ColorChangedEventHandler(Color color);
+        public event ColorChangedEventHandler OnColorChanged;
+        public float DrawScale { get; set; }
 
         private UIElement _colorPane;
         private UIImage _colorDot;

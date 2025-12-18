@@ -5,17 +5,16 @@ using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
-using TerrariaInGameWorldEditor.UI.Editor;
 
 namespace TerrariaInGameWorldEditor.Common.Utils
 {
     internal static class DrawUtils
     {
         // spritebatch
-        private static SpriteBatch _spriteBatch = new SpriteBatch(Main.graphics.GraphicsDevice);
+        private static SpriteBatch _spriteBatch { get; set; } = new SpriteBatch(Main.graphics.GraphicsDevice);
 
         // textures
-        public static Texture2D TransparentTexture2D = new Texture2D(Main.graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+        public static Texture2D TransparentTexture2D { get; set; } = new Texture2D(Main.graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
         public static Texture2D BlankTexture2D => (Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color");
 
         public static void DrawLine(Vector2 point1, Vector2 point2, int width = 4, Color color = default)

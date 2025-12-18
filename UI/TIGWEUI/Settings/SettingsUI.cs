@@ -1,8 +1,6 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
-using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.UIElements.CheckBox;
 using TerrariaInGameWorldEditor.UI.UIElements.ColorPicker;
 using TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable;
@@ -18,13 +16,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             // main area
             Width.Set(700, 0);
             Height.Set(432, 0);
-
-            // settings text
-            UIText optionsText = new UIText("Settings");
-            optionsText.Left.Set(15, 0);
-            optionsText.Top.Set(15, 0);
-            optionsText.IgnoresMouseInteraction = true;
-            Append(optionsText);
+            Title = "Settings";
 
             // color picker
             UIText colorText = new UIText("Tool color: ");

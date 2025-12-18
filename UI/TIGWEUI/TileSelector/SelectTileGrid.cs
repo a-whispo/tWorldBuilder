@@ -6,19 +6,21 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.UI.UIElements;
+using TerrariaInGameWorldEditor.UI.UIElements.TextField;
 
 namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 {
     internal class SelectTileGrid : UIGrid
     {
-        public List<UIElement> AllItems = new List<UIElement>();
+        public bool IsSearching { get; set; } = false;
+        private List<UIElement> _allItems = new List<UIElement>();
 
         public override void Add(UIElement item)
         {
             base.Add(item);
-            if (!AllItems.Contains(item))
+            if (!_allItems.Contains(item))
             {
-                AllItems.Add(item);
+                _allItems.Add(item);
             }
         }
 
@@ -27,21 +29,28 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
             base.AddRange(items);
             foreach (UIElement item in items)
             {
-                if (!AllItems.Contains(item))
+                if (!_allItems.Contains(item))
                 {
-                    AllItems.Add(item);
+                    _allItems.Add(item);
                 }
             }
             SortByTilePlacedTileType();
         }
 
+        public void SetSearchBar(TIGWETextField searchBar)
+        {
+            searchBar.OnTextChanged += (string newText) => SearchFor(newText);
+        }
+
         public void SearchFor(string searchTerm)
         {
+            IsSearching = true;
+
             // list of matching items
-            List<SelectTileItem> matchingItems = new List<SelectTileItem>(AllItems.Count);
+            List<SelectTileItem> matchingItems = new List<SelectTileItem>(_allItems.Count);
 
             // go over all our possible items
-            foreach (SelectTileItem item in AllItems)
+            foreach (SelectTileItem item in _allItems)
             {
                 // check if the item matches the search term and if its a file (we dont want to display folders when searching)
                 if (item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) // if it contains the seatch term add it to items that should show up
@@ -57,12 +66,9 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                 AddRange(matchingItems);
             } else
             {
-                AddRange(AllItems);
+                AddRange(_allItems);
+                IsSearching = false;
             }
-
-            // recalculate and stuff
-            Recalculate();
-            RecalculateChildren();
             SortByTilePlacedTileType();
         }
 
@@ -75,6 +81,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                 SelectTileItem item2 = (SelectTileItem)element2;
                 return item1.ItemId.CompareTo(item2.ItemId);
             });
+            Recalculate();
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)

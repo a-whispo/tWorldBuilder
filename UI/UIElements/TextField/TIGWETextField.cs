@@ -13,11 +13,11 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.TextField
 {
     public class TIGWETextField : UIElement
     {
-        public bool IsFocused = false;
-        public bool CanFocus = true;
-        public string PlaceholderText;
-        public delegate void OnTextChangedEventHandler(string newText);
-        public event OnTextChangedEventHandler OnTextChanged;
+        public delegate void TextChangedEventHandler(string newText);
+        public event TextChangedEventHandler OnTextChanged;
+        public bool IsFocused { get; set; } = false;
+        public bool CanFocus { get; set; } = true;
+        public string PlaceholderText { get; set; }
         public int TextOffsetLeft { get { return (int)_tfText.Left.Pixels; } set { _tfText.Left.Set(value, 0f); } }
         public int TextOffsetTop { get { return (int)_tfText.Top.Pixels; } set { _tfText.Top.Set(value, 0f); } }
 

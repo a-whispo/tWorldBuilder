@@ -1,18 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
 using Terraria;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
     internal class PasteTool : Tool
     {
-        // paste specific stuff
         private static int _pastingCorner = 0;
         private KeyboardState _oldState;
 

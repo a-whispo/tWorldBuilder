@@ -12,46 +12,46 @@ namespace TerrariaInGameWorldEditor.Common
         public static Func<TagCompound, TileCopy> DESERIALIZER = s => DeserializeData(s);
 
         // general tile stuff
-        public bool HasTile;
-        public ushort TileType;
-        public ushort WallType;
-        public int LiquidType;
-        public SlopeType Slope;
-        public bool IsHalfBlock;
-        public Byte TileColor;
-        public int WallFrameNumber;
-        public bool BlueWire;
-        public bool GreenWire;
-        public bool RedWire;
-        public bool YellowWire;
-        public bool IsTileInvisible;
-        public bool IsWallInvisible;   
-        public bool CheckingLiquid;
-        public Byte LiquidAmount;
-        public bool SkipLiquid;
-        public int TileFrameNumber = 10;
-        public short TileFrameX;
-        public short TileFrameY;
-        public Byte WallColor;
-        public bool IsWallFullbright;
-        public int WallFrameX;
-        public int WallFrameY;
-        public bool IsActuated;
-        public bool HasActuator;
-        public bool HasWire;
+        public bool HasTile { get; set; }
+        public ushort TileType { get; set; }
+        public ushort WallType { get; set; }
+        public int LiquidType { get; set; }
+        public SlopeType Slope { get; set; }
+        public bool IsHalfBlock { get; set; }
+        public Byte TileColor { get; set; }
+        public int WallFrameNumber { get; set; }
+        public bool BlueWire { get; set; }
+        public bool GreenWire { get; set; }
+        public bool RedWire { get; set; }
+        public bool YellowWire { get; set; }
+        public bool IsTileInvisible { get; set; }
+        public bool IsWallInvisible { get; set; }
+        public bool CheckingLiquid { get; set; }
+        public Byte LiquidAmount { get; set; }
+        public bool SkipLiquid { get; set; }
+        public int TileFrameNumber { get; set; } = 10;
+        public short TileFrameX { get; set; }
+        public short TileFrameY { get; set; }
+        public Byte WallColor { get; set; }
+        public bool IsWallFullbright { get; set; }
+        public int WallFrameX { get; set; }
+        public int WallFrameY { get; set; }
+        public bool IsActuated { get; set; }
+        public bool HasActuator { get; set; }
+        public bool HasWire { get; set; }
 
         // tree variables
-        public bool IsTreeTop = false;
-        public bool IsTreeBranch = false;
-        public bool IsTreeTrunk = false;
-        public bool IsFlipped = false; // used to know if treebranch textures should be flipped
-        public int TreeVariant; // used to get the right tree trunk texture
-        public int TreeFrame; // used to get treetop and tree branch textures
-        public int TreeFrameWidth; // used to get treetop and tree branch textures
-        public int TreeFrameHeight; // used to get treetop and tree branch textures
-        public int TreeStyle; // used to get treetop and tree branch textures
-        public int y2;
-        public int TreeBiome = 0; // mostly used for help with drawing palm trees
+        public bool IsTreeTop { get; set; } = false;
+        public bool IsTreeBranch { get; set; } = false;
+        public bool IsTreeTrunk { get; set; } = false;
+        public bool IsFlipped { get; set; } = false; // used to know if treebranch textures should be flipped
+        public int TreeVariant { get; set; } // used to get the right tree trunk texture
+        public int TreeFrame { get; set; }// used to get treetop and tree branch textures
+        public int TreeFrameWidth { get; set; }// used to get treetop and tree branch textures
+        public int TreeFrameHeight { get; set; }// used to get treetop and tree branch textures
+        public int TreeStyle { get; set; }// used to get treetop and tree branch textures
+        public int y2 { get; set; }
+        public int TreeBiome { get; set; } = 0; // mostly used for help with drawing palm trees
 
         public TileCopy(Tile tile, int x = default, int y = default)
         {

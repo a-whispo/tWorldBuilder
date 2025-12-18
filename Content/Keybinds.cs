@@ -1,5 +1,4 @@
-﻿using Microsoft.Build.Tasks;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework.Input;
 using Terraria.ModLoader;
 
 namespace TerrariaInGameWorldEditor.Content
