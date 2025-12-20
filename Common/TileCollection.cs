@@ -7,6 +7,8 @@ namespace TerrariaInGameWorldEditor.Common
 {
     public class TileCollection : TagSerializable
     {
+        public EventHandler OnChanged;
+
         // deserializer for the tagcompound
         public static Func<TagCompound, TileCollection> DESERIALIZER = s => DeserializeData(s);
 
@@ -145,12 +147,11 @@ namespace TerrariaInGameWorldEditor.Common
             {
                 TryAddTile(tile.Key, tile.Value);
             }
+            OnChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public bool TryAddTile(Point coords, TileCopy tileToAdd)
         {
-            // check if we can add
-
             // update bounds if we added
             if (_tiles.TryAdd(coords, tileToAdd))
             {
@@ -158,6 +159,7 @@ namespace TerrariaInGameWorldEditor.Common
                 {
                     UpdateBounds(coords);
                 }
+                OnChanged?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             return false;
@@ -173,6 +175,7 @@ namespace TerrariaInGameWorldEditor.Common
                     // if it was we need to recalculate the bounds
                     _boundsDirty = true;
                 }
+                OnChanged?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             return false;
@@ -191,6 +194,7 @@ namespace TerrariaInGameWorldEditor.Common
             _maxX = int.MinValue;
             _maxY = int.MinValue;
             _boundsDirty = false;
+            OnChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public bool ContainsCoord(Point coords)

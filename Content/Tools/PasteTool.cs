@@ -17,6 +17,10 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         {
 
         }
+        public override string GetInfoText()
+        {
+            return $"[c/EAD87A:Count:] {EditorSystem.Local.Clipboard.Count}";
+        }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
@@ -30,12 +34,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 DrawUtils.DrawRectangleOutline(new Rectangle(selection.X, selection.Y, selection.Width + 1, selection.Height + 1), color);
                 DrawUtils.DrawMiscOptions(selection, TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
             }  
-        }
-
-        public override void Update()
-        {
-            base.Update();
-            InfoText = $"[c/EAD87A:Count:] {EditorSystem.Local.Clipboard.Count}";
         }
 
         public override void PostUpdateInput()

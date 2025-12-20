@@ -7,7 +7,6 @@ using Terraria.GameInput;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
@@ -33,6 +32,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private Mode mode = Mode.Rectangle;
         private TIGWENumberField _sizeField;
         private TIGWEDropDown _modeDropDown;
+        private Rectangle _selection;
 
         public ShapesTool() : base("TerrariaInGameWorldEditor/UI/UIImages/ShapesTool", "Shapes")
         {
@@ -74,6 +74,11 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             _sizeField.Height.Set(26, 0);
             _sizeField.ShowButtons = true;
             Settings.Add(("Size:", _sizeField));
+        }
+
+        public override string GetInfoText()
+        {
+            return $"[c/EAD87A:Shape type:] {mode}, [c/EAD87A:Width:] {_selection.Width}, [c/EAD87A:Height:] {_selection.Height}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -120,7 +125,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     _point2placed = false;
                 }
             }
-            InfoText = $"[c/EAD87A:Shape type:] {mode}, [c/EAD87A:Width:] {selection.Width}, [c/EAD87A:Height:] {selection.Height}";
+            _selection = selection;
         }
 
         public override void PostUpdateInput()

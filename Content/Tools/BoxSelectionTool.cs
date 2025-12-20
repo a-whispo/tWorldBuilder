@@ -4,8 +4,6 @@ using System;
 using Terraria;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -33,73 +31,121 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        public override string GetInfoText()
         {
             Rectangle selection = new Rectangle(0, 0, 0, 0);
-            // selection bounds preview
+
             if (_point1placed)
             {
-                // if point2 hasnt been placed yet, put a temporary point2 that follows the mouse so you can see your selection
+                // temp point at the cursor
                 if (!_point2placed)
                 {
                     _point2 = new Point(_canChangePoint2X ? Player.tileTargetX : _point1.X + _oldWidth, _canChangePoint2Y ? Player.tileTargetY : _point1.Y + _oldHeight);
                 }
+                selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
+            }
 
-                // only draw if we have a selection
-                if (Selection.Count > 0 || !_point2placed)
+            return $"[c/EAD87A:Width:] {selection.Width}, [c/EAD87A:Height:] {selection.Height}";
+        }
+
+        public override void ResetSelection()
+        {
+            // unplace both points if you right click, results in selection going away
+            _point1placed = false;
+            _point2placed = false;
+            _canChangePoint2X = true;
+            _canChangePoint2Y = true;
+            _hoveringTop = false;
+            _hoveringBottom = false;
+            _hoveringLeft = false;
+            _hoveringRight = false;
+            _selection.Clear();
+        }
+
+        public override TileCollection GetSelection()
+        {
+            // no selection
+            if (!_point1placed)
+            {
+                return null;
+            }
+
+            // temp point at the cursor
+            if (!_point2placed)
+            {
+                _point2 = new Point(_canChangePoint2X ? Player.tileTargetX : _point1.X + _oldWidth, _canChangePoint2Y ? Player.tileTargetY : _point1.Y + _oldHeight);
+            }
+
+            // update selection
+            _selection.Clear();
+            Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
+            int width = selection.Width;
+            int height = selection.Height;
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
                 {
-                    selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
-                    DrawUtils.DrawRectangleOutline(selection, TIGWESettings.ToolColor);
-                    DrawUtils.DrawMiscOptions(selection, TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
-
-                    // draw hovering side highlight
-                    if (HoveringAny)
-                    {
-                        SpriteBatch sb = Main.spriteBatch;
-                        sb.End();
-                        sb.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
-                        if (_hoveringTop)
-                        {
-                            sb.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - 2 - (int)Main.screenPosition.X, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, selection.Width * 16 + 4, 6), Color.White * 0.8f);
-                        }
-                        if (_hoveringLeft)
-                        {   
-                            sb.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - (int)Main.screenPosition.X - 2, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, 6, selection.Height * 16 + 4), Color.White * 0.8f);
-                        }
-                        if (_hoveringRight)
-                        {
-                            sb.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 + selection.Width * 16 - 4 - (int)Main.screenPosition.X, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, 6, selection.Height * 16 + 4), Color.White * 0.8f);
-                        }
-                        if (_hoveringBottom)
-                        {
-                            sb.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - 2 - (int)Main.screenPosition.X, selection.Y * 16 + selection.Height * 16 - 4 - (int)Main.screenPosition.Y, selection.Width * 16 + 4, 6), Color.White * 0.8f);
-                        }
-                        sb.End();
-                        sb.Begin();
-                    }
+                    int newX = x + selection.X;
+                    int newY = y + selection.Y;
+                    _selection.TryAddTile(new Point(newX, newY), new TileCopy(Main.tile[newX, newY], newX, newY));
                 }
             }
-            InfoText = $"[c/EAD87A:Width:] {selection.Width}, [c/EAD87A:Height:] {selection.Height}";
+
+            return _selection;
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            // dont draw anything if we dont have both points placed
+            if (!_point1placed || !_point2placed)
+            {
+                return;
+            }
+
+            // draw hovering side highlight
+            if (HoveringAny)
+            {
+                Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
+                spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
+                if (_hoveringTop)
+                {
+                    spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - 2 - (int)Main.screenPosition.X, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, selection.Width * 16 + 4, 6), Color.White * 0.8f);
+                }
+                if (_hoveringLeft)
+                {
+                    spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - (int)Main.screenPosition.X - 2, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, 6, selection.Height * 16 + 4), Color.White * 0.8f);
+                }
+                if (_hoveringRight)
+                {
+                    spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 + selection.Width * 16 - 4 - (int)Main.screenPosition.X, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, 6, selection.Height * 16 + 4), Color.White * 0.8f);
+                }
+                if (_hoveringBottom)
+                {
+                    spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - 2 - (int)Main.screenPosition.X, selection.Y * 16 + selection.Height * 16 - 4 - (int)Main.screenPosition.Y, selection.Width * 16 + 4, 6), Color.White * 0.8f);
+                }
+                spriteBatch.End();
+            }
         }
 
         public override void Update()
         {
-            Rectangle selection = new Rectangle(0, 0, 0, 0);
+            if (!_point1placed)
+            {
+                return;
+            }
+
             if (_point2placed)
             {
                 // get what side we're hovering over
                 // working with zoom makes this a bit more complicated
-                selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
-                selection = new Rectangle((int)(selection.X * 16 - (int)Main.screenPosition.X), (int)(selection.Y * 16 - (int)Main.screenPosition.Y), (int)(selection.Width * 16 * Main.GameZoomTarget), (int)(selection.Height * 16 * Main.GameZoomTarget));
+                Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
+                selection = new Rectangle((int)(selection.X * 16 - (int)Main.screenPosition.X), (int)(selection.Y * 16 - (int)Main.screenPosition.Y), (int)(selection.Width * 16), (int)(selection.Height * 16));
                 Vector2 mouse = new Vector2((int)(Main.mouseX), (int)(Main.mouseY)); // mouse position
-                var newXY = Vector2.Transform(new Vector2((int)(selection.X), (int)(selection.Y)), Main.GameViewMatrix.ZoomMatrix);
-                selection.Y = (int)newXY.Y;
-                selection.X = (int)newXY.X;
                 _hoveringLeft = Math.Abs(mouse.X - selection.X) < 8f && (mouse.Y > selection.Y) && (mouse.Y < selection.Y + selection.Height);
                 _hoveringRight = Math.Abs(mouse.X - (selection.X + selection.Width)) < 8f && (mouse.Y > selection.Y) && (mouse.Y < selection.Y + selection.Height);
                 _hoveringTop = Math.Abs(mouse.Y - selection.Y) < 8f && (mouse.X > selection.X) && (mouse.X < selection.X + selection.Width);
                 _hoveringBottom = Math.Abs(mouse.Y - (selection.Y + selection.Height)) < 8f && (mouse.X > selection.X) && (mouse.X < selection.X + selection.Width);
-            }
+            } 
         }
 
         public override void PostUpdateInput()
@@ -146,21 +192,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         {
                             _point2 = new Point(_canChangePoint2X ? Player.tileTargetX : _point1.X + _oldWidth, _canChangePoint2Y ? Player.tileTargetY : _point1.Y + _oldHeight);
                             _point2placed = true;
-
-                            // both points placed, update selection
-                            Selection.Clear();
-                            Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
-                            int width = selection.Width;
-                            int height = selection.Height;
-                            for (int x = 0; x < width; x++)
-                            {
-                                for (int y = 0; y < height; y++)
-                                {
-                                    int newX = x + selection.X;
-                                    int newY = y + selection.Y;
-                                    Selection.TryAddTile(new Point(newX, newY), new TileCopy(Main.tile[newX, newY], newX, newY));
-                                }
-                            }
                         }
                     }
                 }
@@ -169,16 +200,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             // right click
             if (Main.mouseRight && Main.mouseRightRelease && !Main.LocalPlayer.mouseInterface)
             {
-                // unplace both points if you right click, results in selection going away
-                _point1placed = false;
-                _point2placed = false;
-                _canChangePoint2X = true;
-                _canChangePoint2Y = true;
-                _hoveringTop = false;
-                _hoveringBottom = false;
-                _hoveringLeft = false;
-                _hoveringRight = false;
-                Selection.Clear();
+                ResetSelection();
             }
         }
     }

@@ -8,6 +8,7 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
+using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Content;
 using TerrariaInGameWorldEditor.Content.Tools;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
@@ -26,7 +27,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private SpriteBatch _spriteBatch;
 
         // tools
-        public List<Tool> Tools { get; } = new List<Tool> { new BrushTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() };
+        public List<Tool> Tools { get; private set; } 
         private PasteTool _pasteTool = new PasteTool();
         private Tool _currentTool;
         public Tool CurrentTool { // current selected tool
@@ -40,9 +41,59 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         }
 
         // editing
-        public TileCollection Clipboard { get; set; } = new TileCollection(); // current clipboard
-        public TileCollection CurrentSelection { get; set; } = new TileCollection(); // current selection
-        public TileCopy SelectedTile { get; set; } // current selected tile
+        public TileCollection Clipboard // current clipboard
+        {
+            get => _clipboard;
+            set
+            {
+                if (_clipboard != null)
+                {
+                    _clipboard.OnChanged -= ClipboardChanged;
+                }
+                _clipboard = value;
+                if (_clipboard != null)
+                {
+                    _clipboard.OnChanged += ClipboardChanged;
+                }
+                OnClipboardChanged?.Invoke(this, EventArgs.Empty);
+            }
+
+        }
+        public event EventHandler OnClipboardChanged;
+        private TileCollection _clipboard = new TileCollection();
+
+        public TileCollection CurrentSelection // current selection
+        {
+            get => _currentSelection;
+            set
+            {
+                if (_currentSelection != null)
+                {
+                    _currentSelection.OnChanged -= SelectionChanged;
+                }
+                _currentSelection = value;
+                if (_currentSelection != null)
+                {
+                    _currentSelection.OnChanged += SelectionChanged;
+                }
+                OnSelectionChanged?.Invoke(this, EventArgs.Empty);
+            }
+
+        }
+        public event EventHandler OnSelectionChanged;
+        private TileCollection _currentSelection = new TileCollection();
+
+        public TileCopy SelectedTile // current selected tile
+        {
+            get => _selectedTile;
+            set
+            {
+                _selectedTile = value;
+                OnSelectedTileChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        public event EventHandler OnSelectedTileChanged;
+        private TileCopy _selectedTile;
 
         // redo undo
         public List<TileCollection> UndoHistory { get; set; } = new List<TileCollection>();
@@ -52,6 +103,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         {
             base.OnModLoad();
             Local = this;
+            Tools = new List<Tool> { new BrushTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() };
         }
 
         public override void PostSetupContent()
@@ -110,59 +162,77 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // layer stuff
         {
-            if (_mainScreen.Visible)
+            // dont render if not visible
+            if (!_mainScreen.Visible)
             {
-                // removes all layers except the cursor layer
-                layers.RemoveAll(layer =>
-                {
-                    // Vanilla: Interface Logic 4 is the mouse text, idk why
-                    return !(layer.Name.Equals("Vanilla: Cursor") || layer.Name.Equals($"{TerrariaInGameWorldEditor.MODNAME}: UI") || layer.Name.Equals("Vanilla: Interface Logic 4") || layer.Name.Equals("Vanilla: Tile Grid Option"));
-                });
-
-                // insert our layer before the cursor layer but after the tile grid option layer so the tile grid isnt drawn over our UI
-                layers.Insert(layers.FindIndex(0, layers.Count, layer => layer.Name.Equals("Vanilla: Tile Grid Option")) + 1, new LegacyGameInterfaceLayer(
-                    $"{TerrariaInGameWorldEditor.MODNAME}: MainScreen",
-                    delegate
-                    {
-                        if (_mainScreenUI.CurrentState != null)
-                        {
-                            // setup spritebatch if we havent yet
-                            _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
-
-                            // temporarily adjust to make everything act as if the UI scale is 1f
-                            Main.mouseX = (int)(Main.mouseX * Main.UIScale);
-                            Main.mouseY = (int)(Main.mouseY * Main.UIScale);
-                            int tempWidth = Main.screenWidth;
-                            int tempHeight = Main.screenHeight;
-                            float tempUIScale = Main.UIScale;
-                            Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
-                            Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
-                            Main.UIScale = 1f;
-
-                            // start spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
-                            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
-                            _mainScreenUI.Draw(_spriteBatch, Main.gameTimeCache);
-                            _spriteBatch.End();
-
-                            // restore originals
-                            Main.UIScale = tempUIScale;
-                            Main.screenWidth = tempWidth;
-                            Main.screenHeight = tempHeight;
-                        }
-                        return true;
-                    },
-                    InterfaceScaleType.UI)
-                );
+                return;
             }
-            base.ModifyInterfaceLayers(layers);
+
+            // setup spritebatch if we havent yet
+            _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
+
+            // draw tools before the main ui
+            if (Local.CurrentSelection?.Count > 0)
+            {
+                // draw selection outline
+                DrawUtils.DrawTileCollectionOutline(Local.CurrentSelection, new Point(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
+                DrawUtils.DrawMiscOptions(new Rectangle(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY(), Local.CurrentSelection.GetWidth(), Local.CurrentSelection.GetHeight()), TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
+            }
+            // draw current tool
+            Local.CurrentTool?.Draw(_spriteBatch);
+
+            // removes all layers except the cursor layer
+            layers.RemoveAll(layer =>
+            {
+                // Vanilla: Interface Logic 4 is the mouse text, idk why
+                return !(layer.Name.Equals("Vanilla: Cursor") || layer.Name.Equals($"{TerrariaInGameWorldEditor.MODNAME}: UI") || layer.Name.Equals("Vanilla: Interface Logic 4") || layer.Name.Equals("Vanilla: Tile Grid Option"));
+            });
+
+            // insert our layer before the cursor layer but after the tile grid option layer so the tile grid isnt drawn over our UI
+            layers.Insert(layers.FindIndex(0, layers.Count, layer => layer.Name.Equals("Vanilla: Tile Grid Option")) + 1, new LegacyGameInterfaceLayer(
+                $"{TerrariaInGameWorldEditor.MODNAME}: MainScreen",
+                delegate
+                {
+                    if (_mainScreenUI.CurrentState != null)
+                    {
+                        // temporarily adjust to make everything act as if the UI scale is 1f
+                        Main.mouseX = (int)(Main.mouseX * Main.UIScale);
+                        Main.mouseY = (int)(Main.mouseY * Main.UIScale);
+                        int tempWidth = Main.screenWidth;
+                        int tempHeight = Main.screenHeight;
+                        float tempUIScale = Main.UIScale;
+                        Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
+                        Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
+                        Main.UIScale = 1f;
+
+                        // start spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
+                        _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
+                        _mainScreenUI.Draw(_spriteBatch, Main.gameTimeCache);
+                        _spriteBatch.End();
+
+                        // restore originals
+                        Main.UIScale = tempUIScale;
+                        Main.screenWidth = tempWidth;
+                        Main.screenHeight = tempHeight;
+                    }
+                    return true;
+                },
+                InterfaceScaleType.UI)
+            );
         }
 
         public override void PostUpdateInput()
         {
-            // update input for the ui
             if (_mainScreen.Visible)
             {
+                // update input for the ui
                 _mainScreen.PostUpdateInput();
+
+                // update tool input
+                if (!Main.LocalPlayer.mouseInterface)
+                {
+                    Local.CurrentTool?.PostUpdateInput();
+                }
             }
 
             // toggle the main screen visibility if the keybind is pressed
@@ -183,9 +253,9 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape) && _mainScreen.Visible)
             {
                 CurrentSelection.Clear();
-                if (CurrentTool is SelectionTool)
+                if (CurrentTool is SelectionTool selectionTool)
                 {
-                    ((SelectionTool)CurrentTool).Selection.Clear();
+                    selectionTool.ResetSelection();
                 }
             }
 
@@ -262,6 +332,33 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             }
 
             base.PostUpdateInput();
+        }
+
+        public override void PostUpdatePlayers()
+        {
+            base.PostUpdatePlayers();
+
+            // update tools
+            Local.CurrentTool?.Update();
+            if (Local.CurrentTool is SelectionTool selectionTool)
+            {
+                Local.CurrentSelection = selectionTool.GetSelection();
+            }
+        }
+
+        private void ClipboardChanged(object sender, EventArgs e)
+        {
+            OnClipboardChanged?.Invoke(sender, e);
+        }
+
+        private void SelectionChanged(object sender, EventArgs e)
+        {
+            OnSelectionChanged?.Invoke(sender, e);
+        }
+
+        private void SelectedTileChanged(object sender, EventArgs e)
+        {
+            OnSelectedTileChanged?.Invoke(sender, e);
         }
 
         public void CopyToClipboard(TileCollection tilesToCopy) // copy area in gotten area

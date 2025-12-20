@@ -46,18 +46,17 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             _modeDropDown.SetDefaultOption("Selected Tile");
             _modeDropDown.OnOptionChanged += (string optionText) =>
             {
-                if (optionText.Equals("Selected Tile"))
+                switch (optionText)
                 {
-                    // reset reference of clipboard
-                    _brush = new TileCollection();
-                    _mode = LineMode.SelectedTile;
+                    case "Selected Tile":
+                        _mode = LineMode.SelectedTile;
+                    break;
+
+                    case "Clipboard":
+                        _mode = LineMode.Clipboard;
+                    break;
                 }
-                else if (optionText.Equals("Clipboard"))
-                {
-                    // set to reference of clipboard
-                    _brush = EditorSystem.Local.Clipboard;
-                    _mode = LineMode.Clipboard;
-                }
+                UpdateBrush();
             };
             _modeDropDown.Height.Set(26, 0f);
             _modeDropDown.Width.Set(140, 0f);
@@ -68,23 +67,51 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             _d = 4;
             _sizeField.OnValueChanged += (int newValue) =>
             {
-                _d = _sizeField.GetValue();
+                _d = newValue;
+                UpdateBrush();
             };
             _sizeField.Width.Set(60, 0);
             _sizeField.Height.Set(26, 0);
             _sizeField.ShowButtons = true;
             Settings.Add(("Size:", _sizeField));
+
+            // when to update brush
+            EditorSystem.Local.OnSelectedTileChanged += (_, _) =>
+            {
+                UpdateBrush();
+            };
+            EditorSystem.Local.OnClipboardChanged += (_, _) =>
+            {
+                UpdateBrush();
+            };
+        }
+
+        public override string GetInfoText()
+        {
+            return $"[c/EAD87A:Y Difference:] {_yDiff}, [c/EAD87A:X Difference:] {_xDiff}";
+        }
+
+        private void UpdateBrush()
+        {
+            switch (_mode)
+            {
+                case LineMode.SelectedTile:
+                    if (_brush == EditorSystem.Local.Clipboard)
+                    {
+                        _brush = new TileCollection(); // make sure to reset brush if its a reference to clipboard
+                    }
+                    _brush.Clear();
+                    _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
+                break;
+
+                case LineMode.Clipboard:
+                    _brush = EditorSystem.Local.Clipboard;
+                break;
+            }
         }
 
         public override void Update()
         {
-            // update brush if in selected tile mode and either size changed or selected tile changed
-            if (_mode == LineMode.SelectedTile && (_d != _brush.GetWidth() + 1 || _brush.AsDictionary().ToList()[0].Value != EditorSystem.Local.SelectedTile))
-            {
-                _brush.Clear();
-                _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
-            }
-
             // have the mouse act as point 1 while point 1 isnt placed
             if (!_point1placed)
             {
@@ -95,8 +122,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             {
                 _point2 = new Point(Player.tileTargetX, Player.tileTargetY);
             }
-
-            InfoText = $"[c/EAD87A:Y Difference:] {_yDiff}, [c/EAD87A:X Difference:] {_xDiff}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)

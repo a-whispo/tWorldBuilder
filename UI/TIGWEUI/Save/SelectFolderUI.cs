@@ -28,7 +28,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
             Height.Set(440, 0);
             Left.Set(750, 0);
             Top.Set(150, 0);
-            Title = "Select Folder";
+            Title = "(Save) Select Folder";
 
             // open folder
             TIGWEButton openFolder = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/OpenFolder"));

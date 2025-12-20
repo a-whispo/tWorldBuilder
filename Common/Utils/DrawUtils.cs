@@ -112,7 +112,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 int drawY = (coord.Y - minY) * 16 + coordToDrawAt.Y;
 
                 // check if its worth doing calculations
-                if (drawX > Main.screenWidth || drawX < 0 || drawY > Main.screenHeight || drawY < 0)
+                if (drawX > Main.screenWidth * Main.UIScale || drawX < 0 || drawY > Main.screenHeight * Main.UIScale || drawY < 0)
                 {
                     continue;
                 }
@@ -221,7 +221,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 int drawY = (tile.Key.Y - minY) * 16 + coordToDrawAt.Y;
 
                 // check if its worth doing calculations
-                if (drawX > Main.screenWidth || drawX < 0 || drawY > Main.screenHeight || drawY < 0)
+                if (drawX > Main.screenWidth * Main.UIScale || drawX < 0 || drawY > Main.screenHeight * Main.UIScale || drawY < 0)
                 {
                     continue;
                 }
@@ -254,7 +254,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 int drawX = (tile.Key.X - minX) * 16 + coordToDrawAt.X;
                 int drawY = (tile.Key.Y - minY) * 16 + coordToDrawAt.Y;
 
-                if (drawX > Main.screenWidth || drawX < 0 || drawY > Main.screenHeight || drawY < 0)
+                if (drawX > Main.screenWidth * Main.UIScale || drawX < 0 || drawY > Main.screenHeight * Main.UIScale || drawY < 0)
                 {
                     continue;
                 }
@@ -559,7 +559,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
         {
             _spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
 
-            rect = new Rectangle(rect.X * 16 - (int)Main.screenPosition.X, rect.Y * 16 - (int)Main.screenPosition.Y, rect.Width * 16, rect.Height * 16);
+            rect = new Rectangle(rect.X * 16 - (int)Main.screenPosition.X, rect.Y * 16 - (int)Main.screenPosition.Y, (rect.Width + 1) * 16, (rect.Height + 1) * 16);
 
             // add center lines
             // can be toggled

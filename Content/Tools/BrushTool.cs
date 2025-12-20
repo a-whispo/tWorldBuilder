@@ -39,18 +39,17 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             _modeDropDown.SetDefaultOption("Selected Tile");
             _modeDropDown.OnOptionChanged += (string optionText) =>
             {
-                if (optionText.Equals("Selected Tile"))
+                switch (optionText)
                 {
-                    // reset reference of clipboard
-                    _brush = new TileCollection();
-                    _mode = BrushMode.SelectedTile;
+                    case "Selected Tile":
+                        _mode = BrushMode.SelectedTile;
+                    break;
+
+                    case "Clipboard":
+                        _mode = BrushMode.Clipboard;
+                    break;
                 }
-                else if (optionText.Equals("Clipboard"))
-                {
-                    // set to reference of clipboard
-                    _brush = EditorSystem.Local.Clipboard;
-                    _mode = BrushMode.Clipboard;
-                }
+                UpdateBrush();
             };
             _modeDropDown.Height.Set(26, 0f);
             _modeDropDown.Width.Set(140, 0f);
@@ -61,21 +60,41 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             _d = 4;
             _sizeField.OnValueChanged += (int newValue) =>
             {
-                _d = _sizeField.GetValue();
+                _d = newValue;
+                UpdateBrush();
             };
             _sizeField.Width.Set(60, 0);
             _sizeField.Height.Set(26, 0);
             _sizeField.ShowButtons = true;
             Settings.Add(("Size:", _sizeField));
+
+            // when to update brush
+            EditorSystem.Local.OnSelectedTileChanged += (_, _) =>
+            {
+                UpdateBrush();
+            };
+            EditorSystem.Local.OnClipboardChanged += (_, _) =>
+            {
+                UpdateBrush();
+            };
         }
 
-        public override void Update()
+        private void UpdateBrush()
         {
-            // update brush if in selected tile mode and either size changed or selected tile changed
-            if (_mode == BrushMode.SelectedTile && (_d != _brush.GetWidth() + 1 || _brush.AsDictionary().ToList()[0].Value != EditorSystem.Local.SelectedTile))
+            switch(_mode)
             {
-                _brush.Clear();
-                _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
+                case BrushMode.SelectedTile:
+                    if (_brush == EditorSystem.Local.Clipboard)
+                    {
+                        _brush = new TileCollection(); // make sure to reset brush if its a reference to clipboard
+                    }
+                    _brush.Clear();
+                    _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
+                break;
+
+                case BrushMode.Clipboard:
+                    _brush = EditorSystem.Local.Clipboard;
+                break;
             }
         }
 

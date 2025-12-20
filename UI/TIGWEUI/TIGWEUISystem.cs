@@ -46,7 +46,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         public void RegisterUI(TIGWEUI ui)
         {
             ui.Activate();
-            ui.OnShow += () =>
+            ui.OnShow += (_, _) =>
             {
                 MoveToTop(ui);
             };

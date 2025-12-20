@@ -97,7 +97,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
             Append(_saveButton);
 
             // make sure to hide the select folder UI if this one is closed
-            OnHide += () =>
+            OnHide += (_, _) =>
             {
                 if (_selectFolderUI != null)
                 {
@@ -105,24 +105,24 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
                 }
             };
 
-            Height.Set(_saveButton.Top.Pixels + _saveButton.Height.Pixels + _saveButton.Left.Pixels, 0);
-        }
+            // update save button state based on selection
+            EditorSystem.Local.OnSelectionChanged += (_, _) =>
+            {
+                if (EditorSystem.Local.CurrentSelection.Count > 0)
+                {
+                    _saveButton.IgnoresMouseInteraction = false;
+                    _saveButton.SetVisibility(1f, 1f);
+                    _saveText.TextColor = Color.White;
+                }
+                else
+                {
+                    _saveButton.IgnoresMouseInteraction = true;
+                    _saveButton.SetVisibility(0.6f, 0.6f);
+                    _saveText.TextColor = Color.White * 0.6f;
+                }
+            };
 
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-            if (EditorSystem.Local.CurrentSelection.Count > 0)
-            {
-                _saveButton.IgnoresMouseInteraction = false;
-                _saveButton.SetVisibility(1f, 1f);
-                _saveText.TextColor = Color.White;
-            }
-            else
-            {
-                _saveButton.IgnoresMouseInteraction = true;
-                _saveButton.SetVisibility(0.6f, 0.6f);
-                _saveText.TextColor = Color.White * 0.6f;
-            }
+            Height.Set(_saveButton.Top.Pixels + _saveButton.Height.Pixels + _saveButton.Left.Pixels, 0);
         }
 
         private void SelectPath()

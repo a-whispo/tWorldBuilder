@@ -14,10 +14,8 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
     internal class TIGWEUI : UIState
     {
         // events
-        public delegate void ShowEventHandler();
-        public event ShowEventHandler OnShow;
-        public delegate void HideEventHandler();
-        public event HideEventHandler OnHide;
+        public event EventHandler OnShow;
+        public event EventHandler OnHide;
 
         // public
         public bool Visible { get; set; } = false;
@@ -140,12 +138,12 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             // handle visibility and stuff
             if (Visible && _UI.CurrentState == null)
             {
-                OnShow?.Invoke();
+                OnShow?.Invoke(this, EventArgs.Empty);
                 _UI.SetState(this);
             }
             if (!Visible && _UI.CurrentState == this)
             {
-                OnHide?.Invoke();
+                OnHide?.Invoke(this, EventArgs.Empty);
                 _UI.SetState(null);
             }
 

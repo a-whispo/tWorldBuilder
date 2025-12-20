@@ -35,19 +35,9 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             Settings.Add(("Select tiles connected at corners:", _selectCornersCheckBox));
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        public override string GetInfoText()
         {
-            // draw outline while we have a selection
-            if (Selection.Count > 0)
-            {
-                DrawUtils.DrawTileCollectionOutline(Selection, new Point(Selection.GetMinX(), Selection.GetMinY()), TIGWESettings.ToolColor);
-            }
-        }
-
-        public override void Update()
-        {
-            base.Update();
-            InfoText = $"[c/EAD87A:Count:] {Selection.Count}";
+            return $"[c/EAD87A:Count:] {_selection.Count}";
         }
 
         public override void PostUpdateInput()
@@ -61,7 +51,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
                 if (!Keybinds.Key1MK.Current || Keybinds.Key1MK.GetAssignedKeys().Count < 1) // if key 1 is pressed down, keep adding tiles to our selection
                 {
-                    Selection.Clear();
+                    _selection.Clear();
                 }
 
                 // get point and clicked tile
@@ -143,7 +133,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 // if we reach the tile cap just clear the array so we dont draw anything
                 if (count <= _tileCap)
                 {
-                    Selection.TryAddTiles(tilesToAdd);
+                    _selection.TryAddTiles(tilesToAdd);
                 } else
                 {
                     tilesToAdd.Clear(); // just remove the tiles we wanted to add
@@ -155,7 +145,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             if (Main.mouseRight && Main.mouseRightRelease && !Main.LocalPlayer.mouseInterface)
             {
                 // undo selection
-                Selection.Clear();
+                _selection.Clear();
             }
         }
     }
