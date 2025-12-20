@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Save;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector;
 
@@ -12,13 +13,14 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
 {
     internal class TIGWEUISystem : ModSystem
     {
-        public static TIGWEUISystem Local; // local instance
-        public bool ShouldRenderUI = true;
+        public static TIGWEUISystem Local { get; private set; } // local instance
+        public bool ShouldRenderUI { get; set; } = true;
 
         // states
-        public SelectTileUI SelectTileUI;
-        public SettingsUI SettingsUI;
-        public BlueprintsUI BlueprintsUI;
+        public SelectTileUI SelectTileUI { get; private set; }
+        public SettingsUI SettingsUI { get; private set; }
+        public BlueprintsUI BlueprintsUI { get; private set; }
+        public SaveUI SaveUI { get; private set; }
         private List<TIGWEUI> _states = [];
         private SpriteBatch _spriteBatch;
 
@@ -34,9 +36,11 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             SelectTileUI = new SelectTileUI();
             SettingsUI = new SettingsUI();
             BlueprintsUI = new BlueprintsUI();
+            SaveUI = new SaveUI();
             RegisterUI(SelectTileUI);
             RegisterUI(SettingsUI);
             RegisterUI(BlueprintsUI);
+            RegisterUI(SaveUI);
         }
 
         public void RegisterUI(TIGWEUI ui)

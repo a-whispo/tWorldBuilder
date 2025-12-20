@@ -1,35 +1,34 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.IO;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.Common;
-using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid;
 using TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable;
 using TerrariaInGameWorldEditor.UI.UIElements.Scrollbar;
 using TerrariaInGameWorldEditor.UI.UIElements.TextField;
 
-namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints
+namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
 {
-    internal class BlueprintsUI : TIGWEUI
+    // this is pretty much the exact same as BlueprintsUI, so might make a better system later
+    internal class SelectFolderUI : TIGWEUI
     {
+        public delegate void SelectFolderEventHandler(UIDirectoryFolder folder);
+        public event SelectFolderEventHandler OnSelectFolder;
+
         private UIDirectoryGrid _grid;
 
         public override void OnInitialize()
         {
             base.OnInitialize();
-
             // main area
             Width.Set(700, 0);
             Height.Set(440, 0);
             Left.Set(750, 0);
             Top.Set(150, 0);
-            Title = "Blueprints";
+            Title = "Select Folder";
 
             // open folder
             TIGWEButton openFolder = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/OpenFolder"));
@@ -104,20 +103,13 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints
             _grid.SetDirectory(ModLoader.ModPath.Replace("\\Mods", "") + "\\TIGWE\\saves\\");
             _grid.SetScrollbar(sb);
             _grid.SetSearchBar(searchBar);
-            searchBar.PlaceholderText = $"Search for files... [c/60ABE7:({_grid.FileCount})]";
-            _grid.OnSelectFile += (UIDirectoryFile file) =>
-            {
-                try
-                {
-                    TagCompound tag = TagIO.FromFile(file.FullPath);
-                    EditorSystem.Local.Clipboard = tag.Get<TileCollection>("TileCollection");
-                }
-                catch (Exception ex)
-                {
-                    //Console.WriteLine($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] Error: {ex}");
-                    EditorSystem.Local.Clipboard = null;
-                }
-            };
+            searchBar.PlaceholderText = $"Search for folders... [c/60ABE7:({_grid.FolderCount})]";
+            _grid.CanSelectFiles = false;
+            _grid.ShouldShowFiles = false;
+            _grid.ShouldFilesAppearInSearch = false;
+            _grid.ShouldFoldersAppearInSearch = true;
+            _grid.CanSelectFolders = true;
+            _grid.OnSelectFolder += FolderSelected;
             _grid.RefreshContent();
             Append(_grid);
             TIGWEImageResizeable border = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/MainScreenInnerBorder"), 6, 4);
@@ -127,6 +119,11 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints
             border.Width.Set(_grid.Width.Pixels + 16, 0f);
             border.Height.Set(_grid.Height.Pixels + 10, 0f);
             Append(border);
+        }
+
+        private void FolderSelected(UIDirectoryFolder folder)
+        {
+            OnSelectFolder?.Invoke(folder);
         }
 
         private void CreateDirectory(UIMouseEvent evt, UIElement listeningElement)
@@ -147,7 +144,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints
             // create the directory and UIBlueprintItem
             Directory.CreateDirectory(fullPath);
             UIDirectoryFolder folder = new UIDirectoryFolder(fullPath);
-            folder.CanSelect = false;
+            folder.CanSelect = true;
 
             // add the new folder and do some recalculations
             _grid.Add(folder);

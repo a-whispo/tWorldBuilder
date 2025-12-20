@@ -244,6 +244,12 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 {
                     CurrentTool = null;
                 }
+
+                // save menu
+                if (Keybinds.SaveMK.JustPressed && _mainScreen.Visible)
+                {
+                    TIGWEUISystem.Local.SaveUI.Visible = true;
+                }
             }
 
             // delete

@@ -16,6 +16,7 @@ namespace TerrariaInGameWorldEditor.Content
         public static ModKeybind CutMK { get; private set; }
         public static ModKeybind UndoMK { get; private set; }
         public static ModKeybind RedoMK { get; private set; }
+        public static ModKeybind SaveMK { get; private set; }
 
         public override void Load()
         {
@@ -30,6 +31,7 @@ namespace TerrariaInGameWorldEditor.Content
             CutMK = KeybindLoader.RegisterKeybind(Mod, "Cut (Key 1 + selected key)", Keys.X); // cut keybind
             UndoMK = KeybindLoader.RegisterKeybind(Mod, "Undo (Key 1 + selected key)", Keys.Z); // undo keybind
             RedoMK = KeybindLoader.RegisterKeybind(Mod, "Redo (Key 1 + selected key", Keys.Y); // redo keybind
+            SaveMK = KeybindLoader.RegisterKeybind(Mod, "Save (Key 1 + selected key", Keys.S); // save keybind
         }
     }
 }

@@ -8,7 +8,7 @@ namespace TerrariaInGameWorldEditor.Common
     public class TileCollection : TagSerializable
     {
         // deserializer for the tagcompound
-        public static Func<TagCompound, TileCollection> DESERIALIZER { get; set; } = s => DeserializeData(s);
+        public static Func<TagCompound, TileCollection> DESERIALIZER = s => DeserializeData(s);
 
         // tiles stored
         private Dictionary<Point, TileCopy> _tiles = new Dictionary<Point, TileCopy>();
@@ -281,7 +281,7 @@ namespace TerrariaInGameWorldEditor.Common
                 int x = item.GetInt("X");
                 int y = item.GetInt("Y");
                 TileCopy tileCopy = item.Get<TileCopy>("TileCopy");
-                tileColl._tiles.Add(new Point(x, y), tileCopy);
+                tileColl.TryAddTile(new Point(x, y), tileCopy);
             }
             return tileColl;
         }

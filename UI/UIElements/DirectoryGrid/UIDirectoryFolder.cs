@@ -90,7 +90,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
         public override void LeftClick(UIMouseEvent evt)
         {
             base.LeftClick(evt);
-            if (!_isHoveringOverButtons)
+            if (!_isHoveringOverButtons && !_parentGrid.IsSearching)
             {
                 IsOpen = !IsOpen; // swap between open and closed
                 if (IsOpen)
@@ -106,7 +106,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
 
         public void Open()
         {
-            if (_parentGrid == null)
+            if (_parentGrid == null || _parentGrid.IsSearching)
             {
                 return;
             }
@@ -114,6 +114,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
             {
                 // add the item
                 _parentGrid.Add(item);
+                item.RecalculateSize();
 
                 // if the item is a folder and it was open before opening this folder we want to also open it again
                 if (item is UIDirectoryFolder folder && folder.IsOpen)
@@ -128,7 +129,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
 
         public void Close()
         {
-            if (_parentGrid == null)
+            if (_parentGrid == null || _parentGrid.IsSearching)
             {
                 return;
             }
@@ -138,7 +139,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
                 {
                     folder.Close(); // call itself recursivly with the child folder to also remove all children of that folder from the parent grid
                 }
-                _parentGrid.Remove(item);
+                _parentGrid.RemoveVisually(item);
             }
             IsOpen = false;
             _icon.SetImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/FolderClosed"));

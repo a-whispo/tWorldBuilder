@@ -99,7 +99,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
             _selectButton.SetVisibility(0.8f, 1f);
             _selectButton.Width.Set(26, 0);
             _selectButton.Height.Set(26, 0);
-            _selectButton.HoverText = "Copy to clipboard";
+            _selectButton.HoverText = "Select";
             _selectButton.OnLeftClick += (_, _) => _parentGrid.OnSelectItem(this);
             Append(_selectButton);
 
@@ -165,7 +165,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
                 }
 
                 // remove from the grid
-                _parentFolder.RemoveContentChild(this);
+                _parentFolder?.RemoveContentChild(this);
                 _parentGrid.Remove(this);
             }
         }
@@ -216,7 +216,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
 
             // rename
             // stop renaming under these conditions
-            if (Main.keyState.IsKeyDown(Keys.Escape) || Mouse.GetState().LeftButton == ButtonState.Pressed && (!_isHoveringOverButtons || !_renameTextField.IsMouseHovering)) // if we click if the textfield or whatever else just add it as is
+            if (Main.keyState.IsKeyDown(Keys.Escape) || (Mouse.GetState().LeftButton == ButtonState.Pressed && !_isHoveringOverButtons && !_renameTextField.IsMouseHovering)) // if we click if the textfield or whatever else just add it as is
             {
                 RemoveChild(_confirmRenameButton);
                 RemoveChild(_renameTextField);
@@ -245,7 +245,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
             }
 
             // if we dont have a parent folder that means we are in the root folder and we have a directorygrid as a parent so we match that width
-            Width.Set(_parentFolder == null ? _parentGrid.Width.Pixels : _parentFolder.GetInnerDimensions().Width - 14, 0f);
+            Width.Set(_parentFolder == null || _parentGrid.IsSearching ? _parentGrid.Width.Pixels : _parentFolder.GetInnerDimensions().Width - 14, 0f);
             Height.Set(38, 0f);
             _texture.Width.Set(Width.Pixels, 0f);
             _texture.Height.Set(Height.Pixels, 0f);

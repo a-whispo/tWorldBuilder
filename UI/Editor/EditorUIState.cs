@@ -536,14 +536,15 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             {
                 // draw tools
                 // draw selection outline if we're not using a selection tool
-                if (EditorSystem.Local.CurrentTool is SelectionTool && EditorSystem.Local.CurrentSelection != null)
+                if (EditorSystem.Local.CurrentTool is not SelectionTool && EditorSystem.Local.CurrentSelection != null)
                 {
                     DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.CurrentSelection, new Point(EditorSystem.Local.CurrentSelection.GetMinX(), EditorSystem.Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
                 }
 
                 // otherwise the selection tool will handle drawing the outline itself
                 EditorSystem.Local.CurrentTool.Draw(spriteBatch);
-            } else
+            } 
+            else
             {
                 if (EditorSystem.Local.CurrentSelection?.Count > 0)
                 {

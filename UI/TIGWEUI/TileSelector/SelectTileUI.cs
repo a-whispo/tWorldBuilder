@@ -48,7 +48,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
             searchIcon.Width.Set(26, 0);
             searchIcon.Height.Set(26, 0);
             searchIcon.Top.Set(51, 0);
-            searchIcon.Left.Set(289, 0);
+            searchIcon.Left.Set(_searchBar.Left.Pixels + _searchBar.Width.Pixels + 2, 0);
             searchIcon.SetVisibility(0.7f, 1);
             Append(searchIcon);
 
