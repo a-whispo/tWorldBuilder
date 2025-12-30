@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
@@ -12,7 +13,10 @@ using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Content;
 using TerrariaInGameWorldEditor.Content.Tools;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Save;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector;
 
 namespace TerrariaInGameWorldEditor.UI.Editor
 {
@@ -21,10 +25,24 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         // local instance
         public static EditorSystem Local { get; private set; }
 
-        // ui
-        private EditorUIState _mainScreen;
+        // main ui
+        private EditorUIState _mainUI;
         private UserInterface _mainScreenUI;
         private SpriteBatch _spriteBatch;
+
+        // windows
+        public enum EditorWindow
+        {
+            Main,
+            Settings,
+            Blueprints,
+            Save,
+            SelectTile
+        }
+        private SelectTileUI _selectTileUI;
+        private SettingsUI _settingsUI;
+        private BlueprintsUI _blueprintsUI;
+        private SaveUI _saveUI;
 
         // tools
         public List<Tool> Tools { get; private set; } 
@@ -36,7 +54,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             }
             set {
                 _currentTool = value;
-                _mainScreen.RecalculateToolSettings();
+                _mainUI.RecalculateToolSettings();
             }
         }
 
@@ -109,9 +127,19 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void PostSetupContent()
         {
             base.PostSetupContent();
-            _mainScreen = new EditorUIState();
-            _mainScreen.Activate();
+
+            // ui stuff
+            _mainUI = new EditorUIState();
+            _mainUI.Activate();
             _mainScreenUI = new UserInterface();
+            _selectTileUI = new SelectTileUI();
+            _settingsUI = new SettingsUI();
+            _blueprintsUI = new BlueprintsUI();
+            _saveUI = new SaveUI();
+            TIGWEUISystem.Local.RegisterUI(_selectTileUI);
+            TIGWEUISystem.Local.RegisterUI(_settingsUI);
+            TIGWEUISystem.Local.RegisterUI(_blueprintsUI);
+            TIGWEUISystem.Local.RegisterUI(_saveUI);
 
             // for testing
             Tile tile = new Tile();
@@ -126,11 +154,11 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void UpdateUI(GameTime gameTime)
         {
             // update UI
-            if (_mainScreen.Visible)
+            if (_mainUI.Visible)
             {
                 if (_mainScreenUI.CurrentState == null)
                 {
-                    _mainScreenUI.SetState(_mainScreen);
+                    _mainScreenUI.SetState(_mainUI);
                     TIGWEUISystem.Local.ShouldRenderUI = true;
                     return;
                 }
@@ -163,7 +191,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // layer stuff
         {
             // dont render if not visible
-            if (!_mainScreen.Visible)
+            if (!_mainUI.Visible)
             {
                 return;
             }
@@ -223,10 +251,10 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public override void PostUpdateInput()
         {
-            if (_mainScreen.Visible)
+            if (_mainUI.Visible)
             {
                 // update input for the ui
-                _mainScreen.PostUpdateInput();
+                _mainUI.PostUpdateInput();
 
                 // update tool input
                 if (!Main.LocalPlayer.mouseInterface)
@@ -240,19 +268,19 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             {
                 // close the ingame options window if its open
                 Main.ingameOptionsWindow = false;
-                _mainScreen.Visible = !_mainScreen.Visible;
+                _mainUI.Visible = !_mainUI.Visible;
             }
 
             // reset current tool if window is closed
-            if (!_mainScreen.Visible)
+            if (!_mainUI.Visible)
             {
                 CurrentTool = null;
             }
 
             // remove current selection if escape is pressed
-            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape) && _mainScreen.Visible)
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape) && _mainUI.Visible)
             {
-                CurrentSelection.Clear();
+                CurrentSelection?.Clear();
                 if (CurrentTool is SelectionTool selectionTool)
                 {
                     selectionTool.ResetSelection();
@@ -316,9 +344,9 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 }
 
                 // save menu
-                if (Keybinds.SaveMK.JustPressed && _mainScreen.Visible)
+                if (Keybinds.SaveMK.JustPressed && _mainUI.Visible)
                 {
-                    TIGWEUISystem.Local.SaveUI.Visible = true;
+                    _saveUI.Visible = true;
                 }
             }
 
@@ -343,6 +371,28 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             if (Local.CurrentTool is SelectionTool selectionTool)
             {
                 Local.CurrentSelection = selectionTool.GetSelection();
+            }
+        }
+
+        public void ToggleWindow(EditorWindow window)
+        {
+            switch (window)
+            {
+                case EditorWindow.Main:
+                    _mainUI.Visible = !_mainUI.Visible;
+                    break;
+                case EditorWindow.Settings:
+                    _settingsUI.Visible = !_settingsUI.Visible;
+                    break;
+                case EditorWindow.Blueprints:
+                    _blueprintsUI.Visible = !_blueprintsUI.Visible;
+                    break;
+                case EditorWindow.Save:
+                    _saveUI.Visible = !_saveUI.Visible;
+                    break;
+                case EditorWindow.SelectTile:
+                    _selectTileUI.Visible = !_selectTileUI.Visible;
+                    break;
             }
         }
 

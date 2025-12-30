@@ -204,353 +204,360 @@ namespace TerrariaInGameWorldEditor.Common.Utils
             _spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.LinearClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
             TilePaintSystemV2 ps = Main.instance.TilePaintSystem;
 
-            // faster to get index with list
-            var tilesList = tilesToDraw.AsDictionary().ToList();
-            var tilesDict = tilesToDraw.AsDictionary();
-            int minX = tilesToDraw.GetMinX();
-            int minY = tilesToDraw.GetMinY();
-
-            // make into draw coordinates
-            coordToDrawAt.X = coordToDrawAt.X * 16 - (int)Main.screenPosition.X;
-            coordToDrawAt.Y = coordToDrawAt.Y * 16 - (int)Main.screenPosition.Y;
-
-            // draw walls first to avoid them clipping into other tiles
-            foreach (var tile in tilesList)
+            try
             {
-                int drawX = (tile.Key.X - minX) * 16 + coordToDrawAt.X;
-                int drawY = (tile.Key.Y - minY) * 16 + coordToDrawAt.Y;
+                // faster to get index with list
+                var tilesList = tilesToDraw.AsDictionary().ToList();
+                var tilesDict = tilesToDraw.AsDictionary();
+                int minX = tilesToDraw.GetMinX();
+                int minY = tilesToDraw.GetMinY();
 
-                // check if its worth doing calculations
-                if (drawX > Main.screenWidth * Main.UIScale || drawX < 0 || drawY > Main.screenHeight * Main.UIScale || drawY < 0)
+                // make into draw coordinates
+                coordToDrawAt.X = coordToDrawAt.X * 16 - (int)Main.screenPosition.X;
+                coordToDrawAt.Y = coordToDrawAt.Y * 16 - (int)Main.screenPosition.Y;
+
+                // draw walls first to avoid them clipping into other tiles
+                foreach (var tile in tilesList)
                 {
-                    continue;
-                }
+                    int drawX = (tile.Key.X - minX) * 16 + coordToDrawAt.X;
+                    int drawY = (tile.Key.Y - minY) * 16 + coordToDrawAt.Y;
 
-                TileCopy tileTc = tile.Value;
-
-                // wall
-                if ((tileTc.WallType != 0) && drawWalls) // dont draw if there isnt a wall
-                {
-                    // load wall texture
-                    Main.instance.LoadWall(tile.Value.WallType);
-
-                    // calculate bounds
-                    Rectangle boundsWall = new Rectangle(drawX - 8, drawY - 8, 32, 32);
-
-                    // get wall texture with tilepaintsystem to get the texture with paint if it has any
-                    Texture2D tileWallTex = ps.TryGetWallAndRequestIfNotReady(tileTc.WallType, tileTc.WallColor);
-
-                    // get texture from spritesheet with help from frameX and frameY and draw it
-                    if (tileWallTex != null)
+                    // check if its worth doing calculations
+                    if (drawX > Main.screenWidth * Main.UIScale || drawX < 0 || drawY > Main.screenHeight * Main.UIScale || drawY < 0)
                     {
-                        _spriteBatch.Draw(tileWallTex, boundsWall, new Rectangle(tileTc.WallFrameX, tileTc.WallFrameY, 32, 32), Color.White * 0.6f);
-                    }
-                }
-            }
-
-            // go over all the tiles
-            foreach (var tile in tilesList)
-            {
-                int drawX = (tile.Key.X - minX) * 16 + coordToDrawAt.X;
-                int drawY = (tile.Key.Y - minY) * 16 + coordToDrawAt.Y;
-
-                if (drawX > Main.screenWidth * Main.UIScale || drawX < 0 || drawY > Main.screenHeight * Main.UIScale || drawY < 0)
-                {
-                    continue;
-                }
-
-                // load tile texture
-                Main.instance.LoadTiles(tile.Value.TileType);
-
-                TileCopy tileTc = tile.Value;
-
-                if (drawTiles)
-                {
-                    // treetops
-                    if (tileTc.IsTreeTop)
-                    {
-                        if (tileTc.TileType == 72) // underground shroomcaps
-                        {
-                            // some calculations and stuff i took from the source code
-                            Rectangle boundsTile = new Rectangle(drawX - 22, drawY - 26, 60, 42);
-                            Texture2D top = TextureAssets.ShroomCap.Value;
-                            int num = 0;
-                            if (tileTc.TileFrameY == 18)
-                            {
-                                num = 1;
-                            }
-                            else if (tileTc.TileFrameY == 36)
-                            {
-                                num = 2;
-                            }
-                            _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(num * 62, 0, 60, 42)), Color.White * 0.6f);
-                        }
-                        else if (tileTc.TileType == 323) // palm treetops
-                        {
-                            // some calculations and stuff i took from the source code
-                            int treeTextureIndex = 15;
-                            int width = 80;
-                            int height = 80;
-                            int num1 = 32;
-                            int num2 = 0;
-                            int y2 = tileTc.TreeBiome * 82;
-                            if (tileTc.TreeBiome >= 4 && tileTc.TreeBiome <= 7)
-                            {
-                                treeTextureIndex = 21;
-                                width = 114;
-                                height = 98;
-                                num1 = 48;
-                                num2 = 2;
-                                y2 = (tileTc.TreeBiome - 4) * 98;
-                            }
-                            Rectangle boundsTile = new Rectangle(drawX - num1 + tileTc.TileFrameY, drawY + 16 + num2 - height, width, height);
-                            Texture2D top = ps.TryGetTreeTopAndRequestIfNotReady(treeTextureIndex, tileTc.TreeBiome, tileTc.TileColor);
-                            _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(tileTc.TreeFrame * (tileTc.TreeFrameWidth + 2), tileTc.TreeFrame * (tileTc.TreeFrameHeight + 2) + y2, width, height)), Color.White * 0.6f);
-                        }
-                        else
-                        { // rest of the treetops
-                            Rectangle boundsTile = new Rectangle(drawX - tileTc.TreeFrameWidth / 2 + 8, drawY - tileTc.TreeFrameHeight + 16, tileTc.TreeFrameWidth, tileTc.TreeFrameHeight);
-                            Texture2D top = ps.TryGetTreeTopAndRequestIfNotReady(tileTc.TreeStyle, 0, tileTc.TileColor);
-                            _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(tileTc.TreeFrame * (tileTc.TreeFrameWidth + 2), 0, tileTc.TreeFrameWidth, tileTc.TreeFrameHeight)), Color.White * 0.6f);
-                        }
+                        continue;
                     }
 
-                    // tree branches
-                    if (tileTc.IsTreeBranch) // texture dimensions are kind of hardcoded so this might not work with modded trees
-                    {
-                        Texture2D branch = ps.TryGetTreeBranchAndRequestIfNotReady(tileTc.TreeStyle, 0, tileTc.TileColor);
+                    TileCopy tileTc = tile.Value;
 
-                        // (40 is the width and height of the branch sprite)
-                        if (tileTc.IsFlipped)
-                        {
-                            Rectangle boundsTile = new Rectangle(drawX - 24, drawY - (40 / 2) + (16 / 2), 40, 40);
-                            _spriteBatch.Draw(branch, boundsTile, new Rectangle?(new Rectangle(42, tileTc.TreeFrame * 42, 40, 40)), Color.White * 0.6f, default, default, SpriteEffects.FlipHorizontally, default);
-                        }
-                        else
-                        {
-                            Rectangle boundsTile = new Rectangle(drawX, drawY - (40 / 2) + (16 / 2), 40, 40);
-                            _spriteBatch.Draw(branch, boundsTile, new Rectangle?(new Rectangle(42, tileTc.TreeFrame * 42, 40, 40)), Color.White * 0.6f);
-                        }
-                    }
-
-                    // tile
-                    if (!tileTc.IsTreeTop && !tileTc.IsTreeBranch && tileTc.HasTile) // dont draw if theres no tile
+                    // wall
+                    if ((tileTc.WallType != 0) && drawWalls) // dont draw if there isnt a wall
                     {
+                        // load wall texture
+                        Main.instance.LoadWall(tile.Value.WallType);
+
                         // calculate bounds
-                        Rectangle boundsTile = new Rectangle(drawX, drawY + (tileTc.IsHalfBlock ? 8 : 0), 16, (tileTc.IsHalfBlock ? 8 : 16));
+                        Rectangle boundsWall = new Rectangle(drawX - 8, drawY - 8, 32, 32);
 
-                        // get tile texture with tilepaintsystem to get the texture with paint if it has any
-                        Texture2D tileTex = ps.TryGetTileAndRequestIfNotReady(tileTc.TileType, tileTc.TileFrameNumber, tileTc.TileColor);
+                        // get wall texture with tilepaintsystem to get the texture with paint if it has any
+                        Texture2D tileWallTex = ps.TryGetWallAndRequestIfNotReady(tileTc.WallType, tileTc.WallColor);
 
                         // get texture from spritesheet with help from frameX and frameY and draw it
-                        if (tileTc.IsTreeTrunk && tileTc.TileType != 72) // this draws general trees, underground mushroom trees should be drawn like normal tiles tho
+                        if (tileWallTex != null)
                         {
-                            // width for tree trunks should be 20 for the whole sprite
-                            boundsTile = new Rectangle(drawX - 2, drawY, 20, 16);
-
-                            // this one draws tree trunks better
-                            _spriteBatch.Draw(tileTex, boundsTile, new Rectangle((176 * tileTc.TreeVariant) + tileTc.TileFrameX, tileTc.TileFrameY, 20, 16), Color.White * 0.6f);
-                        }
-                        else if (tileTc.TileType == 323) // this draws palm trees
-                        {
-                            // width for tree trunks should be 20 for the whole sprite
-                            boundsTile = new Rectangle(drawX - 2, drawY, 20, 16);
-
-                            // get texture
-                            tileTex = ps.TryGetTileAndRequestIfNotReady(tileTc.TileType, tileTc.TreeBiome, tileTc.TileColor);
-
-                            // this determines the palm tree curve
-                            if (!(tileTc.TileFrameX <= 132 && tileTc.TileFrameX >= 88))
-                            {
-                                boundsTile.X += tileTc.TileFrameY;
-                            }
-                            _spriteBatch.Draw(tileTex, boundsTile, new Rectangle(tileTc.TileFrameX, 22 * tileTc.TreeBiome, 20, 16), Color.White * 0.6f);
-                        }
-                        else // draw normal tiles
-                        {
-                            if (tileTex != null)
-                            {
-                                // make this draw slopes and half blocks at some point
-                                _spriteBatch.Draw(tileTex, boundsTile, new Rectangle(tileTc.TileFrameX, tileTc.TileFrameY, 16, tileTc.IsHalfBlock ? 8 : 16), Color.White * 0.6f);
-                            }
+                            _spriteBatch.Draw(tileWallTex, boundsWall, new Rectangle(tileTc.WallFrameX, tileTc.WallFrameY, 32, 32), Color.White * 0.6f);
                         }
                     }
                 }
 
-
-                // liquid
-                if (drawLiquid && tileTc.LiquidAmount > 0)
+                // go over all the tiles
+                foreach (var tile in tilesList)
                 {
-                    int num = 4;
-                    try
+                    int drawX = (tile.Key.X - minX) * 16 + coordToDrawAt.X;
+                    int drawY = (tile.Key.Y - minY) * 16 + coordToDrawAt.Y;
+
+                    if (drawX > Main.screenWidth * Main.UIScale || drawX < 0 || drawY > Main.screenHeight * Main.UIScale || drawY < 0)
                     {
-                        if ((tileTc.LiquidAmount < 255 || !tilesDict[new Point(tile.Key.X, tile.Key.Y - 1)].HasTile) && tilesDict[new Point(tile.Key.X, tile.Key.Y - 1)].LiquidAmount == 0) // determite if the surface part of the liquid should be shown
+                        continue;
+                    }
+
+                    // load tile texture
+                    Main.instance.LoadTiles(tile.Value.TileType);
+
+                    TileCopy tileTc = tile.Value;
+
+                    if (drawTiles)
+                    {
+                        // treetops
+                        if (tileTc.IsTreeTop)
+                        {
+                            if (tileTc.TileType == 72) // underground shroomcaps
+                            {
+                                // some calculations and stuff i took from the source code
+                                Rectangle boundsTile = new Rectangle(drawX - 22, drawY - 26, 60, 42);
+                                Texture2D top = TextureAssets.ShroomCap.Value;
+                                int num = 0;
+                                if (tileTc.TileFrameY == 18)
+                                {
+                                    num = 1;
+                                }
+                                else if (tileTc.TileFrameY == 36)
+                                {
+                                    num = 2;
+                                }
+                                _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(num * 62, 0, 60, 42)), Color.White * 0.6f);
+                            }
+                            else if (tileTc.TileType == 323) // palm treetops
+                            {
+                                // some calculations and stuff i took from the source code
+                                int treeTextureIndex = 15;
+                                int width = 80;
+                                int height = 80;
+                                int num1 = 32;
+                                int num2 = 0;
+                                int y2 = tileTc.TreeBiome * 82;
+                                if (tileTc.TreeBiome >= 4 && tileTc.TreeBiome <= 7)
+                                {
+                                    treeTextureIndex = 21;
+                                    width = 114;
+                                    height = 98;
+                                    num1 = 48;
+                                    num2 = 2;
+                                    y2 = (tileTc.TreeBiome - 4) * 98;
+                                }
+                                Rectangle boundsTile = new Rectangle(drawX - num1 + tileTc.TileFrameY, drawY + 16 + num2 - height, width, height);
+                                Texture2D top = ps.TryGetTreeTopAndRequestIfNotReady(treeTextureIndex, tileTc.TreeBiome, tileTc.TileColor);
+                                _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(tileTc.TreeFrame * (tileTc.TreeFrameWidth + 2), tileTc.TreeFrame * (tileTc.TreeFrameHeight + 2) + y2, width, height)), Color.White * 0.6f);
+                            }
+                            else
+                            { // rest of the treetops
+                                Rectangle boundsTile = new Rectangle(drawX - tileTc.TreeFrameWidth / 2 + 8, drawY - tileTc.TreeFrameHeight + 16, tileTc.TreeFrameWidth, tileTc.TreeFrameHeight);
+                                Texture2D top = ps.TryGetTreeTopAndRequestIfNotReady(tileTc.TreeStyle, 0, tileTc.TileColor);
+                                _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(tileTc.TreeFrame * (tileTc.TreeFrameWidth + 2), 0, tileTc.TreeFrameWidth, tileTc.TreeFrameHeight)), Color.White * 0.6f);
+                            }
+                        }
+
+                        // tree branches
+                        if (tileTc.IsTreeBranch) // texture dimensions are kind of hardcoded so this might not work with modded trees
+                        {
+                            Texture2D branch = ps.TryGetTreeBranchAndRequestIfNotReady(tileTc.TreeStyle, 0, tileTc.TileColor);
+
+                            // (40 is the width and height of the branch sprite)
+                            if (tileTc.IsFlipped)
+                            {
+                                Rectangle boundsTile = new Rectangle(drawX - 24, drawY - (40 / 2) + (16 / 2), 40, 40);
+                                _spriteBatch.Draw(branch, boundsTile, new Rectangle?(new Rectangle(42, tileTc.TreeFrame * 42, 40, 40)), Color.White * 0.6f, default, default, SpriteEffects.FlipHorizontally, default);
+                            }
+                            else
+                            {
+                                Rectangle boundsTile = new Rectangle(drawX, drawY - (40 / 2) + (16 / 2), 40, 40);
+                                _spriteBatch.Draw(branch, boundsTile, new Rectangle?(new Rectangle(42, tileTc.TreeFrame * 42, 40, 40)), Color.White * 0.6f);
+                            }
+                        }
+
+                        // tile
+                        if (!tileTc.IsTreeTop && !tileTc.IsTreeBranch && tileTc.HasTile) // dont draw if theres no tile
+                        {
+                            // calculate bounds
+                            Rectangle boundsTile = new Rectangle(drawX, drawY + (tileTc.IsHalfBlock ? 8 : 0), 16, (tileTc.IsHalfBlock ? 8 : 16));
+
+                            // get tile texture with tilepaintsystem to get the texture with paint if it has any
+                            Texture2D tileTex = ps.TryGetTileAndRequestIfNotReady(tileTc.TileType, tileTc.TileFrameNumber, tileTc.TileColor);
+
+                            // get texture from spritesheet with help from frameX and frameY and draw it
+                            if (tileTc.IsTreeTrunk && tileTc.TileType != 72) // this draws general trees, underground mushroom trees should be drawn like normal tiles tho
+                            {
+                                // width for tree trunks should be 20 for the whole sprite
+                                boundsTile = new Rectangle(drawX - 2, drawY, 20, 16);
+
+                                // this one draws tree trunks better
+                                _spriteBatch.Draw(tileTex, boundsTile, new Rectangle((176 * tileTc.TreeVariant) + tileTc.TileFrameX, tileTc.TileFrameY, 20, 16), Color.White * 0.6f);
+                            }
+                            else if (tileTc.TileType == 323) // this draws palm trees
+                            {
+                                // width for tree trunks should be 20 for the whole sprite
+                                boundsTile = new Rectangle(drawX - 2, drawY, 20, 16);
+
+                                // get texture
+                                tileTex = ps.TryGetTileAndRequestIfNotReady(tileTc.TileType, tileTc.TreeBiome, tileTc.TileColor);
+
+                                // this determines the palm tree curve
+                                if (!(tileTc.TileFrameX <= 132 && tileTc.TileFrameX >= 88))
+                                {
+                                    boundsTile.X += tileTc.TileFrameY;
+                                }
+                                _spriteBatch.Draw(tileTex, boundsTile, new Rectangle(tileTc.TileFrameX, 22 * tileTc.TreeBiome, 20, 16), Color.White * 0.6f);
+                            }
+                            else // draw normal tiles
+                            {
+                                if (tileTex != null)
+                                {
+                                    // make this draw slopes and half blocks at some point
+                                    _spriteBatch.Draw(tileTex, boundsTile, new Rectangle(tileTc.TileFrameX, tileTc.TileFrameY, 16, tileTc.IsHalfBlock ? 8 : 16), Color.White * 0.6f);
+                                }
+                            }
+                        }
+                    }
+
+
+                    // liquid
+                    if (drawLiquid && tileTc.LiquidAmount > 0)
+                    {
+                        int num = 4;
+                        try
+                        {
+                            if ((tileTc.LiquidAmount < 255 || !tilesDict[new Point(tile.Key.X, tile.Key.Y - 1)].HasTile) && tilesDict[new Point(tile.Key.X, tile.Key.Y - 1)].LiquidAmount == 0) // determite if the surface part of the liquid should be shown
+                            {
+                                num = 0;
+                            }
+                        }
+                        catch (Exception ex)
                         {
                             num = 0;
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        num = 0;
-                    }
-                    int height = (int)(((float)tileTc.LiquidAmount / 255) * 16);
-                    if (height < 6)
-                    {
-                        height = 6;
-                    }
-                    Rectangle boundsTile = new Rectangle(drawX, drawY + (16 - height), 16, height);
-                    _spriteBatch.Draw(TextureAssets.Liquid[tileTc.LiquidType].Value, boundsTile, new Rectangle(0, num, 16, height), Color.White * 0.6f);
-                }
-
-                // wires
-                if (drawWires && (tileTc.GreenWire || tileTc.RedWire || tileTc.YellowWire || tileTc.BlueWire))
-                {
-                    // this whole thing is kinda silly and isnt super accurate when it comes to mixed wire colors
-                    // rewrite this at some point probably
-                    Rectangle boundsTile = new Rectangle(drawX, drawY, 16, 16);
-
-                    bool topWire = false;
-                    bool bottomWire = false;
-                    bool rightWire = false;
-                    bool leftWire = false;
-
-                    bool HasMatchingWire(TileCopy tile1, TileCopy tile2)
-                    {
-                        return (tile1.GreenWire && tile2.GreenWire) || (tile1.RedWire && tile2.RedWire) || (tile1.YellowWire && tile2.YellowWire) || (tile1.BlueWire && tile2.BlueWire);
-                    }
-
-                    if (tilesDict.TryGetValue(new Point(tile.Key.X, tile.Key.Y - 1), out TileCopy top) && HasMatchingWire(tileTc, top))
-                    {
-                        topWire = top.HasWire;
-                    }
-                    if (tilesDict.TryGetValue(new Point(tile.Key.X, tile.Key.Y + 1), out TileCopy bottom) && HasMatchingWire(tileTc, bottom))
-                    {
-                        bottomWire = bottom.HasWire;
-                    }
-                    if (tilesDict.TryGetValue(new Point(tile.Key.X + 1, tile.Key.Y), out TileCopy right) && HasMatchingWire(tileTc, right))
-                    {
-                        rightWire = right.HasWire;
-                    }
-                    if (tilesDict.TryGetValue(new Point(tile.Key.X - 1, tile.Key.Y), out TileCopy left) && HasMatchingWire(tileTc, left))
-                    {
-                        leftWire = left.HasWire;
-                    }
-
-                    void DrawWire(string wireType, bool topWire, bool bottomWire, bool rightWire, bool leftWire, float t)
-                    {
-                        Texture2D texture = TextureAssets.Wire.Value;
-                        switch (wireType)
+                        int height = (int)(((float)tileTc.LiquidAmount / 255) * 16);
+                        if (height < 6)
                         {
-                            case "Red":
-                                texture = TextureAssets.Wire.Value;
-                                break;
-                            case "Blue":
-                                texture = TextureAssets.Wire2.Value;
-                                break;
-                            case "Green":
-                                texture = TextureAssets.Wire3.Value;
-                                break;
-                            case "Yellow":
-                                texture = TextureAssets.Wire4.Value;
-                                break;
+                            height = 6;
+                        }
+                        Rectangle boundsTile = new Rectangle(drawX, drawY + (16 - height), 16, height);
+                        _spriteBatch.Draw(TextureAssets.Liquid[tileTc.LiquidType].Value, boundsTile, new Rectangle(0, num, 16, height), Color.White * 0.6f);
+                    }
+
+                    // wires
+                    if (drawWires && (tileTc.GreenWire || tileTc.RedWire || tileTc.YellowWire || tileTc.BlueWire))
+                    {
+                        // this whole thing is kinda silly and isnt super accurate when it comes to mixed wire colors
+                        // rewrite this at some point probably
+                        Rectangle boundsTile = new Rectangle(drawX, drawY, 16, 16);
+
+                        bool topWire = false;
+                        bool bottomWire = false;
+                        bool rightWire = false;
+                        bool leftWire = false;
+
+                        bool HasMatchingWire(TileCopy tile1, TileCopy tile2)
+                        {
+                            return (tile1.GreenWire && tile2.GreenWire) || (tile1.RedWire && tile2.RedWire) || (tile1.YellowWire && tile2.YellowWire) || (tile1.BlueWire && tile2.BlueWire);
                         }
 
-                        switch (topWire, bottomWire, rightWire, leftWire)
+                        if (tilesDict.TryGetValue(new Point(tile.Key.X, tile.Key.Y - 1), out TileCopy top) && HasMatchingWire(tileTc, top))
                         {
-                            case (false, false, false, false):
-                                // none
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 54, 16, 16), Color.White * t);
-                                break;
-                            case (false, false, false, true):
-                                // left
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 36, 16, 16), Color.White * t);
-                                break;
-                            case (false, false, true, false):
-                                // right
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 36, 16, 16), Color.White * t);
-                                break;
-                            case (false, false, true, true):
-                                // left right
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 0, 16, 16), Color.White * t);
-                                break;
-                            case (false, true, false, false):
-                                // bottom
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 36, 16, 16), Color.White * t);
-                                break;
-                            case (false, true, false, true):
-                                // bottom left
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 18, 16, 16), Color.White * t);
-                                break;
-                            case (false, true, true, false):
-                                // bottom right
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 36, 16, 16), Color.White * t);
-                                break;
-                            case (false, true, true, true):
-                                // bottom left right
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 0, 16, 16), Color.White * t);
-                                break;
-                            case (true, false, false, false):
-                                // top
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 36, 16, 16), Color.White * t);
-                                break;
-                            case (true, false, false, true):
-                                // top left
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 18, 16, 16), Color.White * t);
-                                break;
-                            case (true, false, true, false):
-                                // top right
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 18, 16, 16), Color.White * t);
-                                break;
-                            case (true, false, true, true):
-                                // top left right
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 18, 16, 16), Color.White * t);
-                                break;
-                            case (true, true, false, false):
-                                // top bottom
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 0, 16, 16), Color.White * t);
-                                break;
-                            case (true, true, false, true):
-                                // top bottom left
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 0, 16, 16), Color.White * t);
-                                break;
-                            case (true, true, true, false):
-                                // top bottom right
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 0, 16, 16), Color.White * t);
-                                break;
-                            case (true, true, true, true):
-                                // top bottom right left
-                                _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 18, 16, 16), Color.White * t);
-                                break;
+                            topWire = top.HasWire;
+                        }
+                        if (tilesDict.TryGetValue(new Point(tile.Key.X, tile.Key.Y + 1), out TileCopy bottom) && HasMatchingWire(tileTc, bottom))
+                        {
+                            bottomWire = bottom.HasWire;
+                        }
+                        if (tilesDict.TryGetValue(new Point(tile.Key.X + 1, tile.Key.Y), out TileCopy right) && HasMatchingWire(tileTc, right))
+                        {
+                            rightWire = right.HasWire;
+                        }
+                        if (tilesDict.TryGetValue(new Point(tile.Key.X - 1, tile.Key.Y), out TileCopy left) && HasMatchingWire(tileTc, left))
+                        {
+                            leftWire = left.HasWire;
+                        }
+
+                        void DrawWire(string wireType, bool topWire, bool bottomWire, bool rightWire, bool leftWire, float t)
+                        {
+                            Texture2D texture = TextureAssets.Wire.Value;
+                            switch (wireType)
+                            {
+                                case "Red":
+                                    texture = TextureAssets.Wire.Value;
+                                    break;
+                                case "Blue":
+                                    texture = TextureAssets.Wire2.Value;
+                                    break;
+                                case "Green":
+                                    texture = TextureAssets.Wire3.Value;
+                                    break;
+                                case "Yellow":
+                                    texture = TextureAssets.Wire4.Value;
+                                    break;
+                            }
+
+                            switch (topWire, bottomWire, rightWire, leftWire)
+                            {
+                                case (false, false, false, false):
+                                    // none
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 54, 16, 16), Color.White * t);
+                                    break;
+                                case (false, false, false, true):
+                                    // left
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 36, 16, 16), Color.White * t);
+                                    break;
+                                case (false, false, true, false):
+                                    // right
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 36, 16, 16), Color.White * t);
+                                    break;
+                                case (false, false, true, true):
+                                    // left right
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 0, 16, 16), Color.White * t);
+                                    break;
+                                case (false, true, false, false):
+                                    // bottom
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 36, 16, 16), Color.White * t);
+                                    break;
+                                case (false, true, false, true):
+                                    // bottom left
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 18, 16, 16), Color.White * t);
+                                    break;
+                                case (false, true, true, false):
+                                    // bottom right
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 36, 16, 16), Color.White * t);
+                                    break;
+                                case (false, true, true, true):
+                                    // bottom left right
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 0, 16, 16), Color.White * t);
+                                    break;
+                                case (true, false, false, false):
+                                    // top
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 36, 16, 16), Color.White * t);
+                                    break;
+                                case (true, false, false, true):
+                                    // top left
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 18, 16, 16), Color.White * t);
+                                    break;
+                                case (true, false, true, false):
+                                    // top right
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 18, 16, 16), Color.White * t);
+                                    break;
+                                case (true, false, true, true):
+                                    // top left right
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 18, 16, 16), Color.White * t);
+                                    break;
+                                case (true, true, false, false):
+                                    // top bottom
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 0, 16, 16), Color.White * t);
+                                    break;
+                                case (true, true, false, true):
+                                    // top bottom left
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 0, 16, 16), Color.White * t);
+                                    break;
+                                case (true, true, true, false):
+                                    // top bottom right
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 0, 16, 16), Color.White * t);
+                                    break;
+                                case (true, true, true, true):
+                                    // top bottom right left
+                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 18, 16, 16), Color.White * t);
+                                    break;
+                            }
+                        }
+
+                        // draw the wires
+                        if (tileTc.RedWire)
+                        {
+                            DrawWire("Red", topWire, bottomWire, rightWire, leftWire, 0.65f);
+                        }
+                        if (tileTc.BlueWire)
+                        {
+                            DrawWire("Blue", topWire, bottomWire, rightWire, leftWire, 0.4f);
+                        }
+                        if (tileTc.GreenWire)
+                        {
+                            DrawWire("Green", topWire, bottomWire, rightWire, leftWire, 0.4f);
+                        }
+                        if (tileTc.YellowWire)
+                        {
+                            DrawWire("Yellow", topWire, bottomWire, rightWire, leftWire, 0.4f);
                         }
                     }
 
-                    // draw the wires
-                    if (tileTc.RedWire)
+                    // actuator
+                    if (drawWires && tileTc.HasActuator)
                     {
-                        DrawWire("Red", topWire, bottomWire, rightWire, leftWire, 0.65f);
-                    }
-                    if (tileTc.BlueWire)
-                    {
-                        DrawWire("Blue", topWire, bottomWire, rightWire, leftWire, 0.4f);
-                    }
-                    if (tileTc.GreenWire)
-                    {
-                        DrawWire("Green", topWire, bottomWire, rightWire, leftWire, 0.4f);
-                    }
-                    if (tileTc.YellowWire)
-                    {
-                        DrawWire("Yellow", topWire, bottomWire, rightWire, leftWire, 0.4f);
+                        Rectangle boundsTile = new Rectangle(drawX, drawY, 16, 16);
+
+                        Texture2D texture = TextureAssets.Actuator.Value;
+                        _spriteBatch.Draw(texture, boundsTile, Color.White * 0.6f);
                     }
                 }
-
-                // actuator
-                if (drawWires && tileTc.HasActuator)
-                {
-                    Rectangle boundsTile = new Rectangle(drawX, drawY, 16, 16);
-
-                    Texture2D texture = TextureAssets.Actuator.Value;
-                    _spriteBatch.Draw(texture, boundsTile, Color.White * 0.6f);
-                }
+            } catch (Exception ex)
+            {
+                // make sure to end the spritebatch if something goes wrong
+                _spriteBatch.End();
             }
             _spriteBatch.End();
         }
@@ -673,7 +680,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
 
             }

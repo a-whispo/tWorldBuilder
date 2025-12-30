@@ -11,7 +11,6 @@ using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Content.Tools;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
 using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable;
 
@@ -129,8 +128,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             xButton.Top.Set(6, 0f);
             xButton.OnLeftClick += (_, _) =>
             {
-                Visible = false;
-                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.Main);
             };
             xButton.HoverText = "Close";
             Append(xButton);
@@ -144,7 +142,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             settingsButton.Top.Set(4, 0f);
             settingsButton.OnLeftClick += (_, _) =>
             {
-                TIGWEUISystem.Local.SettingsUI.Visible = !TIGWEUISystem.Local.SettingsUI.Visible;
+                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.Settings);
             };
             settingsButton.HoverText = "Settings";
             Append(settingsButton);
@@ -158,7 +156,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             blueprintsButton.Top.Set(4, 0f);
             blueprintsButton.OnLeftClick += (_, _) =>
             {
-                TIGWEUISystem.Local.BlueprintsUI.Visible = !TIGWEUISystem.Local.BlueprintsUI.Visible;
+                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.Blueprints);
             };
             blueprintsButton.HoverText = "Blueprints";
             Append(blueprintsButton);
@@ -172,7 +170,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             saveButton.Top.Set(4, 0f);
             saveButton.OnLeftClick += (_, _) =>
             {
-                TIGWEUISystem.Local.SaveUI.Visible = !TIGWEUISystem.Local.SaveUI.Visible;
+                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.Save);
             };
             saveButton.HoverText = "Save";
             Append(saveButton);
@@ -187,7 +185,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             tileButton.HoverText = "Tile Browser";
             tileButton.OnLeftClick += (_, _) =>
             {
-                TIGWEUISystem.Local.SelectTileUI.Visible = !TIGWEUISystem.Local.SelectTileUI.Visible;
+                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.SelectTile);
             };
             // draw the selected tile
             tileButton.OnPreDrawSelf += (SpriteBatch spriteBatch) =>
@@ -317,7 +315,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             saveTileButton.OnLeftClick += (_, _) =>
             {
                 PaletteItem item = new PaletteItem(EditorSystem.Local.SelectedTile);
-                item.OnLeftClick += (_, _) =>
+                item.OnLeftClick += (_, _) =>   
                 {
                     EditorSystem.Local.SelectedTile = item.TileCopy;
                 };

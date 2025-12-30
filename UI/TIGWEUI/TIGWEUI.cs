@@ -140,16 +140,18 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             {
                 OnShow?.Invoke(this, EventArgs.Empty);
                 _UI.SetState(this);
+                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
             }
             if (!Visible && _UI.CurrentState == this)
             {
                 OnHide?.Invoke(this, EventArgs.Empty);
                 _UI.SetState(null);
+                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
             }
 
+            // update the UI
             if (Visible)
             {
-                // update the UI
                 _UI.Update(gametime);
             }
         }

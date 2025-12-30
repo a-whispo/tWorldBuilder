@@ -108,7 +108,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
             // update save button state based on selection
             EditorSystem.Local.OnSelectionChanged += (_, _) =>
             {
-                if (EditorSystem.Local.CurrentSelection.Count > 0)
+                if (EditorSystem.Local.CurrentSelection?.Count > 0)
                 {
                     _saveButton.IgnoresMouseInteraction = false;
                     _saveButton.SetVisibility(1f, 1f);

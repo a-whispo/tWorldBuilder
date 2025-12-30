@@ -43,11 +43,11 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 {
                     case "Selected Tile":
                         _mode = BrushMode.SelectedTile;
-                    break;
+                        break;
 
                     case "Clipboard":
                         _mode = BrushMode.Clipboard;
-                    break;
+                        break;
                 }
                 UpdateBrush();
             };
@@ -90,11 +90,11 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     }
                     _brush.Clear();
                     _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
-                break;
+                    break;
 
                 case BrushMode.Clipboard:
                     _brush = EditorSystem.Local.Clipboard;
-                break;
+                    break;
             }
         }
 

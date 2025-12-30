@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Save;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector;
 
 namespace TerrariaInGameWorldEditor.UI.TIGWEUI
 {
@@ -17,10 +13,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         public bool ShouldRenderUI { get; set; } = true;
 
         // states
-        public SelectTileUI SelectTileUI { get; private set; }
-        public SettingsUI SettingsUI { get; private set; }
-        public BlueprintsUI BlueprintsUI { get; private set; }
-        public SaveUI SaveUI { get; private set; }
         private List<TIGWEUI> _states = [];
         private SpriteBatch _spriteBatch;
 
@@ -28,19 +20,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         {
             base.OnModLoad();
             Local = this;
-        }
-
-        public override void PostSetupContent()
-        {
-            base.PostSetupContent();
-            SelectTileUI = new SelectTileUI();
-            SettingsUI = new SettingsUI();
-            BlueprintsUI = new BlueprintsUI();
-            SaveUI = new SaveUI();
-            RegisterUI(SelectTileUI);
-            RegisterUI(SettingsUI);
-            RegisterUI(BlueprintsUI);
-            RegisterUI(SaveUI);
         }
 
         public void RegisterUI(TIGWEUI ui)
@@ -70,7 +49,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             // check if mouse is hovering over ui
             foreach (TIGWEUI state in _states.ToArray())
             {
-                // update UI
+                Main.hasFocus = IsMouseHoveringState(state);
                 state.UpdateUI(gameTime);
             }
         }
@@ -106,7 +85,9 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         {
             for (int i = _states.Count - 1; i >= 0; i--)
             {
-                if (_states[i].GetDimensions().ToRectangle().Contains(Main.mouseX, Main.mouseY))
+                // mouse over or dragging both count as the mouse hovering
+                // sometimes you might be dragging a state but still have the mouse be outside due to the states position not being updated yet
+                if (_states[i].GetDimensions().ToRectangle().Contains(Main.mouseX, Main.mouseY) || _states[i].IsDragging)
                 {
                     return _states[i] == stateToCheck;
                 }
@@ -145,10 +126,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                         // go over all the UIs
                         foreach (TIGWEUI state in _states)
                         {
-                            if (state != null)
-                            {
-                                state.Draw(_spriteBatch, Main.gameTimeCache);
-                            }
+                            state?.Draw(_spriteBatch, Main.gameTimeCache);
                         }
 
                         _spriteBatch.End();
