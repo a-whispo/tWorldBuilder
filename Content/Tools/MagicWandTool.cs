@@ -1,7 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.GameInput;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
@@ -49,7 +51,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 // flood fill kinda
                 // will add some settings so you can choose to only fill tiles and/or walls and/or liquid if you want to
 
-                if (!Keybinds.Key1MK.Current || Keybinds.Key1MK.GetAssignedKeys().Count < 1) // if key 1 is pressed down, keep adding tiles to our selection
+                if (PlayerInput.GetPressedKeys().Contains(Keys.LeftControl)) // if ctrl is pressed down, keep adding tiles to our selection
                 {
                     _selection.Clear();
                 }

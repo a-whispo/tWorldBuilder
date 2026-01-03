@@ -18,5 +18,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
         public static bool ShouldPasteOnLiquid { get; set; }
         public static bool ShouldPasteOnAir { get; set; }
         public static bool ShouldUpdateDrawnTiles { get; set; }
+        public static bool ShouldTeleportOnEditorClosed { get; set; } = true;
     }
 }

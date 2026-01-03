@@ -5,7 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.Audio;
+using Terraria.GameContent.Creative;
+using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
@@ -26,8 +27,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public static EditorSystem Local { get; private set; }
 
         // main ui
-        private EditorUIState _mainUI;
-        private UserInterface _mainScreenUI;
+        private EditorUIState _mainUIState;
+        private UserInterface _mainUserInterface;
         private SpriteBatch _spriteBatch;
 
         // windows
@@ -39,10 +40,10 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             Save,
             SelectTile
         }
-        private SelectTileUI _selectTileUI;
-        private SettingsUI _settingsUI;
-        private BlueprintsUI _blueprintsUI;
-        private SaveUI _saveUI;
+        private SelectTileUI _selectTileUIState;
+        private SettingsUI _settingsUIState;
+        private BlueprintsUI _blueprintsUIState;
+        private SaveUI _saveUIState;
 
         // tools
         public List<Tool> Tools { get; private set; } 
@@ -54,7 +55,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             }
             set {
                 _currentTool = value;
-                _mainUI.RecalculateToolSettings();
+                _mainUIState.RecalculateToolSettings();
             }
         }
 
@@ -113,9 +114,13 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public event EventHandler OnSelectedTileChanged;
         private TileCopy _selectedTile;
 
+        // screen offsets
+        private Point _mouseMiddleClickedPoint;
+        private Vector2 _screenPositionOffset;
+
         // redo undo
         public List<TileCollection> UndoHistory { get; set; } = new List<TileCollection>();
-        public List<TileCollection> RedoHistory { get; set; } = new List<TileCollection>();
+        public List<TileCollection> RedoHistory { get; set; } = new List<TileCollection>(); 
 
         public override void OnModLoad()
         {
@@ -129,17 +134,17 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             base.PostSetupContent();
 
             // ui stuff
-            _mainUI = new EditorUIState();
-            _mainUI.Activate();
-            _mainScreenUI = new UserInterface();
-            _selectTileUI = new SelectTileUI();
-            _settingsUI = new SettingsUI();
-            _blueprintsUI = new BlueprintsUI();
-            _saveUI = new SaveUI();
-            TIGWEUISystem.Local.RegisterUI(_selectTileUI);
-            TIGWEUISystem.Local.RegisterUI(_settingsUI);
-            TIGWEUISystem.Local.RegisterUI(_blueprintsUI);
-            TIGWEUISystem.Local.RegisterUI(_saveUI);
+            _mainUIState = new EditorUIState();
+            _mainUIState.Activate();
+            _mainUserInterface = new UserInterface();
+            _selectTileUIState = new SelectTileUI();
+            _settingsUIState = new SettingsUI();
+            _blueprintsUIState = new BlueprintsUI();
+            _saveUIState = new SaveUI();
+            TIGWEUISystem.Local.RegisterUI(_selectTileUIState);
+            TIGWEUISystem.Local.RegisterUI(_settingsUIState);
+            TIGWEUISystem.Local.RegisterUI(_blueprintsUIState);
+            TIGWEUISystem.Local.RegisterUI(_saveUIState);
 
             // for testing
             Tile tile = new Tile();
@@ -149,16 +154,57 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             tile.TileFrameX = 18;
             tile.TileFrameY = 18;
             SelectedTile = new TileCopy(tile);
+
+            // smart cursor kinda messes with the drawing/pasting since the tools use tileTargetX/Y
+            // so we want to make sure its always off when the editor is open
+            On_Player.TryToToggleSmartCursor += DisableSmartCursor;
+
+            /*
+            Main.OnPreDraw += (_) =>
+            {
+                return;
+                if (!_mainUIState.Visible)
+                {
+                    return;
+                }
+
+                // make sure to remove the local player from players that are to be drawn
+                FieldInfo _playersThatDrawBehindNPCs = typeof(Main).GetField("_playersThatDrawBehindNPCs", BindingFlags.NonPublic | BindingFlags.Instance);
+                ((List<Player>)_playersThatDrawBehindNPCs.GetValue(Main.instance)).Remove(Main.LocalPlayer);
+                FieldInfo _playersThatDrawAfterProjectiles = typeof(Main).GetField("_playersThatDrawAfterProjectiles", BindingFlags.NonPublic | BindingFlags.Instance);
+                ((List<Player>)_playersThatDrawAfterProjectiles.GetValue(Main.instance)).Remove(Main.LocalPlayer);
+            };
+            Main.OnPostDraw += (_) =>
+            {
+                if (!_mainUIState.Visible)
+                {
+                    return;
+                }
+
+                // make sure to re add the player
+                MethodInfo RefreshPlayerDrawOrder = typeof(Main).GetMethod("RefreshPlayerDrawOrder", BindingFlags.NonPublic | BindingFlags.Instance);
+                RefreshPlayerDrawOrder.Invoke(Main.instance, null);
+            };
+            */
+        }
+
+        private void DisableSmartCursor(On_Player.orig_TryToToggleSmartCursor orig, Player self, ref bool smartCursorWanted)
+        {
+            if (_mainUIState.Visible)
+            {
+                smartCursorWanted = false;
+            }
+            orig(self, ref smartCursorWanted);
         }
 
         public override void UpdateUI(GameTime gameTime)
         {
             // update UI
-            if (_mainUI.Visible)
+            if (_mainUIState.Visible)
             {
-                if (_mainScreenUI.CurrentState == null)
+                if (_mainUserInterface.CurrentState == null)
                 {
-                    _mainScreenUI.SetState(_mainUI);
+                    _mainUserInterface.SetState(_mainUIState);
                     TIGWEUISystem.Local.ShouldRenderUI = true;
                     return;
                 }
@@ -174,7 +220,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 Main.UIScale = 1f;
 
                 // do thing
-                _mainScreenUI.Update(gameTime);
+                _mainUserInterface.Update(gameTime);
 
                 // restore originals
                 Main.UIScale = tempUIScale;
@@ -183,7 +229,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             }
             else
             {
-                _mainScreenUI.SetState(null);
+                _mainUserInterface.SetState(null);
                 TIGWEUISystem.Local.ShouldRenderUI = false;
             }
         }
@@ -191,7 +237,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // layer stuff
         {
             // dont render if not visible
-            if (!_mainUI.Visible)
+            if (!_mainUIState.Visible)
             {
                 return;
             }
@@ -206,6 +252,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 DrawUtils.DrawTileCollectionOutline(Local.CurrentSelection, new Point(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
                 DrawUtils.DrawMiscOptions(new Rectangle(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY(), Local.CurrentSelection.GetWidth(), Local.CurrentSelection.GetHeight()), TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
             }
+
             // draw current tool
             Local.CurrentTool?.Draw(_spriteBatch);
 
@@ -221,7 +268,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 $"{TerrariaInGameWorldEditor.MODNAME}: MainScreen",
                 delegate
                 {
-                    if (_mainScreenUI.CurrentState != null)
+                    if (_mainUserInterface.CurrentState != null)
                     {
                         // temporarily adjust to make everything act as if the UI scale is 1f
                         Main.mouseX = (int)(Main.mouseX * Main.UIScale);
@@ -235,7 +282,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
                         // start spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
                         _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
-                        _mainScreenUI.Draw(_spriteBatch, Main.gameTimeCache);
+                        _mainUserInterface.Draw(_spriteBatch, Main.gameTimeCache);
                         _spriteBatch.End();
 
                         // restore originals
@@ -251,34 +298,28 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public override void PostUpdateInput()
         {
-            if (_mainUI.Visible)
-            {
-                // update input for the ui
-                _mainUI.PostUpdateInput();
+            base.PostUpdateInput();
 
-                // update tool input
-                if (!Main.LocalPlayer.mouseInterface)
-                {
-                    Local.CurrentTool?.PostUpdateInput();
-                }
-            }
-
-            // toggle the main screen visibility if the keybind is pressed
+            // open
             if (Keybinds.OpenEditorMK.JustPressed)
             {
-                // close the ingame options window if its open
-                Main.ingameOptionsWindow = false;
-                _mainUI.Visible = !_mainUI.Visible;
+                ToggleEditor();
             }
 
-            // reset current tool if window is closed
-            if (!_mainUI.Visible)
+            if (!_mainUIState?.Visible ?? true)
             {
-                CurrentTool = null;
+                return;
+            }
+
+            // update input for the ui and tool
+            _mainUIState.PostUpdateInput();
+            if (!Main.LocalPlayer.mouseInterface)
+            {
+                Local.CurrentTool?.PostUpdateInput();
             }
 
             // remove current selection if escape is pressed
-            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape) && _mainUI.Visible)
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape))
             {
                 CurrentSelection?.Clear();
                 if (CurrentTool is SelectionTool selectionTool)
@@ -287,8 +328,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 }
             }
 
-            // keybinds that need key 1 to be pressed down go in here. count is < 1 if theres no keybind set
-            if (Keybinds.Key1MK.Current || Keybinds.Key1MK.GetAssignedKeys().Count < 1)
+            // keybinds that need ctrl
+            if (PlayerInput.GetPressedKeys().Contains(Keys.LeftControl))
             {
                 // undo
                 if (Keybinds.UndoMK.JustPressed)
@@ -331,7 +372,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 {
                     if (CurrentSelection != null)
                     {
-                        // copy and delete
                         CopyToClipboard(CurrentSelection);
                         Delete(CurrentSelection, true);
                     }
@@ -344,22 +384,75 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 }
 
                 // save menu
-                if (Keybinds.SaveMK.JustPressed && _mainUI.Visible)
+                if (Keybinds.SaveMK.JustPressed)
                 {
-                    _saveUI.Visible = true;
+                    _saveUIState.Visible = true;
+                }
+            }
+            else // if key 1 is not pressed down
+            {
+                // zoom in/out with mouse
+                PlayerInput.LockVanillaMouseScroll($"{TerrariaInGameWorldEditor.MODNAME}/Zoom");
+                if (PlayerInput.ScrollWheelDelta > 0)
+                {
+                    Main.GameZoomTarget = Math.Clamp(Main.GameZoomTarget + 0.1f, 1f, 2f);
+                }
+                if (PlayerInput.ScrollWheelDelta < 0)
+                {
+                    Main.GameZoomTarget = Math.Clamp(Main.GameZoomTarget - 0.1f, 1f, 2f);
                 }
             }
 
             // delete
             if (Keybinds.DeleteMK.JustPressed)
             {
-                if (CurrentSelection != null) // if we have a selection
+                if (CurrentSelection != null)
                 {
-                    Delete(CurrentSelection, true); // delete
+                    Delete(CurrentSelection, true);
                 }
             }
 
-            base.PostUpdateInput();
+            // moving screen with mouse and movement keys
+            if (Main.mouseMiddle)
+            {
+                if (Main.mouseMiddleRelease)
+                {
+                    _mouseMiddleClickedPoint = new Point((int)((float)Main.mouseX / Main.GameZoomTarget) + (int)_screenPositionOffset.X, (int)((float)Main.mouseY / Main.GameZoomTarget) + (int)_screenPositionOffset.Y);
+                }
+                _screenPositionOffset.X = _mouseMiddleClickedPoint.X - Main.mouseX / Main.GameZoomTarget;
+                _screenPositionOffset.Y = _mouseMiddleClickedPoint.Y - Main.mouseY / Main.GameZoomTarget;
+            }
+            int mult = 1;
+            if (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift))
+            {
+                mult = 3;
+            }
+            if (PlayerInput.Triggers.Current.KeyStatus["Up"] || PlayerInput.Triggers.Current.KeyStatus["Jump"])
+            {
+                _screenPositionOffset.Y -= 10 * mult;
+            }
+            if (PlayerInput.Triggers.Current.KeyStatus["Down"])
+            {
+                _screenPositionOffset.Y += 10 * mult;
+            }
+            if (PlayerInput.Triggers.Current.KeyStatus["Left"])
+            {
+                _screenPositionOffset.X -= 10 * mult;
+            }
+            if (PlayerInput.Triggers.Current.KeyStatus["Right"])
+            {
+                _screenPositionOffset.X += 10 * mult;
+            }
+        }
+
+        public override void ModifyScreenPosition()
+        {
+            base.ModifyScreenPosition();
+
+            if (_mainUIState.Visible)
+            {
+                Main.screenPosition += _screenPositionOffset;
+            }
         }
 
         public override void PostUpdatePlayers()
@@ -374,24 +467,49 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             }
         }
 
+        private void ToggleEditor()
+        {
+            _mainUIState.Visible = !_mainUIState.Visible;
+            
+            if (!_mainUIState.Visible)
+            {
+                CreativePowerManager.Instance.GetPower<CreativePowers.GodmodePower>().SetEnabledState(Main.LocalPlayer.whoAmI, false);
+                CurrentTool = null;
+                if (TIGWESettings.ShouldTeleportOnEditorClosed)
+                {
+                    Vector2 screenPos = new Vector2(Main.screenPosition.X + Main.screenWidth / 2f - Main.LocalPlayer.width / 2f, Main.screenPosition.Y + Main.screenHeight / 2f - Main.LocalPlayer.height / 2f);
+                    Main.LocalPlayer.Teleport(screenPos);
+                    Main.blockInput = false;
+                }
+            }
+            else
+            {
+                CreativePowerManager.Instance.GetPower<CreativePowers.GodmodePower>().SetEnabledState(Main.LocalPlayer.whoAmI, true);
+                Main.ingameOptionsWindow = false;
+                _screenPositionOffset = Vector2.Zero;
+                Main.blockInput = true;
+                Main.SmartCursorWanted_Mouse = false;
+            }
+        }
+
         public void ToggleWindow(EditorWindow window)
         {
             switch (window)
             {
                 case EditorWindow.Main:
-                    _mainUI.Visible = !_mainUI.Visible;
+                    ToggleEditor();
                     break;
                 case EditorWindow.Settings:
-                    _settingsUI.Visible = !_settingsUI.Visible;
+                    _settingsUIState.Visible = !_settingsUIState.Visible;
                     break;
                 case EditorWindow.Blueprints:
-                    _blueprintsUI.Visible = !_blueprintsUI.Visible;
+                    _blueprintsUIState.Visible = !_blueprintsUIState.Visible;
                     break;
                 case EditorWindow.Save:
-                    _saveUI.Visible = !_saveUI.Visible;
+                    _saveUIState.Visible = !_saveUIState.Visible;
                     break;
                 case EditorWindow.SelectTile:
-                    _selectTileUI.Visible = !_selectTileUI.Visible;
+                    _selectTileUIState.Visible = !_selectTileUIState.Visible;
                     break;
             }
         }
@@ -404,11 +522,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private void SelectionChanged(object sender, EventArgs e)
         {
             OnSelectionChanged?.Invoke(sender, e);
-        }
-
-        private void SelectedTileChanged(object sender, EventArgs e)
-        {
-            OnSelectedTileChanged?.Invoke(sender, e);
         }
 
         public void CopyToClipboard(TileCollection tilesToCopy) // copy area in gotten area
@@ -459,7 +572,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             // go over all the tiles in the most recently added tile collection to undo
             for (int i = 0; i < tiles.Count; i++)
             {
-                // x and y
                 int x = tiles[i].Key.X;
                 int y = tiles[i].Key.Y;
 
@@ -500,7 +612,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             // since we update the tiles as we replace we take a copy of the selected area for history before we replace anything
             foreach (var tile in tilesToChange.AsDictionary())
             {
-                // get coords of tile
                 int x = tile.Key.X;
                 int y = tile.Key.Y;
 
@@ -515,11 +626,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             // go over the collection
             foreach (var tile in tilesToChange.AsDictionary())
             {
-                // get coords of tile
                 int x = tile.Key.X;
                 int y = tile.Key.Y;
-
-                // create a temporary copy
                 TileCopy temp = new TileCopy(Main.tile[x, y]);
 
                 if (tile.Value.WallType == tileFrom.WallType)
@@ -529,10 +637,8 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     temp.CopyTileData(Main.tile[x, y]); // copy tile data of tiles at the location we're pasting to so we dont replace them
                     temp.CopyWireData(Main.tile[x, y]); // copy tile data of wires at the location we're pasting to so we dont replace them
 
-                    // set walls
+                    // set and update walls
                     Main.tile[x, y].CopyFrom(temp.GetAsTile());
-
-                    // update walls
                     WorldGen.SquareWallFrame(x, y, true);
                 }
 

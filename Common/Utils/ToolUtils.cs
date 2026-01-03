@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.GameInput;
 using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
 namespace TerrariaInGameWorldEditor.Common.Utils

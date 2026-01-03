@@ -519,7 +519,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 _undoButton.IgnoresMouseInteraction = true;
                 _undoButton.SetVisibility(0.6f, 0.6f);
             }
-
             _toolInfoText.SetText($"([c/EAD87A:X:] {Player.tileTargetX}, [c/EAD87A:Y:] {Player.tileTargetY}) {EditorSystem.Local.CurrentTool?.GetInfoText()}");
             _toolInfoText.Left.Set(LeftWidth + 4, 0f);
             _toolInfoText.Recalculate();

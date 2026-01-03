@@ -47,12 +47,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public override void PostUpdateInput()
         {
             Main.blockMouse = true;
-            // left click
             if (Main.mouseLeft && Main.mouseLeftRelease && !Main.LocalPlayer.mouseInterface)
             {
-                // flood fill kinda
-                // will add some settings so you can choose to only fill tiles and/or walls and/or liquid if you want to
-
                 // get point and clicked tile
                 Point point = new Point(Player.tileTargetX, Player.tileTargetY);
                 TileCopy clickedTile = new TileCopy(Main.tile[point.X, point.Y]);

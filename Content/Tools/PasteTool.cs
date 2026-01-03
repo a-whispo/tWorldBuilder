@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
+using Terraria.GameInput;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
@@ -39,13 +40,15 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public override void PostUpdateInput()
         {
             Main.blockMouse = true;
+
             // left click
             if (Main.mouseRight && Main.mouseRightRelease && !Main.LocalPlayer.mouseInterface)
             {
                 EditorSystem.Local.CurrentTool = null;
             }
 
-            if (Keybinds.Key1MK.Current || Keybinds.Key1MK.GetAssignedKeys().Count < 1) // keybinds that need key 1 to be pressed down go in here. count is < 1 if theres no keybind set
+            // keybinds that need ctrl
+            if (PlayerInput.GetPressedKeys().Contains(Keys.LeftControl))
             {
                 // paste
                 if (Keybinds.PasteMK.JustPressed && EditorSystem.Local.Clipboard != null)

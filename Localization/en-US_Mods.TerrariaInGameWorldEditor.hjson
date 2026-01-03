@@ -12,4 +12,14 @@ Keybinds: {
 	"Rotate selection (Key 1 + selected key).DisplayName": Rotate selection ( Key 1 + selected key)
 	"Mirror selection (Key 1 + selected key).DisplayName": Mirror selection ( Key 1 + selected key)
 	"Save (Key 1 + selected key.DisplayName": Save ( Key 1 + selected key
+	"Delete (Ctrl + Key).DisplayName": Delete ( Ctrl +  Key)
+	"Copy (Ctrl + Key).DisplayName": Copy ( Ctrl +  Key)
+	"Paste (Ctrl + Key).DisplayName": Paste ( Ctrl +  Key)
+	"Change Paste Corner (Ctrl + Key).DisplayName": Change  Paste  Corner ( Ctrl +  Key)
+	"Rotate selection (Ctrl + Key).DisplayName": Rotate selection ( Ctrl +  Key)
+	"Mirror selection (Ctrl + Key).DisplayName": Mirror selection ( Ctrl +  Key)
+	"Cut (Ctrl + Key).DisplayName": Cut ( Ctrl +  Key)
+	"Undo (Ctrl + Key).DisplayName": Undo ( Ctrl +  Key)
+	"Redo (Ctrl + Key).DisplayName": Redo ( Ctrl +  Key)
+	"Save (Ctrl + Key).DisplayName": Save ( Ctrl +  Key)
 }

@@ -158,7 +158,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             }
 
             // change size with mouse wheel
-            if (Keybinds.Key1MK.Current || Keybinds.Key1MK.GetAssignedKeys().Count < 1)
+            if (PlayerInput.GetPressedKeys().Contains(Keys.LeftControl))
             {
                 PlayerInput.LockVanillaMouseScroll($"{TerrariaInGameWorldEditor.MODNAME}/Shapes");
                 if (PlayerInput.ScrollWheelDelta > 0)
