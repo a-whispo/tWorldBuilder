@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Terraria.ModLoader;
@@ -114,7 +113,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
             {
                 // add the item
                 _parentGrid.Add(item);
-                item.RecalculateSize();
+                item.Recalculate();
 
                 // if the item is a folder and it was open before opening this folder we want to also open it again
                 if (item is UIDirectoryFolder folder && folder.IsOpen)
@@ -146,9 +145,10 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
             _parentGrid.UpdateOrder();
         }
 
-        public override void RecalculateSize()
+        public override void Recalculate()
         {
-            base.RecalculateSize();
+            base.Recalculate();
+
             _createSubFolderButton.Left.Set(_canSelect ? _selectButton.Left.Pixels - _selectButton.Width.Pixels - 2 : _renameButton.Left.Pixels - _renameButton.Width.Pixels - 2, 0f);
             _createSubFolderButton.Top.Set(6, 0f);
         }

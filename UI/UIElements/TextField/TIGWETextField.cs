@@ -108,12 +108,17 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.TextField
                 }
             }
 
+            // this is kinda weird but ok
+            _background.Texture = IsFocused ? _background.TextureHover : ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture");
+        }
+
+        public override void Recalculate()
+        {
+            base.Recalculate();
+
             // update offset
             _background.Width.Set(Width.Pixels, 0f);
             _background.Height.Set(Height.Pixels, 0f);
-
-            // this is kinda weird but ok
-            _background.Texture = IsFocused ? _background.TextureHover : ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture");
         }
 
         public override void MouseOver(UIMouseEvent evt)

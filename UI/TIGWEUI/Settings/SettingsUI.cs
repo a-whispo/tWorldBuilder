@@ -34,78 +34,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             toolColorPicker.Left.Set(12, 0);
             Append(toolColorPicker);
 
-            // delete/cut/copy options
-            UIText wallsAndTilesText = new UIText("Only paste/delete/cut/draw:");
-            wallsAndTilesText.Left.Set(368, 0);
-            wallsAndTilesText.Top.Set(52, 0);
-            Append(wallsAndTilesText);
-            TIGWEImageResizeable pasteOptions = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"));
-            pasteOptions.Left.Set(368, 0);
-            pasteOptions.Top.Set(72, 0);
-            pasteOptions.Width.Set(320, 0);
-            pasteOptions.Height.Set(120, 0);
-            Append(pasteOptions);
-
-            // paste options tiles
-            UIText pasteTilesText = new UIText("Tiles");
-            pasteTilesText.Left.Set(40, 0);
-            pasteTilesText.Top.Set(15, 0);
-            pasteOptions.Append(pasteTilesText);
-            TIGWECheckBox pasteTilesCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteTiles = pasteTilesCheckBox.IsChecked;
-            pasteTilesCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteTiles = isChecked;
-            };
-            pasteTilesCheckBox.Left.Set(10, 0);
-            pasteTilesCheckBox.Top.Set(11, 0);
-            pasteOptions.Append(pasteTilesCheckBox);
-
-            // paste options walls
-            UIText pasteWallsText = new UIText("Walls");
-            pasteWallsText.Left.Set(40, 0);
-            pasteWallsText.Top.Set(51, 0);
-            pasteOptions.Append(pasteWallsText);
-            TIGWECheckBox pasteWallsCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteWalls = pasteWallsCheckBox.IsChecked;
-            pasteWallsCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteWalls = isChecked;
-            };
-            pasteWallsCheckBox.Left.Set(10, 0);
-            pasteWallsCheckBox.Top.Set(47, 0);
-            pasteOptions.Append(pasteWallsCheckBox);
-
-            // paste options liquid
-            UIText pasteLiquidText = new UIText("Liquid");
-            pasteLiquidText.Left.Set(40, 0);
-            pasteLiquidText.Top.Set(87, 0);
-            pasteOptions.Append(pasteLiquidText);
-            TIGWECheckBox pasteLiquidCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteLiquid = pasteLiquidCheckBox.IsChecked;
-            pasteLiquidCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteLiquid = isChecked;
-            };
-            pasteLiquidCheckBox.Left.Set(10, 0);
-            pasteLiquidCheckBox.Top.Set(83, 0);
-            pasteOptions.Append(pasteLiquidCheckBox);
-
-            // paste options wire
-            UIText pasteWireText = new UIText("Wires/Actuators");
-            pasteWireText.Left.Set(140, 0);
-            pasteWireText.Top.Set(15, 0);
-            pasteOptions.Append(pasteWireText);
-            TIGWECheckBox pasteWireCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteWires = pasteWireCheckBox.IsChecked;
-            pasteWireCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteWires = isChecked;
-            };
-            pasteWireCheckBox.Left.Set(110, 0);
-            pasteWireCheckBox.Top.Set(11, 0);
-            pasteOptions.Append(pasteWireCheckBox);
-
             // other options
             UIText otherOptionsText = new UIText("Other options:");
             otherOptionsText.Left.Set(15, 0);
@@ -148,36 +76,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             measureCheckBox.Top.Set(45, 0);
             otherOptions.Append(measureCheckBox);
 
-            // only paste on air option
-            UIText pasteOnAirText = new UIText("Only paste/draw on fully empty tiles?");
-            pasteOnAirText.Left.Set(40, 0);
-            pasteOnAirText.Top.Set(85, 0);
-            otherOptions.Append(pasteOnAirText);
-            TIGWECheckBox pasteOnAirCheckBox = new TIGWECheckBox();
-            TIGWESettings.ShouldOnlyPasteOnAir = pasteOnAirCheckBox.IsChecked;
-            pasteOnAirCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldOnlyPasteOnAir = isChecked;
-            };
-            pasteOnAirCheckBox.Left.Set(10, 0);
-            pasteOnAirCheckBox.Top.Set(80, 0);
-            otherOptions.Append(pasteOnAirCheckBox);
-
-            // paste air option
-            UIText pasteAirText = new UIText("Paste air/empty walls?");
-            pasteAirText.Left.Set(40, 0);
-            pasteAirText.Top.Set(120, 0);
-            otherOptions.Append(pasteAirText);
-            TIGWECheckBox pasteAirCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteAir = pasteAirCheckBox.IsChecked;
-            pasteAirCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteAir = isChecked;
-            };
-            pasteAirCheckBox.Left.Set(10, 0);
-            pasteAirCheckBox.Top.Set(115, 0);
-            otherOptions.Append(pasteAirCheckBox);
-
             // update draw
             UIText updateDrawnTilesText = new UIText("Update drawn tiles texture?");
             updateDrawnTilesText.Left.Set(40, 0);
@@ -193,78 +91,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             updateDrawnTilesCheckBox.Left.Set(10, 0);
             updateDrawnTilesCheckBox.Top.Set(150, 0);
             otherOptions.Append(updateDrawnTilesCheckBox);
-
-            // paste on options
-            UIText pasteOnText = new UIText("Only paste/draw on:");
-            pasteOnText.Left.Set(2, 0);
-            pasteOnText.Top.Set(-20, 0);
-            TIGWEImageResizeable pasteOnOptions = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"));
-            pasteOnOptions.Left.Set(368, 0);
-            pasteOnOptions.Top.Set(234, 0);
-            pasteOnOptions.Width.Set(320, 0);
-            pasteOnOptions.Height.Set(186, 0);
-            Append(pasteOnOptions);
-            pasteOnOptions.Append(pasteOnText);
-
-            // paste on tiles
-            UIText onTilesText = new UIText("Tiles");
-            onTilesText.Left.Set(40, 0);
-            onTilesText.Top.Set(15, 0);
-            pasteOnOptions.Append(onTilesText);
-            TIGWECheckBox onTilesCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteOnTiles = onTilesCheckBox.IsChecked;
-            onTilesCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteOnTiles = isChecked;
-            };
-            onTilesCheckBox.Left.Set(10, 0);
-            onTilesCheckBox.Top.Set(10, 0);
-            pasteOnOptions.Append(onTilesCheckBox);
-
-            // paste on walls
-            UIText onWallsText = new UIText("Walls");
-            onWallsText.Left.Set(40, 0);
-            onWallsText.Top.Set(50, 0);
-            pasteOnOptions.Append(onWallsText);
-            TIGWECheckBox onWallsCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteOnWalls = onWallsCheckBox.IsChecked;
-            onWallsCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteOnWalls = isChecked;
-            };
-            onWallsCheckBox.Left.Set(10, 0);
-            onWallsCheckBox.Top.Set(46, 0);
-            pasteOnOptions.Append(onWallsCheckBox);
-
-            // paste on liquid
-            UIText onLiquidText = new UIText("Liquid");
-            onLiquidText.Left.Set(40, 0);
-            onLiquidText.Top.Set(86, 0);
-            pasteOnOptions.Append(onLiquidText);
-            TIGWECheckBox onLiquidCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteOnLiquid = onLiquidCheckBox.IsChecked;
-            onLiquidCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteOnLiquid = isChecked;
-            };
-            onLiquidCheckBox.Left.Set(10, 0);
-            onLiquidCheckBox.Top.Set(82, 0);
-            pasteOnOptions.Append(onLiquidCheckBox);
-
-            // paste on air
-            UIText onAirText = new UIText("Air");
-            onAirText.Left.Set(40, 0);
-            onAirText.Top.Set(122, 0);
-            pasteOnOptions.Append(onAirText);
-            TIGWECheckBox OnAirCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteOnAir = OnAirCheckBox.IsChecked;
-            OnAirCheckBox.OnCheckedChanged += (isChecked) =>
-            {
-                TIGWESettings.ShouldPasteOnAir = isChecked;
-            };
-            OnAirCheckBox.Left.Set(10, 0);
-            OnAirCheckBox.Top.Set(118, 0);
-            pasteOnOptions.Append(OnAirCheckBox);
         }
     }
 }

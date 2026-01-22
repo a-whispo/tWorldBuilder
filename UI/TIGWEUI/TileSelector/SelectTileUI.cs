@@ -54,9 +54,9 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 
             // scrollbar
             TIGWEScrollbar sb = new TIGWEScrollbar(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"), ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Scrollbar"));
-            sb.Height.Set(336, 0);
+            sb.Height.Set(348, 0);
             sb.Left.Set(12, 0);
-            sb.Top.Set(88, 0);
+            sb.Top.Set(82, 0);
             Append(sb);
 
             // grid
@@ -73,9 +73,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                 // get all tiles from mods
                 for (int i = 0; i < ItemLoader.ItemCount; i++)
                 {
+                    Item item = null;
                     try
                     {
-                        Item item = new Item(i);
+                        item = new Item(i);
                         if (item.createTile != -1 || item.createWall != -1)
                         {
                             // add to selectable tiles
@@ -92,7 +93,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error: {ex}");
+                        TerrariaInGameWorldEditor.ModLogger.Warn($"Failed to load item {(item != null ? $"\"{item.Name}\"" : "(item was null)")}, with ID {i}.", ex);
                     }
                 }
                 _grid.SortByTilePlacedTileType();

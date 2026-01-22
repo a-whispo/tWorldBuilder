@@ -101,131 +101,114 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector
 
         public void SetItem(int itemId)
         {
-            try
-            {
-                Main.instance.LoadItem(itemId);
-                Item item = new Item(itemId);
-                Name = item.Name;
-                this.ItemId = itemId;
-                _createTile = item.createTile;
-                _createWall = item.createWall;
-                _placeStyle = item.placeStyle;
-                _itemTexture = TextureAssets.Item[itemId].Value;
-                _hasItem = true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error selecting item: {ex}");
-            }
+            Main.instance.LoadItem(itemId);
+            Item item = new Item(itemId);
+            Name = item.Name;
+            this.ItemId = itemId;
+            _createTile = item.createTile;
+            _createWall = item.createWall;
+            _placeStyle = item.placeStyle;
+            _itemTexture = TextureAssets.Item[itemId].Value;
+            _hasItem = true;
         }
 
         public TileCopy GetAsTileCopy()
         {
-            if (_hasItem)
+            if (!_hasItem)
             {
-                try
+                return null;
+            }
+
+            Tile tile = new Tile();
+            if (_createTile != -1)
+            {
+                // important
+                tile.TileType = (ushort)_createTile;
+                tile.HasTile = true;
+                tile.WallType = 0;
+
+                var tileObjectData = (TileObjectData.GetTileData(_createTile, _placeStyle, 0) ?? TileObjectData.GetTileData(_createTile, 0, 0)) ?? null;
+                if (tileObjectData != null)
                 {
-                    Tile tile = new Tile();
-                    if (_createTile != -1)
+                    // calculate tileframex and tileframey
+                    if (tileObjectData.StyleHorizontal)
                     {
-                        // important
-                        tile.TileType = (ushort)_createTile;
-                        tile.HasTile = true;
-                        tile.WallType = 0;
+                        // get values
+                        int x = (short)(tileObjectData.CoordinateFullWidth * _placeStyle * tileObjectData.StyleMultiplier);
+                        int y = 0;
 
-                        var tileObjectData = (TileObjectData.GetTileData(_createTile, _placeStyle, 0) ?? TileObjectData.GetTileData(_createTile, 0, 0)) ?? null;
-                        if (tileObjectData != null)
+                        if (tileObjectData.StyleWrapLimit != 0)
                         {
-                            // calculate tileframex and tileframey
-                            if (tileObjectData.StyleHorizontal)
+                            // calculate pixels per row
+                            int pixelsPerRow = tileObjectData.CoordinateFullWidth * tileObjectData.StyleWrapLimit;
+
+                            // if we exceed the pixels per row that means we have to wrap around to the next row
+                            if (x >= pixelsPerRow)
                             {
-                                // get values
-                                int x = (short)(tileObjectData.CoordinateFullWidth * _placeStyle * tileObjectData.StyleMultiplier);
-                                int y = 0;
-
-                                if (tileObjectData.StyleWrapLimit != 0)
-                                {
-                                    // calculate pixels per row
-                                    int pixelsPerRow = tileObjectData.CoordinateFullWidth * tileObjectData.StyleWrapLimit;
-
-                                    // if we exceed the pixels per row that means we have to wrap around to the next row
-                                    if (x >= pixelsPerRow)
-                                    {
-                                        // calculate new coordinates
-                                        int row = x / pixelsPerRow;
-                                        y = row * tileObjectData.CoordinateFullHeight;
-                                        x = x % pixelsPerRow;
-                                    }
-                                }
-
-                                tile.TileFrameX = (short)x;
-                                tile.TileFrameY = (short)y;
-                            }
-                            else
-                            {
-                                int x = 0;
-                                int y = (short)(tileObjectData.CoordinateFullHeight * _placeStyle * tileObjectData.StyleMultiplier);
-
-                                if (tileObjectData.StyleWrapLimit != 0)
-                                {
-                                    int pixelsPerRow = tileObjectData.CoordinateFullHeight * tileObjectData.StyleWrapLimit;
-
-                                    if (y >= pixelsPerRow)
-                                    {
-                                        int row = y / pixelsPerRow;
-                                        x = row * tileObjectData.CoordinateFullHeight;
-                                        y = y % pixelsPerRow;
-                                    }
-                                }
-
-                                tile.TileFrameX = (short)x;
-                                tile.TileFrameY = (short)y;
+                                // calculate new coordinates
+                                int row = x / pixelsPerRow;
+                                y = row * tileObjectData.CoordinateFullHeight;
+                                x = x % pixelsPerRow;
                             }
                         }
-                        else
-                        {
-                            // place a temporary tile
-                            int tempX = Main.maxTilesX - 10;
-                            int tempY = Main.maxTilesY - 10;
 
-                            // place temp tile
-                            WorldGen.PlaceTile(tempX, tempY, _createTile, true, false, -1, _placeStyle);
-
-                            // get tileframey and tileframex
-                            TileCopy tc = new TileCopy(Main.tile[tempX, tempY]);
-                            tile.TileFrameX = tc.TileFrameX;
-                            tile.TileFrameY = tc.TileFrameY;
-
-                            // remove tile
-                            WorldGen.KillTile(tempX, tempY, false, false, true);
-                        }
+                        tile.TileFrameX = (short)x;
+                        tile.TileFrameY = (short)y;
                     }
                     else
                     {
-                        tile.WallType = (ushort)_createWall;
-                        Main.instance.LoadWall(tile.WallType);
-                        tile.WallColor = 0;
-                        tile.TileType = 0;
-                        tile.HasTile = false;
+                        int x = 0;
+                        int y = (short)(tileObjectData.CoordinateFullHeight * _placeStyle * tileObjectData.StyleMultiplier);
 
-                        // default wall to wallframex = 36 and wallframey = 36
-                        // this is the wallframex and wallframey when the wall is 16x16
-                        tile.WallFrameX = 36;
-                        tile.WallFrameY = 36;
+                        if (tileObjectData.StyleWrapLimit != 0)
+                        {
+                            int pixelsPerRow = tileObjectData.CoordinateFullHeight * tileObjectData.StyleWrapLimit;
+
+                            if (y >= pixelsPerRow)
+                            {
+                                int row = y / pixelsPerRow;
+                                x = row * tileObjectData.CoordinateFullHeight;
+                                y = y % pixelsPerRow;
+                            }
+                        }
+
+                        tile.TileFrameX = (short)x;
+                        tile.TileFrameY = (short)y;
                     }
-
-                    return new TileCopy(tile);
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Error converting to TileCopy: {ex}");
-                    return null;
+                    // place a temporary tile
+                    int tempX = Main.maxTilesX - 10;
+                    int tempY = Main.maxTilesY - 10;
+
+                    // place temp tile
+                    WorldGen.PlaceTile(tempX, tempY, _createTile, true, false, -1, _placeStyle);
+
+                    // get tileframey and tileframex
+                    TileCopy tc = new TileCopy(Main.tile[tempX, tempY]);
+                    tile.TileFrameX = tc.TileFrameX;
+                    tile.TileFrameY = tc.TileFrameY;
+
+                    // remove tile
+                    WorldGen.KillTile(tempX, tempY, false, false, true);
                 }
             }
             else
             {
-                return null;
+                tile.WallType = (ushort)_createWall;
+                Main.instance.LoadWall(tile.WallType);
+                tile.WallColor = 0;
+                tile.TileType = 0;
+                tile.HasTile = false;
+
+                // default wall to wallframex = 36 and wallframey = 36
+                // this is the wallframex and wallframey when the wall is 16x16
+                tile.WallFrameX = 36;
+                tile.WallFrameY = 36;
             }
+
+            return new TileCopy(tile);
         }
     }
 }

@@ -140,7 +140,8 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
                     }
                 }
                 AddRange(items);
-            } else
+            } 
+            else
             {
                 IsSearching = true;
 

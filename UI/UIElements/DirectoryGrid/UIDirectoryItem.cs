@@ -189,8 +189,8 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
                 }
                 catch (Exception ex)
                 {
-                    // failed to rename, probably because a file/folder with that name already exists
-                    // Main.NewText($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] Failed to rename, a file or folder with that name may already exist.");
+                    TerrariaInGameWorldEditor.ModLogger.Warn($"Failed to rename.", ex);
+                    Main.NewText("Failed to rename, a file or folder with that name likely already exist.", Color.Red);
                     return;
                 }
             }
@@ -232,12 +232,9 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
                 _deleteButton.HoverText = "Delete";
                 _deleteButton.SetImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Delete"));
             }
-
-            // should prob not recalculate size every frame
-            RecalculateSize();
         }
 
-        public virtual void RecalculateSize()
+        public override void Recalculate()
         {
             if (Parent == null)
             {
@@ -261,6 +258,8 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
 
             // name
             _nameText.Left.Set(_icon.Width.Pixels + 20, 0f);
+
+            base.Recalculate();
         }
 
         public override void MouseOver(UIMouseEvent evt)

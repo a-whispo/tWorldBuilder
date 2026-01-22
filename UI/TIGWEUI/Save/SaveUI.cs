@@ -157,11 +157,9 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
                 string modsPath = ModLoader.ModPath.Replace("\\Mods", "");
                 Directory.CreateDirectory($"{modsPath}\\TIGWE\\saves");
                 string path = $"{_selectedPath}\\{name}";
-
-                // check if file exists
                 if (File.Exists(path))
                 {
-                    //Main.NewText($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] A file with that name already exists.");
+                    Main.NewText("A file with that name already exists.", Color.Red);
                     return;
                 }
 
@@ -176,7 +174,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
             }
             catch (Exception ex)
             {
-                //Main.NewText($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] Error: {ex}");
+                TerrariaInGameWorldEditor.ModLogger.Warn("Failed to save current selection.", ex);
             }
         }
     }

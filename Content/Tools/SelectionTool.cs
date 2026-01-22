@@ -6,11 +6,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
     {
         protected TileCollection _selection = new TileCollection();
 
-        public SelectionTool(string iconPath, string hoverText) : base(iconPath, hoverText)
-        {
-
-        }
-
         public virtual TileCollection GetSelection()
         {
             return _selection;

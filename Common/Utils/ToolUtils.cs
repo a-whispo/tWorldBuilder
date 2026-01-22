@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.GameInput;
+using Terraria.ID;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 
@@ -13,44 +13,33 @@ namespace TerrariaInGameWorldEditor.Common.Utils
     {
         public static void Paste(TileCollection tilesToPaste, Point point, bool saveToUndo = true, bool placeTileWithTileFraming = false) // takes point in terraria coordinates
         {
-            // point is in tile coordinates
-
-            // for undo history
-            TileCollection tileColl = new TileCollection();
-
-            // faster to get index with list
-            List<KeyValuePair<Point, TileCopy>> tiles = tilesToPaste.ToNormalized().AsDictionary().ToList();
+            TileCollection undoColl = new TileCollection();
+            List<KeyValuePair<Point, TileCopy>> tilesToPasteList = tilesToPaste.ToNormalized().AsDictionary().ToList();
 
             // if we want to update the tiles we're pasting we need to make sure to grab a copy of what we're pasting over before we do the paste
             // as well as the tiles around it since those textures will also update
             if (placeTileWithTileFraming)
             {
-                foreach (var tile in tiles)
+                foreach (var tile in tilesToPasteList)
                 {
                     int x = tile.Key.X + point.X;
                     int y = tile.Key.Y + point.Y;
-
-                    // check if location is in selected area
                     if ((!EditorSystem.Local.CurrentSelection?.ContainsCoord(new Point(x, y)) ?? false) && (EditorSystem.Local.CurrentSelection?.Count > 0))
                     {
                         continue;
                     }
-
-                    // for undo history
-                    tileColl.TryAddTile(new Point(x, y), new TileCopy(Main.tile[x, y]));
-                    tileColl.TryAddTile(new Point(x + 1, y), new TileCopy(Main.tile[x + 1, y]));
-                    tileColl.TryAddTile(new Point(x - 1, y), new TileCopy(Main.tile[x - 1, y]));
-                    tileColl.TryAddTile(new Point(x, y + 1), new TileCopy(Main.tile[x, y + 1]));
-                    tileColl.TryAddTile(new Point(x, y - 1), new TileCopy(Main.tile[x, y - 1]));
+                    undoColl.TryAddTile(new Point(x, y), new TileCopy(Main.tile[x, y]));
+                    undoColl.TryAddTile(new Point(x + 1, y), new TileCopy(Main.tile[x + 1, y]));
+                    undoColl.TryAddTile(new Point(x - 1, y), new TileCopy(Main.tile[x - 1, y]));
+                    undoColl.TryAddTile(new Point(x, y + 1), new TileCopy(Main.tile[x, y + 1]));
+                    undoColl.TryAddTile(new Point(x, y - 1), new TileCopy(Main.tile[x, y - 1]));
                 }
             }
 
-            foreach (var tile in tiles)
+            foreach (var tile in tilesToPasteList)
             {
                 int x = tile.Key.X + point.X;
                 int y = tile.Key.Y + point.Y;
-
-                // check if location is in selected area
                 if ((!EditorSystem.Local.CurrentSelection?.ContainsCoord(new Point(x, y)) ?? false) && (EditorSystem.Local.CurrentSelection?.Count > 0))
                 {
                     continue;
@@ -59,95 +48,90 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 // if we dont want the pasted tiles to update just add to history as we paste the tiles
                 if (!placeTileWithTileFraming)
                 {
-                    // for undo history
-                    tileColl.TryAddTile(new Point(x, y), new TileCopy(Main.tile[x, y]));
+                    undoColl.TryAddTile(new Point(x, y), new TileCopy(Main.tile[x, y]));
                 }
 
-                // temporary copy of the tile we want to paste
                 TileCopy temp = new TileCopy(tile.Value.GetAsTile());
-                if ((TIGWESettings.ShouldOnlyPasteOnAir && Main.tile[x, y].LiquidAmount == 0 && Main.tile[x, y].WallType == 0 && !Main.tile[x, y].HasTile) || !TIGWESettings.ShouldOnlyPasteOnAir)
+                if (CompareTileToDrawOnMask(new TileCopy(Main.tile[x, y])))
                 {
-                    // check what we should paste on
-                    if ((TIGWESettings.ShouldPasteOnTiles && Main.tile[x, y].HasTile) || (TIGWESettings.ShouldPasteOnWalls && Main.tile[x, y].WallType != 0) || (TIGWESettings.ShouldPasteOnLiquid && Main.tile[x, y].LiquidAmount > 0) || (TIGWESettings.ShouldPasteOnAir && (!Main.tile[x, y].HasTile && Main.tile[x, y].TileType == 0 && Main.tile[x, y].WallType == 0 && Main.tile[x, y].LiquidAmount == 0)))
+                    // chech if what we're about to paste is going to be an empty tile
+                    temp.HasTile = (TIGWESettings.ShouldPasteTiles ? temp.HasTile : false);
+                    temp.WallType = (TIGWESettings.ShouldPasteWalls ? temp.WallType : (ushort)0);
+                    temp.LiquidAmount = (TIGWESettings.ShouldPasteLiquid ? temp.LiquidAmount : (byte)0);
+                    if (!TIGWESettings.ShouldPasteWires)
                     {
-                        // paste liquid
-                        if (TIGWESettings.ShouldPasteLiquid)
+                        temp.HasActuator = false;
+                        temp.RedWire = false;
+                        temp.GreenWire = false;
+                        temp.YellowWire = false;
+                        temp.BlueWire = false;
+                    }
+                    if (!TIGWESettings.ShouldPasteEmpty && IsTileCopyEmpty(temp))
+                    {
+                        continue;
+                    }
+                    temp = new TileCopy(tile.Value.GetAsTile());
+
+                    // paste liquid
+                    if (TIGWESettings.ShouldPasteLiquid)
+                    {
+                        ((Tile)(Main.tile[x, y])).LiquidType = temp.LiquidType;
+                        Main.tile[x, y].LiquidAmount = temp.LiquidAmount; // set liquid
+                    }
+
+                    // paste walls
+                    if (TIGWESettings.ShouldPasteWalls)
+                    {
+                        // copy data of tiles at the location we're pasting to so we dont replace them
+                        temp.CopyWallData(tile.Value.GetAsTile());
+                        temp.CopyTileData(Main.tile[x, y]); 
+                        temp.CopyWireData(Main.tile[x, y]);
+
+                        // set and update walls
+                        Main.tile[x, y].CopyFrom(temp.GetAsTile());
+                        if (placeTileWithTileFraming)
                         {
-                            if ((!TIGWESettings.ShouldPasteAir && tile.Value.LiquidAmount != 0) || TIGWESettings.ShouldPasteAir)
-                            {
-                                ((Tile)(Main.tile[x, y])).LiquidType = temp.LiquidType;
-                                Main.tile[x, y].LiquidAmount = temp.LiquidAmount; // set liquid
-                            }
+                            WorldGen.SquareWallFrame(x, y, true);
                         }
+                    }
 
-                        // paste walls
-                        if (TIGWESettings.ShouldPasteWalls)
+                    // paste tiles
+                    if (TIGWESettings.ShouldPasteTiles)
+                    {
+                        // get some temporary values and copy data
+                        byte liquidAmount = Main.tile[x, y].LiquidAmount;
+                        int liquidType = Main.tile[x, y].LiquidType;
+                        temp.CopyTileData(tile.Value.GetAsTile());
+                        temp.CopyWallData(Main.tile[x, y]);
+                        temp.CopyWireData(Main.tile[x, y]);
+
+                        // set tiles and update
+                        Main.tile[x, y].CopyFrom(temp.GetAsTile());
+                        ((Tile)(Main.tile[x, y])).LiquidType = liquidType;
+                        Main.tile[x, y].LiquidAmount = liquidAmount;
+                        if (placeTileWithTileFraming)
                         {
-                            if ((!TIGWESettings.ShouldPasteAir && tile.Value.WallType != 0) || TIGWESettings.ShouldPasteAir)
-                            {
-                                // get some temporary values
-                                temp.CopyWallData(tile.Value.GetAsTile());
-                                temp.CopyTileData(Main.tile[x, y]); // copy tile data of tiles at the location we're pasting to so we dont replace them
-                                temp.CopyWireData(Main.tile[x, y]); // copy tile data of wires at the location we're pasting to so we dont replace them
-
-                                // set walls
-                                Main.tile[x, y].CopyFrom(temp.GetAsTile());
-
-                                if (placeTileWithTileFraming)
-                                {
-                                    // update walls
-                                    WorldGen.SquareWallFrame(x, y, true);
-                                }
-                            }
+                            // squareframe but with noBreak
+                            bool isTileFrameImportant = Main.tileFrameImportant[temp.TileType];
+                            WorldGen.TileFrame(x, y, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x + 1, y, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x - 1, y, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x, y + 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x, y - 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x + 1, y + 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x - 1, y + 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x - 1, y - 1, true, !isTileFrameImportant);
+                            WorldGen.TileFrame(x + 1, y - 1, true, !isTileFrameImportant);
                         }
+                    }
 
-                        // paste tiles
-                        if (TIGWESettings.ShouldPasteTiles)
-                        {
-                            if ((!TIGWESettings.ShouldPasteAir && tile.Value.HasTile) || TIGWESettings.ShouldPasteAir)
-                            {
-                                // get some temporary values
-                                byte liquidAmount = Main.tile[x, y].LiquidAmount;
-                                int liquidType = Main.tile[x, y].LiquidType;
-                                temp.CopyTileData(tile.Value.GetAsTile()); // copy original tile data in case we replaced before when pasting walls
-                                temp.CopyWallData(Main.tile[x, y]);
-                                temp.CopyWireData(Main.tile[x, y]);
-
-                                // set tiles
-                                Main.tile[x, y].CopyFrom(temp.GetAsTile());
-                                ((Tile)(Main.tile[x, y])).LiquidType = liquidType;
-                                Main.tile[x, y].LiquidAmount = liquidAmount;
-
-                                if (placeTileWithTileFraming)
-                                {
-                                    // squareframe but with noBreak
-                                    // update tiles
-                                    bool isTileFrameImportant = Main.tileFrameImportant[temp.TileType];
-                                    WorldGen.TileFrame(x, y, true, !isTileFrameImportant);
-                                    WorldGen.TileFrame(x + 1, y, true, !isTileFrameImportant);
-                                    WorldGen.TileFrame(x - 1, y, true, !isTileFrameImportant);
-                                    WorldGen.TileFrame(x, y + 1, true, !isTileFrameImportant);
-                                    WorldGen.TileFrame(x, y - 1, true, !isTileFrameImportant);
-                                    WorldGen.TileFrame(x + 1, y + 1, true, !isTileFrameImportant);
-                                    WorldGen.TileFrame(x - 1, y + 1, true, !isTileFrameImportant);
-                                    WorldGen.TileFrame(x - 1, y - 1, true, !isTileFrameImportant);
-                                    WorldGen.TileFrame(x + 1, y - 1, true, !isTileFrameImportant);
-                                }
-                            }
-                        }
-
-                        // paste wire stuff
-                        if (TIGWESettings.ShouldPasteWires)
-                        {
-                            if ((!TIGWESettings.ShouldPasteAir && (tile.Value.HasWire || tile.Value.HasActuator)) || TIGWESettings.ShouldPasteAir)
-                            {
-                                // get some temporary values
-                                temp.CopyWireData(tile.Value.GetAsTile());
-                                temp.CopyTileData(Main.tile[x, y]);
-                                temp.CopyWallData(Main.tile[x, y]);
-                                Main.tile[x, y].CopyFrom(temp.GetAsTile()); // set wires
-                            }
-                        }
+                    // paste wire stuff
+                    if (TIGWESettings.ShouldPasteWires)
+                    {
+                        temp.CopyWireData(tile.Value.GetAsTile());
+                        temp.CopyTileData(Main.tile[x, y]);
+                        temp.CopyWallData(Main.tile[x, y]);
+                        Main.tile[x, y].CopyFrom(temp.GetAsTile());
                     }
                 }
             }
@@ -155,8 +139,49 @@ namespace TerrariaInGameWorldEditor.Common.Utils
             // add to undo history
             if (saveToUndo)
             {
-                EditorSystem.Local.UndoHistory.Add(tileColl);
+                EditorSystem.Local.UndoHistory.Add(undoColl);
             }
+        }
+
+        public static bool IsTileCopyEmpty(TileCopy tile)
+        {
+            return (!tile.HasTile && tile.WallType == WallID.None && tile.LiquidAmount == 0 && !(tile.HasActuator || tile.HasWire));
+        }
+
+        public static bool CompareTileToDrawOnMask(TileCopy tile)
+        {
+            bool CompareMaskToBool(Mask mask, bool value)
+            {
+                switch (mask)
+                {
+                    case Mask.Yes:
+                        return value;
+                    case Mask.Any:
+                        return true;
+                    case Mask.No:
+                        return !value;
+                    default: 
+                        return false;
+                }
+            }
+
+            if (!CompareMaskToBool(TIGWESettings.ShouldPasteOnTiles, (tile.HasTile)))
+            {
+                return false;
+            }
+            if (!CompareMaskToBool(TIGWESettings.ShouldPasteOnWalls, (tile.WallType != WallID.None)))
+            {
+                return false;
+            }
+            if (!CompareMaskToBool(TIGWESettings.ShouldPasteOnLiquid, (tile.LiquidAmount > 0)))
+            {
+                return false;
+            }
+            if (!CompareMaskToBool(TIGWESettings.ShouldPasteOnWires, (tile.HasActuator || tile.HasWire)))
+            {
+                return false;
+            }
+            return true;
         }
 
         public static List<Point> CalculatePointsInLine(Point origin, Point endpoint)

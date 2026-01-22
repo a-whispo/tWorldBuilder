@@ -3,9 +3,11 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -14,10 +16,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private static int _pastingCorner = 0;
         private KeyboardState _oldState;
 
-        public PasteTool() : base("TerrariaInGameWorldEditor/UI/UIImages/PasteTool", "Paste")
+        public PasteTool()
         {
-
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/PasteTool"));
+            ToggleToolButton.HoverText = "Paste";
         }
+
         public override string GetInfoText()
         {
             return $"[c/EAD87A:Count:] {EditorSystem.Local.Clipboard.Count}";

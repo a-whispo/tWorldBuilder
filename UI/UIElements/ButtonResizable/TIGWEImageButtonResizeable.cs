@@ -39,10 +39,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ButtonResizable
         public override void MouseOver(UIMouseEvent evt)
         {
             base.MouseOver(evt);
-            if (IsMouseHovering)
-            {
-                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
-            }
+            SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
         }
     }
 }

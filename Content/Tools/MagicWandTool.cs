@@ -4,9 +4,11 @@ using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.CheckBox;
 using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
 
@@ -18,8 +20,11 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private TIGWENumberField _tileCapField;
         private TIGWECheckBox _selectCornersCheckBox;
 
-        public MagicWandTool() : base("TerrariaInGameWorldEditor/UI/UIImages/MagicWandTool", "Magic Wand")
+        public MagicWandTool()
         {
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/MagicWandTool"));
+            ToggleToolButton.HoverText = "Magic Wand";
+
             // settings
             // tile cap
             _tileCapField = new TIGWENumberField(_tileCap, minValue: 1);
@@ -51,7 +56,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 // flood fill kinda
                 // will add some settings so you can choose to only fill tiles and/or walls and/or liquid if you want to
 
-                if (PlayerInput.GetPressedKeys().Contains(Keys.LeftControl)) // if ctrl is pressed down, keep adding tiles to our selection
+                if (!PlayerInput.GetPressedKeys().Contains(Keys.LeftControl)) // if ctrl is pressed down, keep adding tiles to our selection
                 {
                     _selection.Clear();
                 }

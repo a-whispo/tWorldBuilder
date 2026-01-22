@@ -5,10 +5,12 @@ using System;
 using System.Linq;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
 
@@ -37,8 +39,11 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private TIGWENumberField _sizeField;
         private TIGWEDropDown _modeDropDown;
 
-        public LineTool() : base("TerrariaInGameWorldEditor/UI/UIImages/LineTool", "Line")
+        public LineTool()
         {
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/LineTool"));
+            ToggleToolButton.HoverText = "Line";
+
             // settings
             // mode
             _modeDropDown = new TIGWEDropDown(["Selected Tile", "Clipboard"]);

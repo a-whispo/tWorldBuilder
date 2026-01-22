@@ -128,7 +128,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             xButton.Top.Set(6, 0f);
             xButton.OnLeftClick += (_, _) =>
             {
-                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.Main);
+                EditorSystem.Local.ToggleWindow(EditorWindow.Main);
             };
             xButton.HoverText = "Close";
             Append(xButton);
@@ -142,7 +142,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             settingsButton.Top.Set(4, 0f);
             settingsButton.OnLeftClick += (_, _) =>
             {
-                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.Settings);
+                EditorSystem.Local.ToggleWindow(EditorWindow.Settings);
             };
             settingsButton.HoverText = "Settings";
             Append(settingsButton);
@@ -156,12 +156,12 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             blueprintsButton.Top.Set(4, 0f);
             blueprintsButton.OnLeftClick += (_, _) =>
             {
-                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.Blueprints);
+                EditorSystem.Local.ToggleWindow(EditorWindow.Blueprints);
             };
             blueprintsButton.HoverText = "Blueprints";
             Append(blueprintsButton);
 
-            // blueprints button
+            // save button
             TIGWEButton saveButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/SaveButton"));
             saveButton.SetVisibility(0.8f, 1f);
             saveButton.Width.Set(30, 0f);
@@ -170,7 +170,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             saveButton.Top.Set(4, 0f);
             saveButton.OnLeftClick += (_, _) =>
             {
-                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.Save);
+                EditorSystem.Local.ToggleWindow(EditorWindow.Save);
             };
             saveButton.HoverText = "Save";
             Append(saveButton);
@@ -185,124 +185,130 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             tileButton.HoverText = "Tile Browser";
             tileButton.OnLeftClick += (_, _) =>
             {
-                EditorSystem.Local.ToggleWindow(EditorSystem.EditorWindow.SelectTile);
+                EditorSystem.Local.ToggleWindow(EditorWindow.SelectTile);
             };
             // draw the selected tile
             tileButton.OnPreDrawSelf += (SpriteBatch spriteBatch) =>
             {
-                try
+                if (EditorSystem.Local.SelectedTile != null)
                 {
-                    if (EditorSystem.Local.SelectedTile != null)
+                    TileCopy selectedTile = EditorSystem.Local.SelectedTile;
+                    TilePaintSystemV2 ps = Main.instance.TilePaintSystem;
+                    Rectangle tileButtonRect = tileButton.GetDimensions().ToRectangle();
+                    int x = tileButtonRect.X + tileButtonRect.Width / 2 - 16 / 2;
+                    int y = tileButtonRect.Y + tileButtonRect.Height / 2 - 16 / 2;
+
+                    // wall part
+                    if (selectedTile.WallType != 0)
                     {
-                        TileCopy selectedTile = EditorSystem.Local.SelectedTile;
-                        TilePaintSystemV2 ps = Main.instance.TilePaintSystem;
-                        Rectangle tileButtonRect = tileButton.GetDimensions().ToRectangle();
-                        int x = tileButtonRect.X + tileButtonRect.Width / 2 - 16 / 2;
-                        int y = tileButtonRect.Y + tileButtonRect.Height / 2 - 16 / 2;
 
-                        // wall part
-                        if (selectedTile.WallType != 0)
+                        // get wall texture with tilepaintsystem to get the texture with paint if it has any
+                        Texture2D tileWallTex = ps.TryGetWallAndRequestIfNotReady(selectedTile.WallType, selectedTile.WallColor);
+                        if (tileWallTex != null)
                         {
-
-                            // get wall texture with tilepaintsystem to get the texture with paint if it has any
-                            Texture2D tileWallTex = ps.TryGetWallAndRequestIfNotReady(selectedTile.WallType, selectedTile.WallColor);
-                            if (tileWallTex != null)
-                            {
-                                // get texture from spritesheet with help from frameX and frameY and draw it
-                                spriteBatch.Draw(tileWallTex, new Rectangle(x - 8, y - 8, 32, 32), new Rectangle(selectedTile.WallFrameX, selectedTile.WallFrameY, 32, 32), Color.White * (tileButton.IsMouseHovering ? 0.8f : 1f));
-                            }
-                        }
-
-                        // tile part
-                        if (selectedTile.HasTile)
-                        {
-                            // get tile texture with tilepaintsystem to get the texture with paint if it has any
-                            Texture2D tileTex = ps.TryGetTileAndRequestIfNotReady(selectedTile.TileType, selectedTile.TileFrameNumber, selectedTile.TileColor);
-
-                            if (tileTex != null)
-                            {
-                                // get texture from spritesheet with help from frameX and frameY and draw it
-                                spriteBatch.Draw(tileTex, new Rectangle(x, y, 16, 16), new Rectangle(selectedTile.TileFrameX, selectedTile.TileFrameY, 16, 16), Color.White * (tileButton.IsMouseHovering ? 0.8f : 1f));
-
-                            }
-                        }
-
-                        // liquid
-                        if (selectedTile.LiquidAmount > 0)
-                        {
-                            int num = 0;
-                            int height = (int)(((float)selectedTile.LiquidAmount / 255) * 16);
-                            if (height < 6)
-                            {
-                                height = 6;
-                            }
-                            spriteBatch.Draw(TextureAssets.Liquid[selectedTile.LiquidType].Value, new Rectangle(x, y + (16 - height), 16, height), new Rectangle(0, num, 16, height), Color.White * 0.6f * (tileButton.IsMouseHovering ? 0.8f : 1f));
-                        }
-
-                        // wire
-                        if ((selectedTile.GreenWire || selectedTile.RedWire || selectedTile.YellowWire || selectedTile.BlueWire))
-                        {
-                            Rectangle boundsTile = new Rectangle(x, y, 16, 16);
-
-                            void DrawWire(string wireType, float t)
-                            {
-                                Texture2D texture = TextureAssets.Wire.Value;
-                                switch (wireType)
-                                {
-                                    case "Red":
-                                        texture = TextureAssets.Wire.Value;
-                                        break;
-                                    case "Blue":
-                                        texture = TextureAssets.Wire2.Value;
-                                        break;
-                                    case "Green":
-                                        texture = TextureAssets.Wire3.Value;
-                                        break;
-                                    case "Yellow":
-                                        texture = TextureAssets.Wire4.Value;
-                                        break;
-                                }
-
-                                // none
-                                spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 54, 16, 16), Color.White * t * (tileButton.IsMouseHovering ? 0.8f : 1f));
-                            }
-
-                            // draw the wires
-                            if (selectedTile.RedWire)
-                            {
-                                DrawWire("Red", 0.65f);
-                            }
-                            if (selectedTile.BlueWire)
-                            {
-                                DrawWire("Blue", 0.4f);
-                            }
-                            if (selectedTile.GreenWire)
-                            {
-                                DrawWire("Green", 0.4f);
-                            }
-                            if (selectedTile.YellowWire)
-                            {
-                                DrawWire("Yellow", 0.4f);
-                            }
-                        }
-
-                        // actuator
-                        if (selectedTile.HasActuator)
-                        {
-                            Rectangle boundsTile = new Rectangle(x, y, 16, 16);
-
-                            Texture2D texture = TextureAssets.Actuator.Value;
-                            spriteBatch.Draw(texture, boundsTile, Color.White * 0.6f * (tileButton.IsMouseHovering ? 0.8f : 1f));
+                            // get texture from spritesheet with help from frameX and frameY and draw it
+                            spriteBatch.Draw(tileWallTex, new Rectangle(x - 8, y - 8, 32, 32), new Rectangle(selectedTile.WallFrameX, selectedTile.WallFrameY, 32, 32), Color.White * (tileButton.IsMouseHovering ? 0.8f : 1f));
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
+
+                    // tile part
+                    if (selectedTile.HasTile)
+                    {
+                        // get tile texture with tilepaintsystem to get the texture with paint if it has any
+                        Texture2D tileTex = ps.TryGetTileAndRequestIfNotReady(selectedTile.TileType, selectedTile.TileFrameNumber, selectedTile.TileColor);
+
+                        if (tileTex != null)
+                        {
+                            // get texture from spritesheet with help from frameX and frameY and draw it
+                            spriteBatch.Draw(tileTex, new Rectangle(x, y, 16, 16), new Rectangle(selectedTile.TileFrameX, selectedTile.TileFrameY, 16, 16), Color.White * (tileButton.IsMouseHovering ? 0.8f : 1f));
+
+                        }
+                    }
+
+                    // liquid
+                    if (selectedTile.LiquidAmount > 0)
+                    {
+                        int num = 0;
+                        int height = (int)(((float)selectedTile.LiquidAmount / 255) * 16);
+                        if (height < 6)
+                        {
+                            height = 6;
+                        }
+                        spriteBatch.Draw(TextureAssets.Liquid[selectedTile.LiquidType].Value, new Rectangle(x, y + (16 - height), 16, height), new Rectangle(0, num, 16, height), Color.White * 0.6f * (tileButton.IsMouseHovering ? 0.8f : 1f));
+                    }
+
+                    // wire
+                    if ((selectedTile.GreenWire || selectedTile.RedWire || selectedTile.YellowWire || selectedTile.BlueWire))
+                    {
+                        Rectangle boundsTile = new Rectangle(x, y, 16, 16);
+
+                        void DrawWire(string wireType, float t)
+                        {
+                            Texture2D texture = TextureAssets.Wire.Value;
+                            switch (wireType)
+                            {
+                                case "Red":
+                                    texture = TextureAssets.Wire.Value;
+                                    break;
+                                case "Blue":
+                                    texture = TextureAssets.Wire2.Value;
+                                    break;
+                                case "Green":
+                                    texture = TextureAssets.Wire3.Value;
+                                    break;
+                                case "Yellow":
+                                    texture = TextureAssets.Wire4.Value;
+                                    break;
+                            }
+
+                            // none
+                            spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 54, 16, 16), Color.White * t * (tileButton.IsMouseHovering ? 0.8f : 1f));
+                        }
+
+                        // draw the wires
+                        if (selectedTile.RedWire)
+                        {
+                            DrawWire("Red", 0.65f);
+                        }
+                        if (selectedTile.BlueWire)
+                        {
+                            DrawWire("Blue", 0.4f);
+                        }
+                        if (selectedTile.GreenWire)
+                        {
+                            DrawWire("Green", 0.4f);
+                        }
+                        if (selectedTile.YellowWire)
+                        {
+                            DrawWire("Yellow", 0.4f);
+                        }
+                    }
+
+                    // actuator
+                    if (selectedTile.HasActuator)
+                    {
+                        Rectangle boundsTile = new Rectangle(x, y, 16, 16);
+
+                        Texture2D texture = TextureAssets.Actuator.Value;
+                        spriteBatch.Draw(texture, boundsTile, Color.White * 0.6f * (tileButton.IsMouseHovering ? 0.8f : 1f));
+                    }
                 }
             };
             Append(tileButton);
 
+            // mask button
+            TIGWEButton maskButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/MaskButton"));
+            maskButton.SetVisibility(0.8f, 1f);
+            maskButton.Width.Set(30, 0f);
+            maskButton.Height.Set(30, 0f);
+            maskButton.Left.Set(saveButton.Left.Pixels + saveButton.Width.Pixels + 2, 0f);
+            maskButton.Top.Set(4, 0f);
+            maskButton.OnLeftClick += (_, _) =>
+            {
+                EditorSystem.Local.ToggleWindow(EditorWindow.Masks);
+            };
+            maskButton.HoverText = "Masks";
+            Append(maskButton);
 
             // save tile to palette button
             TIGWEButton saveTileButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/AddButton"));

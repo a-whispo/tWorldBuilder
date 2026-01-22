@@ -36,6 +36,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                     MoveToTop(ui);
                 }
             };
+            ui.OnHide += (_, _) =>
+            {
+                MoveToBottom(ui);
+            };
             _states.Add(ui);
         }
 
@@ -56,29 +60,14 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
 
         public void MoveToTop(TIGWEUI state)
         {
-            // moves the state to the end of the array so its rendered last and therefore on top
-            int? index = null;
+            _states.Remove(state);
+            _states.Add(state);
+        }
 
-            // find index of the state
-            for (int i = 0; i < _states.Count; i++)
-            {
-                if (_states[i] == state)
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            // just return if we're already at the top
-            if (index == _states.Count - 1 || index == null)
-            {
-                return;
-            }
-
-            // swap UIs around
-            var temp = _states[(int)index];
-            _states.Remove(_states[(int)index]);
-            _states.Add(temp);
+        public void MoveToBottom(TIGWEUI state)
+        {
+            _states.Remove(state);
+            _states.Insert(0, state);
         }
 
         private bool IsMouseHoveringState(UIState stateToCheck)

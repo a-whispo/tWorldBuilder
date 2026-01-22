@@ -15,6 +15,7 @@ using TerrariaInGameWorldEditor.Content;
 using TerrariaInGameWorldEditor.Content.Tools;
 using TerrariaInGameWorldEditor.UI.TIGWEUI;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Blueprints;
+using TerrariaInGameWorldEditor.UI.TIGWEUI.Masks;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Save;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.TileSelector;
@@ -32,18 +33,11 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private SpriteBatch _spriteBatch;
 
         // windows
-        public enum EditorWindow
-        {
-            Main,
-            Settings,
-            Blueprints,
-            Save,
-            SelectTile
-        }
         private SelectTileUI _selectTileUIState;
         private SettingsUI _settingsUIState;
         private BlueprintsUI _blueprintsUIState;
         private SaveUI _saveUIState;
+        private MaskUI _maskUIState;
 
         // tools
         public List<Tool> Tools { get; private set; } 
@@ -126,7 +120,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         {
             base.OnModLoad();
             Local = this;
-            Tools = new List<Tool> { new BrushTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() };
+            Tools = new List<Tool> { new BrushTool(), new EraseTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() };
         }
 
         public override void PostSetupContent()
@@ -141,10 +135,12 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             _settingsUIState = new SettingsUI();
             _blueprintsUIState = new BlueprintsUI();
             _saveUIState = new SaveUI();
+            _maskUIState = new MaskUI();
             TIGWEUISystem.Local.RegisterUI(_selectTileUIState);
             TIGWEUISystem.Local.RegisterUI(_settingsUIState);
             TIGWEUISystem.Local.RegisterUI(_blueprintsUIState);
             TIGWEUISystem.Local.RegisterUI(_saveUIState);
+            TIGWEUISystem.Local.RegisterUI(_maskUIState);
 
             // for testing
             Tile tile = new Tile();
@@ -388,60 +384,60 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 {
                     _saveUIState.Visible = true;
                 }
+
+                // delete
+                if (Keybinds.DeleteMK.JustPressed)
+                {
+                    if (CurrentSelection != null)
+                    {
+                        Delete(CurrentSelection, true);
+                    }
+                }
             }
             else // if key 1 is not pressed down
             {
                 // zoom in/out with mouse
                 PlayerInput.LockVanillaMouseScroll($"{TerrariaInGameWorldEditor.MODNAME}/Zoom");
-                if (PlayerInput.ScrollWheelDelta > 0)
+                if (PlayerInput.ScrollWheelDelta > 0 && !Main.LocalPlayer.mouseInterface)
                 {
                     Main.GameZoomTarget = Math.Clamp(Main.GameZoomTarget + 0.1f, 1f, 2f);
                 }
-                if (PlayerInput.ScrollWheelDelta < 0)
+                if (PlayerInput.ScrollWheelDelta < 0 && !Main.LocalPlayer.mouseInterface)
                 {
                     Main.GameZoomTarget = Math.Clamp(Main.GameZoomTarget - 0.1f, 1f, 2f);
                 }
-            }
 
-            // delete
-            if (Keybinds.DeleteMK.JustPressed)
-            {
-                if (CurrentSelection != null)
+                // moving screen with mouse and movement keys
+                if (Main.mouseMiddle)
                 {
-                    Delete(CurrentSelection, true);
+                    if (Main.mouseMiddleRelease)
+                    {
+                        _mouseMiddleClickedPoint = new Point((int)((float)Main.mouseX / Main.GameZoomTarget) + (int)_screenPositionOffset.X, (int)((float)Main.mouseY / Main.GameZoomTarget) + (int)_screenPositionOffset.Y);
+                    }
+                    _screenPositionOffset.X = _mouseMiddleClickedPoint.X - Main.mouseX / Main.GameZoomTarget;
+                    _screenPositionOffset.Y = _mouseMiddleClickedPoint.Y - Main.mouseY / Main.GameZoomTarget;
                 }
-            }
-
-            // moving screen with mouse and movement keys
-            if (Main.mouseMiddle)
-            {
-                if (Main.mouseMiddleRelease)
+                int mult = 1;
+                if (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift))
                 {
-                    _mouseMiddleClickedPoint = new Point((int)((float)Main.mouseX / Main.GameZoomTarget) + (int)_screenPositionOffset.X, (int)((float)Main.mouseY / Main.GameZoomTarget) + (int)_screenPositionOffset.Y);
+                    mult = 3;
                 }
-                _screenPositionOffset.X = _mouseMiddleClickedPoint.X - Main.mouseX / Main.GameZoomTarget;
-                _screenPositionOffset.Y = _mouseMiddleClickedPoint.Y - Main.mouseY / Main.GameZoomTarget;
-            }
-            int mult = 1;
-            if (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift))
-            {
-                mult = 3;
-            }
-            if (PlayerInput.Triggers.Current.KeyStatus["Up"] || PlayerInput.Triggers.Current.KeyStatus["Jump"])
-            {
-                _screenPositionOffset.Y -= 10 * mult;
-            }
-            if (PlayerInput.Triggers.Current.KeyStatus["Down"])
-            {
-                _screenPositionOffset.Y += 10 * mult;
-            }
-            if (PlayerInput.Triggers.Current.KeyStatus["Left"])
-            {
-                _screenPositionOffset.X -= 10 * mult;
-            }
-            if (PlayerInput.Triggers.Current.KeyStatus["Right"])
-            {
-                _screenPositionOffset.X += 10 * mult;
+                if (PlayerInput.Triggers.Current.KeyStatus["Up"] || PlayerInput.Triggers.Current.KeyStatus["Jump"])
+                {
+                    _screenPositionOffset.Y -= 10 * mult;
+                }
+                if (PlayerInput.Triggers.Current.KeyStatus["Down"])
+                {
+                    _screenPositionOffset.Y += 10 * mult;
+                }
+                if (PlayerInput.Triggers.Current.KeyStatus["Left"])
+                {
+                    _screenPositionOffset.X -= 10 * mult;
+                }
+                if (PlayerInput.Triggers.Current.KeyStatus["Right"])
+                {
+                    _screenPositionOffset.X += 10 * mult;
+                }
             }
         }
 
@@ -510,6 +506,9 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     break;
                 case EditorWindow.SelectTile:
                     _selectTileUIState.Visible = !_selectTileUIState.Visible;
+                    break;
+                case EditorWindow.Masks:
+                    _maskUIState.Visible = !_maskUIState.Visible;
                     break;
             }
         }

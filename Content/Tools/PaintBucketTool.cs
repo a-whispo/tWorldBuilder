@@ -2,10 +2,12 @@
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.CheckBox;
 using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
 
@@ -17,8 +19,11 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private TIGWENumberField _tileCapField;
         private TIGWECheckBox _fillCornersCheckBox;
 
-        public PaintBucketTool() : base("TerrariaInGameWorldEditor/UI/UIImages/PaintBucketTool", "Paint Bucket")
+        public PaintBucketTool()
         {
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/PaintBucketTool"));
+            ToggleToolButton.HoverText = "Paint Bucket";
+
             // settings
             // tile cap
             _tileCapField = new TIGWENumberField(_tileCap, minValue: 1);

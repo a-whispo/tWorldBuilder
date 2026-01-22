@@ -189,14 +189,6 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
                 }
             }
 
-            // update offsets
-            _incrementButton.Left.Set(Width.Pixels - 16, 0f);
-            _incrementButton.Top.Set(0, 0f);
-            _decrementButton.Left.Set(Width.Pixels - 16, 0f);
-            _decrementButton.Top.Set(12, 0f);
-            _background.Width.Set(Width.Pixels - 14, 0f);
-            _background.Height.Set(Height.Pixels, 0f);
-
             // this is kinda weird but ok
             _background.Texture = IsFocused ? _background.TextureHover : ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture");
 
@@ -216,6 +208,19 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
                     Append(_incrementButton);
                 }
             }
+        }
+
+        public override void Recalculate()
+        {
+            base.Recalculate();
+
+            // update offsets
+            _incrementButton.Left.Set(Width.Pixels - 16, 0f);
+            _incrementButton.Top.Set(0, 0f);
+            _decrementButton.Left.Set(Width.Pixels - 16, 0f);
+            _decrementButton.Top.Set(12, 0f);
+            _background.Width.Set(Width.Pixels - 14, 0f);
+            _background.Height.Set(Height.Pixels, 0f);
         }
 
         public override void MouseOver(UIMouseEvent evt)

@@ -2,8 +2,10 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -26,9 +28,10 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private int _oldWidth = 0;
         private int _oldHeight = 0;
 
-        public BoxSelectionTool() : base("TerrariaInGameWorldEditor/UI/UIImages/SelectTool", "Box Selection")
+        public BoxSelectionTool()
         {
-
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/SelectTool"));
+            ToggleToolButton.HoverText = "Box Selection";
         }
 
         public override string GetInfoText()

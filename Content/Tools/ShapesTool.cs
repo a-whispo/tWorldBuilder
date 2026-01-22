@@ -4,10 +4,12 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
 
@@ -34,8 +36,11 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private TIGWEDropDown _modeDropDown;
         private Rectangle _selection;
 
-        public ShapesTool() : base("TerrariaInGameWorldEditor/UI/UIImages/ShapesTool", "Shapes")
+        public ShapesTool()
         {
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/ShapesTool"));
+            ToggleToolButton.HoverText = "Shapes";
+
             // settings
             // mode
             _modeDropDown = new TIGWEDropDown(["Rectangle", "Filled Rectangle", "Circle", "Filled Circle"]);

@@ -12,98 +12,42 @@ using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
 using TerrariaInGameWorldEditor.UI.UIElements.Button;
-using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
-    internal class BrushTool : Tool
+    internal class EraseTool : Tool
     {
         private Dictionary<Point, TileCopy> _currentDrawPreTilesPlaced = new Dictionary<Point, TileCopy>(); // the state of the tiles before we draw on them (for undo)
         private List<Point> _currentDrawLinePoints = new List<Point>(); // list of all the points the cursor passed over when we're drawing (used to make lines complete without gaps caused by 60 fps)
         private TileCollection _brush = new TileCollection(); // the brush itself, a collection of tiles in the shape of an ellipse
         private int _d; // diameter of the brush
-        private enum BrushMode
-        {
-            SelectedTile,
-            Clipboard
-        }
-        private BrushMode _mode;
         private TIGWENumberField _sizeField;
-        private TIGWEDropDown _modeDropDown;
 
-        public BrushTool()
+        // pretty much just copied everything from brush so some things might be unnecessary
+        public EraseTool()
         {
-            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/BrushTool"));
-            ToggleToolButton.HoverText = "Brush";
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/EraseTool"));
+            ToggleToolButton.HoverText = "Eraser";
 
             // settings
-            // mode
-            _modeDropDown = new TIGWEDropDown(["Selected Tile", "Clipboard"]);
-            _modeDropDown.ShowDropDownButton = true;
-            _modeDropDown.SetDefaultOption("Selected Tile");
-            _modeDropDown.OnOptionChanged += (string optionText) =>
-            {
-                switch (optionText)
-                {
-                    case "Selected Tile":
-                        _mode = BrushMode.SelectedTile;
-                        break;
-
-                    case "Clipboard":
-                        _mode = BrushMode.Clipboard;
-                        break;
-                }
-                UpdateBrush();
-            };
-            _modeDropDown.Height.Set(26, 0f);
-            _modeDropDown.Width.Set(140, 0f);
-            Settings.Add(("Mode:", _modeDropDown));
-
             // size
             _sizeField = new TIGWENumberField(4, 200, 1);
             _d = 4;
             _sizeField.OnValueChanged += (int newValue) =>
             {
                 _d = newValue;
-                UpdateBrush();
+                _brush.Clear();
+                _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, new TileCopy(new Tile())).AsDictionary());
             };
             _sizeField.Width.Set(60, 0);
             _sizeField.Height.Set(26, 0);
             _sizeField.ShowButtons = true;
             Settings.Add(("Size:", _sizeField));
 
-            // when to update brush
-            EditorSystem.Local.OnSelectedTileChanged += (_, _) =>
-            {
-                UpdateBrush();
-            };
-            EditorSystem.Local.OnClipboardChanged += (_, _) =>
-            {
-                UpdateBrush();
-            };
-
             // make sure brush is set at the start
-            UpdateBrush();
-        }
-
-        protected virtual void UpdateBrush()
-        {
-            switch(_mode)
-            {
-                case BrushMode.SelectedTile:
-                    if (_brush == EditorSystem.Local.Clipboard)
-                    {
-                        _brush = new TileCollection(); // make sure to reset brush if its a reference to clipboard
-                    }
-                    _brush.Clear();
-                    _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
-                    break;
-
-                case BrushMode.Clipboard:
-                    _brush = EditorSystem.Local.Clipboard;
-                    break;
-            }
+            _brush.Clear();
+            _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, new TileCopy(new Tile())).AsDictionary());
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -112,7 +56,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             int width = (int)Math.Floor(_brush.GetWidth() / 2f);
             int height = (int)Math.Floor(_brush.GetHeight() / 2f);
             Point point = new Point(Player.tileTargetX - width, Player.tileTargetY - height);
-            DrawUtils.DrawTileCollection(_brush, point, TIGWESettings.ShouldPasteTiles, TIGWESettings.ShouldPasteWalls, TIGWESettings.ShouldPasteLiquid, TIGWESettings.ShouldPasteWires);
+            DrawUtils.DrawTileCollection(_brush, point);
             DrawUtils.DrawTileCollectionOutline(_brush, point, TIGWESettings.ToolColor);
         }
 
@@ -154,7 +98,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 // get brush as list for easier iteration
                 var brushList = _brush.ToNormalized().AsDictionary().ToList();
 
-                foreach (Point point in pointsToDrawAt) {
+                foreach (Point point in pointsToDrawAt)
+                {
 
                     // go over all the tiles and set coordinates
                     foreach (var tile in brushList)

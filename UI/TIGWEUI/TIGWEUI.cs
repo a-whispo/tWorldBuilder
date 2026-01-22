@@ -33,8 +33,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         {
             base.OnInitialize();
             _UI = new UserInterface();
-
-            // default size
             Height.Set(300, 0);
             Width.Set(300, 0);
 
@@ -42,13 +40,11 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             _body = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TIGWEUIBody"), 42, 2);
             _body.OnLeftMouseDown += (_, _) =>
             {
-                // set dragging to true and grab the offset from the mouse position
                 IsDragging = true;
                 _offset = (Main.mouseX - (int)Left.Pixels, Main.mouseY - (int)Top.Pixels);
             };
             _body.OnLeftMouseUp += (_, _) =>
             {
-                // stop dragging when letting go
                 IsDragging = false;
             };
             Append(_body);
@@ -67,7 +63,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             _xButton.Height.Set(26, 0f);
             _xButton.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);
             _xButton.Top.Set(6, 0f);
-            _xButton.OnLeftClick += (evt, listeningElement) =>
+            _xButton.OnLeftClick += (_, _) =>
             {
                 Visible = false;
                 SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
@@ -79,7 +75,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         {
             base.Update(gameTime);
 
-            // check if mouse is hovering over ui
             if (IsMouseHovering || IsDragging)
             {
                 Main.LocalPlayer.mouseInterface = true;
@@ -88,15 +83,12 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             // update left and right offsets when dragging
             if (IsDragging)
             {
-                // get bounds
                 int screenWidth = (int)(Main.screenWidth * Main.UIScale);
                 int screenHeight = (int)(Main.screenHeight * Main.UIScale);
                 Rectangle screenBounds = new Rectangle(0, 0, screenWidth, screenHeight);
                 var dimensions = GetDimensions();
 
-                // check so the midpoint of the UI is within the screen bounds
-
-                // check if we should clamp the x position to the screen bounds
+                // check so the midpoint of the UI is within the screen bounds and clamp x and y if needed
                 if (!screenBounds.Contains((int)(Main.mouseX - _offset.Left + dimensions.Width / 2), (int)(dimensions.Y + dimensions.Height / 2)))
                 {
                     Left.Set(Math.Clamp(Main.mouseX - _offset.Left, -dimensions.Width / 2, screenWidth - dimensions.Width / 2), 0);
@@ -105,8 +97,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                 {
                     Left.Set(Main.mouseX - _offset.Left, 0);
                 }
-
-                // check if we should clamp the y position to the screen bounds
                 if (!screenBounds.Contains((int)(dimensions.X + dimensions.Width / 2), (int)(Main.mouseY - _offset.Top + dimensions.Height / 2)))
                 {
                     Top.Set(Math.Clamp(Main.mouseY - _offset.Top, -dimensions.Height / 2, screenHeight - dimensions.Height / 2), 0);
@@ -116,16 +106,21 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                     Top.Set(Main.mouseY - _offset.Top, 0);
                 }
             }
+        }
+
+        public override void Recalculate()
+        {
+            base.Recalculate();
 
             // update title bar and body sizes and location to match resizes
-            _body.Top.Set(0, 0);
-            _body.Left.Set(0, 0);
-            _body.Height.Set(Height.Pixels, 0);
-            _body.Width.Set(Width.Pixels, 0);
-            _xButton.Height.Set(26, 0f);
-            _xButton.Width.Set(26, 0f);
-            _xButton.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);
-            _xButton.Top.Set(6, 0f);
+            _body?.Top.Set(0, 0);
+            _body?.Left.Set(0, 0);
+            _body?.Height.Set(Height.Pixels, 0);
+            _body?.Width.Set(Width.Pixels, 0);
+            _xButton?.Height.Set(26, 0f);
+            _xButton?.Width.Set(26, 0f);
+            _xButton?.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);
+            _xButton?.Top.Set(6, 0f);
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)

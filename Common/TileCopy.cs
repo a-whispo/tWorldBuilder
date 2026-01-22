@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.Build.Utilities;
+using System;
 using Terraria;
 using Terraria.GameContent.Drawing;
 using Terraria.ID;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
@@ -38,7 +40,7 @@ namespace TerrariaInGameWorldEditor.Common
         public int WallFrameY { get; set; }
         public bool IsActuated { get; set; }
         public bool HasActuator { get; set; }
-        public bool HasWire { get; set; }
+        public bool HasWire { get { return (RedWire || GreenWire || BlueWire || YellowWire); } }
 
         // tree variables
         public bool IsTreeTop { get; set; } = false;
@@ -194,10 +196,6 @@ namespace TerrariaInGameWorldEditor.Common
             this.RedWire = original.RedWire;
             this.YellowWire = original.YellowWire;
             this.HasActuator = original.HasActuator;
-            if (BlueWire || GreenWire || RedWire || YellowWire)
-            {
-                this.HasWire = true;
-            }
         }
 
         public Tile GetAsTile()
@@ -290,18 +288,18 @@ namespace TerrariaInGameWorldEditor.Common
             try
             {
                 tc.TileType = (ushort)TileID.Search.GetId(tag.GetString("TileTypeName"));
-            } catch (Exception e)
+            } catch (Exception ex)
             {
-                Console.WriteLine($"{TerrariaInGameWorldEditor.MODNAME} Error: {e.Message}");
+                TerrariaInGameWorldEditor.ModLogger.Warn("Failed to find TileType when deserializing TileCopy.", ex);
                 tc.TileType = 697; // unloaded tile
             }
             try
             {
                 tc.WallType = (ushort)WallID.Search.GetId(tag.GetString("WallTypeName"));
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine($"{TerrariaInGameWorldEditor.MODNAME} Error: {e.Message}");
+                TerrariaInGameWorldEditor.ModLogger.Warn("Failed to find WallType when deserializing TileCopy.", ex);
                 tc.WallType = 347; // unloaded wall
             }
             tc.LiquidType = tag.GetInt("LiquidType");
@@ -337,10 +335,6 @@ namespace TerrariaInGameWorldEditor.Common
             tc.HasActuator = tag.GetBool("HasActuator");
             tc.IsActuated = tag.GetBool("IsActuated");
             tc.Slope = (SlopeType)tag.GetInt("Slope");
-            if (tc.BlueWire || tc.GreenWire || tc.RedWire || tc.YellowWire)
-            {
-                tc.HasWire = true;
-            }
             return tc;
         }
     }

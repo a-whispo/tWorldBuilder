@@ -2,18 +2,21 @@
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
     internal class TilePickerTool : Tool
     {
-        public TilePickerTool() : base("TerrariaInGameWorldEditor/UI/UIImages/TilePickerTool", "Tile Picker")
+        public TilePickerTool()
         {
-
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TilePickerTool"));
+            ToggleToolButton.HoverText = "Tile Picker";
         }
 
         public override string GetInfoText()

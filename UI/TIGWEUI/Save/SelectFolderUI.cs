@@ -85,23 +85,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
             searchIcon.SetVisibility(0.7f, 1);
             Append(searchIcon);
 
-            // scrollbar
-            TIGWEScrollbar sb = new TIGWEScrollbar(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"), ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Scrollbar"));
-            sb.Height.Set(352, 0);
-            sb.Left.Set(6, 0);
-            sb.Top.Set(76, 0);
-            Append(sb);
-
             // grid
             _grid = new UIDirectoryGrid();
             _grid.Height.Set(354, 0);
             _grid.Width.Set(650, 0);
-            _grid.Left.Set(sb.Left.Pixels + sb.Width.Pixels + 10, 0);
+            _grid.Left.Set(36, 0);
             _grid.Top.Set(74, 0);
             _grid.ListPadding = 2;
             _grid.PaddingTop = 2;
             _grid.SetDirectory(ModLoader.ModPath.Replace("\\Mods", "") + "\\TIGWE\\saves\\");
-            _grid.SetScrollbar(sb);
             _grid.SetSearchBar(searchBar);
             searchBar.PlaceholderText = $"Search for folders... [c/60ABE7:({_grid.FolderCount})]";
             _grid.CanSelectFiles = false;
@@ -112,12 +104,19 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
             _grid.OnSelectFolder += FolderSelected;
             _grid.RefreshContent();
             Append(_grid);
+            TIGWEScrollbar sb = new TIGWEScrollbar(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"), ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Scrollbar"));
+            sb.Height.Set(_grid.Height.Pixels + 10, 0);
+            sb.Width.Set(20, 0);
+            sb.Top.Set(_grid.Top.Pixels - 4, 0);
+            sb.Left.Set(_grid.Left.Pixels - sb.Width.Pixels - 10, 0);
+            Append(sb);
+            _grid.SetScrollbar(sb);
             TIGWEImageResizeable border = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/MainScreenInnerBorder"), 6, 4);
             border.IgnoresMouseInteraction = true;
             border.Top.Set(_grid.Top.Pixels - 4, 0);
             border.Left.Set(_grid.Left.Pixels - 8, 0);
-            border.Width.Set(_grid.Width.Pixels + 16, 0f);
-            border.Height.Set(_grid.Height.Pixels + 10, 0f);
+            border.Width.Set(_grid.Width.Pixels + 16, 0);
+            border.Height.Set(_grid.Height.Pixels + 10, 0);
             Append(border);
         }
 

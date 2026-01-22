@@ -3,9 +3,11 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
 using Terraria;
+using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.UI.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -13,9 +15,10 @@ namespace TerrariaInGameWorldEditor.Content.Tools
     {
         private bool _isSelecting = false;
 
-        public LassoTool() : base("TerrariaInGameWorldEditor/UI/UIImages/LassoTool", "Lasso")
+        public LassoTool()
         {
-
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/LassoTool"));
+            ToggleToolButton.HoverText = "Lasso";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
