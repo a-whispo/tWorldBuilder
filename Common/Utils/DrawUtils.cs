@@ -1,59 +1,42 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.GameContent.Liquid;
 using Terraria.ModLoader;
 
 namespace TerrariaInGameWorldEditor.Common.Utils
 {
     internal static class DrawUtils
     {
-        // spritebatch
-        private static SpriteBatch _spriteBatch { get; set; } = new SpriteBatch(Main.graphics.GraphicsDevice);
-
-        // textures
         public static Texture2D TransparentTexture2D { get; set; } = new Texture2D(Main.graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
         public static Texture2D BlankTexture2D => (Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color");
+        public static SpriteBatch SpriteBatch = new SpriteBatch(Main.graphics.GraphicsDevice);
 
         public static void DrawLine(Vector2 point1, Vector2 point2, int width = 4, Color color = default)
         {
-            // spritebatch stuff
-            _spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
-
+            SpriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
             float angle = (float)Math.Atan2(point2.Y - point1.Y, point2.X - point1.X);
             float length = (point2 - point1).Length();
-
-            _spriteBatch.Draw(BlankTexture2D, point1, null, color, angle, default, new Vector2(length, width), SpriteEffects.None, 0);
-            _spriteBatch.End();
-        }
-
-        public static void DrawTextAtMouse(string text)
-        {
-            if (Main.LocalPlayer.mouseInterface == false)
-            {
-                Main.instance.MouseText(text);
-            }
+            SpriteBatch.Draw(BlankTexture2D, point1, null, color, angle, default, new Vector2(length, width), SpriteEffects.None, 0);
+            SpriteBatch.End();
         }
 
         public static void DrawRectangleOutline(Rectangle rect, Color customColor)
         {
+            SpriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
             rect = new Rectangle(rect.X * 16 - (int)Main.screenPosition.X - 2, rect.Y * 16 - (int)Main.screenPosition.Y - 2, rect.Width * 16 + 4, rect.Height * 16 + 4);
+
+            // set color, texture and transparency
             Texture2D texture = new Texture2D(Main.graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-
-            // start spritebatch and set color + texture
-            _spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
             Color[] c = new Color[1];
-            c[0] = Color.FromNonPremultiplied(255, 255, 255, 50); // add transparency
+            c[0] = Color.FromNonPremultiplied(255, 255, 255, 50);
             TransparentTexture2D.SetData<Color>(c);
-            Color color = new Color(150, 150, 150); // transparent selection color
-
-            // draw rectangle
-            _spriteBatch.Draw(TransparentTexture2D, rect, color);
-
-            // draw outline
-            Texture2D outlineTexture = (Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureEmpty");
+            Color color = new Color(150, 150, 150);
+            SpriteBatch.Draw(TransparentTexture2D, rect, color);
 
             // calculate bounds
             int cornerSize = 8;
@@ -61,48 +44,45 @@ namespace TerrariaInGameWorldEditor.Common.Utils
             Point topLeft = new Point(rect.X, rect.Y);
             Point bottomRight = new Point(topLeft.X + rect.Width - cornerSize, topLeft.Y + rect.Height - cornerSize);
 
+            // draw
+            Texture2D outlineTexture = (Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureEmpty");
+
             // middle part
-            _spriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X + cornerSize, topLeft.Y + cornerSize, rect.Width - cornerSize * 2, rect.Height - cornerSize * 2), new Rectangle(cornerSize, cornerSize, barSize - 2, barSize - 2), customColor); // middle part
+            SpriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X + cornerSize, topLeft.Y + cornerSize, rect.Width - cornerSize * 2, rect.Height - cornerSize * 2), new Rectangle(cornerSize, cornerSize, barSize - 2, barSize - 2), customColor); // middle part
 
             // corners
-            _spriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X, topLeft.Y, cornerSize, cornerSize), new Rectangle(0, 0, cornerSize, cornerSize), customColor); // top left
-            _spriteBatch.Draw(outlineTexture, new Rectangle(bottomRight.X, topLeft.Y, cornerSize, cornerSize), new Rectangle(cornerSize + barSize, 0, cornerSize, cornerSize), customColor); // top right
-            _spriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X, bottomRight.Y, cornerSize, cornerSize), new Rectangle(0, cornerSize + barSize, cornerSize, cornerSize), customColor); // bottom left
-            _spriteBatch.Draw(outlineTexture, new Rectangle(bottomRight.X, bottomRight.Y, cornerSize, cornerSize), new Rectangle(cornerSize + barSize, cornerSize + barSize, cornerSize, cornerSize), customColor); // bottom right
+            SpriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X, topLeft.Y, cornerSize, cornerSize), new Rectangle(0, 0, cornerSize, cornerSize), customColor); // top left
+            SpriteBatch.Draw(outlineTexture, new Rectangle(bottomRight.X, topLeft.Y, cornerSize, cornerSize), new Rectangle(cornerSize + barSize, 0, cornerSize, cornerSize), customColor); // top right
+            SpriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X, bottomRight.Y, cornerSize, cornerSize), new Rectangle(0, cornerSize + barSize, cornerSize, cornerSize), customColor); // bottom left
+            SpriteBatch.Draw(outlineTexture, new Rectangle(bottomRight.X, bottomRight.Y, cornerSize, cornerSize), new Rectangle(cornerSize + barSize, cornerSize + barSize, cornerSize, cornerSize), customColor); // bottom right
 
             // top and bottom
-            _spriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X + cornerSize, topLeft.Y, rect.Width - cornerSize * 2, cornerSize), new Rectangle(cornerSize, 0, barSize, cornerSize), customColor); // top
-            _spriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X + cornerSize, bottomRight.Y, rect.Width - cornerSize * 2, cornerSize), new Rectangle(cornerSize, cornerSize + barSize, barSize, cornerSize), customColor); // bottom
+            SpriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X + cornerSize, topLeft.Y, rect.Width - cornerSize * 2, cornerSize), new Rectangle(cornerSize, 0, barSize, cornerSize), customColor); // top
+            SpriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X + cornerSize, bottomRight.Y, rect.Width - cornerSize * 2, cornerSize), new Rectangle(cornerSize, cornerSize + barSize, barSize, cornerSize), customColor); // bottom
 
             // left and right
-            _spriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X, topLeft.Y + cornerSize, cornerSize, rect.Height - cornerSize * 2), new Rectangle(0, cornerSize, cornerSize, barSize), customColor); // left
-            _spriteBatch.Draw(outlineTexture, new Rectangle(bottomRight.X, topLeft.Y + cornerSize, cornerSize, rect.Height - cornerSize * 2), new Rectangle(cornerSize + barSize, cornerSize, cornerSize, barSize), customColor); // right
-
-            // end spritebatch and dispose of texture
-            _spriteBatch.End();
+            SpriteBatch.Draw(outlineTexture, new Rectangle(topLeft.X, topLeft.Y + cornerSize, cornerSize, rect.Height - cornerSize * 2), new Rectangle(0, cornerSize, cornerSize, barSize), customColor); // left
+            SpriteBatch.Draw(outlineTexture, new Rectangle(bottomRight.X, topLeft.Y + cornerSize, cornerSize, rect.Height - cornerSize * 2), new Rectangle(cornerSize + barSize, cornerSize, cornerSize, barSize), customColor); // right
+            texture.Dispose();
+            SpriteBatch.End();
         }
 
         public static void DrawTileCollectionOutline(TileCollection tc, Point coordToDrawAt, Color customColor)
         {
-            // get minx and miny
+            SpriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
+            // make minx and miny into draw coordinates
             int minX = tc.GetMinX();
             int minY = tc.GetMinY();
-
-            // make into draw coordinates
             coordToDrawAt.X = coordToDrawAt.X * 16 - (int)Main.screenPosition.X;
             coordToDrawAt.Y = coordToDrawAt.Y * 16 - (int)Main.screenPosition.Y;
 
-            // spritebatch stuff
-            _spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
-
-            Texture2D texture = (ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureEmpty")).Value;
-            Texture2D textureInnerCorners = (ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureEmptyInnerCorners")).Value;
-
-            // draw transparent layer
+            // texture stuff
+            Texture2D texture = (Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureEmpty");
+            Texture2D textureInnerCorners = (Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureEmptyInnerCorners");
             Color[] c = new Color[1];
-            c[0] = Color.FromNonPremultiplied(255, 255, 255, 50); // add transparency
+            c[0] = Color.FromNonPremultiplied(255, 255, 255, 50);
             TransparentTexture2D.SetData<Color>(c);
-            Color transparentColor = new Color(150, 150, 150); // transparent selection color
+            Color transparentColor = new Color(150, 150, 150);
 
             // go over all the coords in the list
             foreach (var coord in tc.ToListOfPoints())
@@ -116,11 +96,8 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 {
                     continue;
                 }
-
-                // get x and y
                 int tileX = coord.X;
                 int tileY = coord.Y;
-
                 var tcDict = tc.AsDictionary();
 
                 // check for coords around the coord
@@ -129,85 +106,80 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 bool hasRight = tcDict.ContainsKey(new Point(tileX + 1, tileY));
                 bool hasLeft = tcDict.ContainsKey(new Point(tileX - 1, tileY));
 
-                // draw rectangle
-                _spriteBatch.Draw(TransparentTexture2D, new Rectangle(drawX, drawY, 16, 16), transparentColor);
-
+                SpriteBatch.Draw(TransparentTexture2D, new Rectangle(drawX, drawY, 16, 16), transparentColor);
                 if (hasTop && hasBottom && hasRight && hasLeft)
                 {
                     continue;
                 }
-
-                // corner and barsize
                 int cornerSize = 6;
                 int barSize = 20;
 
                 // sides
                 if (!hasTop) // top
                 {
-                    _spriteBatch.Draw(texture, new Rectangle(drawX, drawY - 2, 16, 6), new Rectangle(cornerSize, 0, barSize, cornerSize), customColor);
+                    SpriteBatch.Draw(texture, new Rectangle(drawX, drawY - 2, 16, 6), new Rectangle(cornerSize, 0, barSize, cornerSize), customColor);
                 }
                 if (!hasBottom) // bottom
                 {
-                    _spriteBatch.Draw(texture, new Rectangle(drawX, drawY + 16 - 4, 16, 6), new Rectangle(cornerSize, cornerSize + barSize, barSize, cornerSize), customColor);
+                    SpriteBatch.Draw(texture, new Rectangle(drawX, drawY + 16 - 4, 16, 6), new Rectangle(cornerSize, cornerSize + barSize, barSize, cornerSize), customColor);
                 }
                 if (!hasRight) // right
                 {
-                    _spriteBatch.Draw(texture, new Rectangle(drawX + 16 - 4, drawY, 6, 16), new Rectangle(cornerSize + barSize, cornerSize, cornerSize, barSize), customColor); // right
+                    SpriteBatch.Draw(texture, new Rectangle(drawX + 16 - 4, drawY, 6, 16), new Rectangle(cornerSize + barSize, cornerSize, cornerSize, barSize), customColor); // right
                 }
                 if (!hasLeft) // left
                 {
-                    _spriteBatch.Draw(texture, new Rectangle(drawX - 2, drawY, 6, 16), new Rectangle(0, cornerSize, cornerSize, barSize), customColor); // left
+                    SpriteBatch.Draw(texture, new Rectangle(drawX - 2, drawY, 6, 16), new Rectangle(0, cornerSize, cornerSize, barSize), customColor); // left
                 }
 
                 // outer corners
                 if (!hasTop && !hasLeft) // top left
                 {
-                    _spriteBatch.Draw(texture, new Rectangle(drawX - 2, drawY - 2, 6, 6), new Rectangle(0, 0, cornerSize, cornerSize), customColor); // top left
+                    SpriteBatch.Draw(texture, new Rectangle(drawX - 2, drawY - 2, 6, 6), new Rectangle(0, 0, cornerSize, cornerSize), customColor); // top left
                 }
                 if (!hasTop && !hasRight) // top right
                 {
-                    _spriteBatch.Draw(texture, new Rectangle(drawX + 16 - 4, drawY - 2, 6, 6), new Rectangle(cornerSize + barSize, 0, cornerSize, cornerSize), customColor); // top right
+                    SpriteBatch.Draw(texture, new Rectangle(drawX + 16 - 4, drawY - 2, 6, 6), new Rectangle(cornerSize + barSize, 0, cornerSize, cornerSize), customColor); // top right
                 }
                 if (!hasBottom && !hasRight) // bottom right
                 {
-                    _spriteBatch.Draw(texture, new Rectangle(drawX + 16 - 4, drawY + 16 - 4, 6, 6), new Rectangle(cornerSize + barSize, cornerSize + barSize, cornerSize, cornerSize), customColor); // bottom right
+                    SpriteBatch.Draw(texture, new Rectangle(drawX + 16 - 4, drawY + 16 - 4, 6, 6), new Rectangle(cornerSize + barSize, cornerSize + barSize, cornerSize, cornerSize), customColor); // bottom right
                 }
                 if (!hasBottom && !hasLeft) // bottom left
                 {
-                    _spriteBatch.Draw(texture, new Rectangle(drawX - 2, drawY + 16 - 4, 6, 6), new Rectangle(0, cornerSize + barSize, cornerSize, cornerSize), customColor); // bottom left
+                    SpriteBatch.Draw(texture, new Rectangle(drawX - 2, drawY + 16 - 4, 6, 6), new Rectangle(0, cornerSize + barSize, cornerSize, cornerSize), customColor); // bottom left
                 }
 
                 // inner corners
                 if (tcDict.ContainsKey(new Point(tileX + 1, tileY - 1)) && !hasRight && hasTop) // top left
                 {
-                    _spriteBatch.Draw(textureInnerCorners, new Rectangle(drawX + 16 - 4, drawY - 4, 6, 6), new Rectangle(0, 0, cornerSize, cornerSize), customColor); // top left
+                    SpriteBatch.Draw(textureInnerCorners, new Rectangle(drawX + 16 - 4, drawY - 4, 6, 6), new Rectangle(0, 0, cornerSize, cornerSize), customColor); // top left
                 }
                 if (tcDict.ContainsKey(new Point(tileX - 1, tileY - 1)) && !hasLeft && hasTop) // top right
                 {
-                    _spriteBatch.Draw(textureInnerCorners, new Rectangle(drawX - 2, drawY - 4, 6, 6), new Rectangle(6, 0, cornerSize, cornerSize), customColor); // top right
+                    SpriteBatch.Draw(textureInnerCorners, new Rectangle(drawX - 2, drawY - 4, 6, 6), new Rectangle(6, 0, cornerSize, cornerSize), customColor); // top right
                 }
                 if (tcDict.ContainsKey(new Point(tileX - 1, tileY + 1)) && !hasLeft && hasBottom) // bottom right
                 {
-                    _spriteBatch.Draw(textureInnerCorners, new Rectangle(drawX - 2, drawY + 16 - 2, 6, 6), new Rectangle(6, 6, cornerSize, cornerSize), customColor); // bottom right
+                    SpriteBatch.Draw(textureInnerCorners, new Rectangle(drawX - 2, drawY + 16 - 2, 6, 6), new Rectangle(6, 6, cornerSize, cornerSize), customColor); // bottom right
                 }
                 if (tcDict.ContainsKey(new Point(tileX + 1, tileY + 1)) && !hasRight && hasBottom) // bottom left
                 {
-                    _spriteBatch.Draw(textureInnerCorners, new Rectangle(drawX + 16 - 4, drawY + 16 - 2, 6, 6), new Rectangle(0, 6, cornerSize, cornerSize), customColor); // bottom left
+                    SpriteBatch.Draw(textureInnerCorners, new Rectangle(drawX + 16 - 4, drawY + 16 - 2, 6, 6), new Rectangle(0, 6, cornerSize, cornerSize), customColor); // bottom left
                 }
             }
-            _spriteBatch.End();
+            SpriteBatch.End();
         }
 
         public static void DrawTileCollection(TileCollection tilesToDraw, Point coordToDrawAt, bool drawTiles = true, bool drawWalls = true, bool drawLiquid = true, bool drawWires = true)
         {
-            // spritebatch and draw stuff
-            _spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.LinearClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
-            TilePaintSystemV2 ps = Main.instance.TilePaintSystem;
-
+            SpriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.LinearClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
             try
             {
+                TilePaintSystemV2 ps = Main.instance.TilePaintSystem;
+
                 // faster to get index with list
-                var tilesList = tilesToDraw.AsDictionary().ToList();
+                var tilesList = tilesToDraw.ToList();
                 var tilesDict = tilesToDraw.AsDictionary();
                 int minX = tilesToDraw.GetMinX();
                 int minY = tilesToDraw.GetMinY();
@@ -227,16 +199,12 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                     {
                         continue;
                     }
-
                     TileCopy tileTc = tile.Value;
 
                     // wall
                     if ((tileTc.WallType != 0) && drawWalls) // dont draw if there isnt a wall
                     {
-                        // load wall texture
-                        Main.instance.LoadWall(tile.Value.WallType);
-
-                        // calculate bounds
+                        Main.instance.LoadWall(tileTc.WallType);
                         Rectangle boundsWall = new Rectangle(drawX - 8, drawY - 8, 32, 32);
 
                         // get wall texture with tilepaintsystem to get the texture with paint if it has any
@@ -245,7 +213,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                         // get texture from spritesheet with help from frameX and frameY and draw it
                         if (tileWallTex != null)
                         {
-                            _spriteBatch.Draw(tileWallTex, boundsWall, new Rectangle(tileTc.WallFrameX, tileTc.WallFrameY, 32, 32), Color.White * 0.6f);
+                            SpriteBatch.Draw(tileWallTex, boundsWall, new Rectangle(tileTc.WallFrameX, tileTc.WallFrameY, 32, 32), Color.White * 0.6f);
                         }
                     }
                 }
@@ -255,19 +223,15 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 {
                     int drawX = (tile.Key.X - minX) * 16 + coordToDrawAt.X;
                     int drawY = (tile.Key.Y - minY) * 16 + coordToDrawAt.Y;
-
                     if (drawX > Main.screenWidth * Main.UIScale || drawX < 0 || drawY > Main.screenHeight * Main.UIScale || drawY < 0)
                     {
                         continue;
                     }
-
-                    // load tile texture
-                    Main.instance.LoadTiles(tile.Value.TileType);
-
                     TileCopy tileTc = tile.Value;
 
                     if (drawTiles)
                     {
+                        Main.instance.LoadTiles(tileTc.TileType);
                         // treetops
                         if (tileTc.IsTreeTop)
                         {
@@ -285,7 +249,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                                 {
                                     num = 2;
                                 }
-                                _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(num * 62, 0, 60, 42)), Color.White * 0.6f);
+                                SpriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(num * 62, 0, 60, 42)), Color.White * 0.6f);
                             }
                             else if (tileTc.TileType == 323) // palm treetops
                             {
@@ -307,13 +271,13 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                                 }
                                 Rectangle boundsTile = new Rectangle(drawX - num1 + tileTc.TileFrameY, drawY + 16 + num2 - height, width, height);
                                 Texture2D top = ps.TryGetTreeTopAndRequestIfNotReady(treeTextureIndex, tileTc.TreeBiome, tileTc.TileColor);
-                                _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(tileTc.TreeFrame * (tileTc.TreeFrameWidth + 2), tileTc.TreeFrame * (tileTc.TreeFrameHeight + 2) + y2, width, height)), Color.White * 0.6f);
+                                SpriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(tileTc.TreeFrame * (tileTc.TreeFrameWidth + 2), tileTc.TreeFrame * (tileTc.TreeFrameHeight + 2) + y2, width, height)), Color.White * 0.6f);
                             }
                             else
                             { // rest of the treetops
                                 Rectangle boundsTile = new Rectangle(drawX - tileTc.TreeFrameWidth / 2 + 8, drawY - tileTc.TreeFrameHeight + 16, tileTc.TreeFrameWidth, tileTc.TreeFrameHeight);
                                 Texture2D top = ps.TryGetTreeTopAndRequestIfNotReady(tileTc.TreeStyle, 0, tileTc.TileColor);
-                                _spriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(tileTc.TreeFrame * (tileTc.TreeFrameWidth + 2), 0, tileTc.TreeFrameWidth, tileTc.TreeFrameHeight)), Color.White * 0.6f);
+                                SpriteBatch.Draw(top, boundsTile, new Rectangle?(new Rectangle(tileTc.TreeFrame * (tileTc.TreeFrameWidth + 2), 0, tileTc.TreeFrameWidth, tileTc.TreeFrameHeight)), Color.White * 0.6f);
                             }
                         }
 
@@ -326,12 +290,12 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                             if (tileTc.IsFlipped)
                             {
                                 Rectangle boundsTile = new Rectangle(drawX - 24, drawY - (40 / 2) + (16 / 2), 40, 40);
-                                _spriteBatch.Draw(branch, boundsTile, new Rectangle?(new Rectangle(42, tileTc.TreeFrame * 42, 40, 40)), Color.White * 0.6f, default, default, SpriteEffects.FlipHorizontally, default);
+                                SpriteBatch.Draw(branch, boundsTile, new Rectangle?(new Rectangle(42, tileTc.TreeFrame * 42, 40, 40)), Color.White * 0.6f, default, default, SpriteEffects.FlipHorizontally, default);
                             }
                             else
                             {
                                 Rectangle boundsTile = new Rectangle(drawX, drawY - (40 / 2) + (16 / 2), 40, 40);
-                                _spriteBatch.Draw(branch, boundsTile, new Rectangle?(new Rectangle(42, tileTc.TreeFrame * 42, 40, 40)), Color.White * 0.6f);
+                                SpriteBatch.Draw(branch, boundsTile, new Rectangle?(new Rectangle(42, tileTc.TreeFrame * 42, 40, 40)), Color.White * 0.6f);
                             }
                         }
 
@@ -351,7 +315,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                                 boundsTile = new Rectangle(drawX - 2, drawY, 20, 16);
 
                                 // this one draws tree trunks better
-                                _spriteBatch.Draw(tileTex, boundsTile, new Rectangle((176 * tileTc.TreeVariant) + tileTc.TileFrameX, tileTc.TileFrameY, 20, 16), Color.White * 0.6f);
+                                SpriteBatch.Draw(tileTex, boundsTile, new Rectangle((176 * tileTc.TreeVariant) + tileTc.TileFrameX, tileTc.TileFrameY, 20, 16), Color.White * 0.6f);
                             }
                             else if (tileTc.TileType == 323) // this draws palm trees
                             {
@@ -366,14 +330,14 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                                 {
                                     boundsTile.X += tileTc.TileFrameY;
                                 }
-                                _spriteBatch.Draw(tileTex, boundsTile, new Rectangle(tileTc.TileFrameX, 22 * tileTc.TreeBiome, 20, 16), Color.White * 0.6f);
+                                SpriteBatch.Draw(tileTex, boundsTile, new Rectangle(tileTc.TileFrameX, 22 * tileTc.TreeBiome, 20, 16), Color.White * 0.6f);
                             }
                             else // draw normal tiles
                             {
                                 if (tileTex != null)
                                 {
                                     // make this draw slopes and half blocks at some point
-                                    _spriteBatch.Draw(tileTex, boundsTile, new Rectangle(tileTc.TileFrameX, tileTc.TileFrameY, 16, tileTc.IsHalfBlock ? 8 : 16), Color.White * 0.6f);
+                                    SpriteBatch.Draw(tileTex, boundsTile, new Rectangle(tileTc.TileFrameX, tileTc.TileFrameY, 16, tileTc.IsHalfBlock ? 8 : 16), Color.White * 0.6f);
                                 }
                             }
                         }
@@ -384,24 +348,15 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                     if (drawLiquid && tileTc.LiquidAmount > 0)
                     {
                         int num = 4;
-                        try
-                        {
-                            if ((tileTc.LiquidAmount < 255 || !tilesDict[new Point(tile.Key.X, tile.Key.Y - 1)].HasTile) && tilesDict[new Point(tile.Key.X, tile.Key.Y - 1)].LiquidAmount == 0) // determite if the surface part of the liquid should be shown
-                            {
-                                num = 0;
-                            }
-                        }
-                        catch
+                        if (tilesDict.TryGetValue(new Point(tile.Key.X, tile.Key.Y - 1), out TileCopy above) && (tileTc.LiquidAmount < 255 || !above.HasTile) && above.LiquidAmount == 0) // determite if the surface part of the liquid should be shown
                         {
                             num = 0;
                         }
+
                         int height = (int)(((float)tileTc.LiquidAmount / 255) * 16);
-                        if (height < 6)
-                        {
-                            height = 6;
-                        }
+                        height = Math.Clamp(height, 6, 16);
                         Rectangle boundsTile = new Rectangle(drawX, drawY + (16 - height), 16, height);
-                        _spriteBatch.Draw(TextureAssets.Liquid[tileTc.LiquidType].Value, boundsTile, new Rectangle(0, num, 16, height), Color.White * 0.6f);
+                        SpriteBatch.Draw(TextureAssets.Liquid[tileTc.LiquidType].Value, boundsTile, new Rectangle(0, num, 16, height), Color.White * 0.6f);
                     }
 
                     // wires
@@ -461,67 +416,67 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                             {
                                 case (false, false, false, false):
                                     // none
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 54, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(0, 54, 16, 16), Color.White * t);
                                     break;
                                 case (false, false, false, true):
                                     // left
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 36, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(54, 36, 16, 16), Color.White * t);
                                     break;
                                 case (false, false, true, false):
                                     // right
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 36, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(72, 36, 16, 16), Color.White * t);
                                     break;
                                 case (false, false, true, true):
                                     // left right
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 0, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(18, 0, 16, 16), Color.White * t);
                                     break;
                                 case (false, true, false, false):
                                     // bottom
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 36, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(18, 36, 16, 16), Color.White * t);
                                     break;
                                 case (false, true, false, true):
                                     // bottom left
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 18, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(72, 18, 16, 16), Color.White * t);
                                     break;
                                 case (false, true, true, false):
                                     // bottom right
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 36, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(0, 36, 16, 16), Color.White * t);
                                     break;
                                 case (false, true, true, true):
                                     // bottom left right
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(72, 0, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(72, 0, 16, 16), Color.White * t);
                                     break;
                                 case (true, false, false, false):
                                     // top
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 36, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(36, 36, 16, 16), Color.White * t);
                                     break;
                                 case (true, false, false, true):
                                     // top left
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 18, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(54, 18, 16, 16), Color.White * t);
                                     break;
                                 case (true, false, true, false):
                                     // top right
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 18, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(36, 18, 16, 16), Color.White * t);
                                     break;
                                 case (true, false, true, true):
                                     // top left right
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 18, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(0, 18, 16, 16), Color.White * t);
                                     break;
                                 case (true, true, false, false):
                                     // top bottom
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 0, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(0, 0, 16, 16), Color.White * t);
                                     break;
                                 case (true, true, false, true):
                                     // top bottom left
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(54, 0, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(54, 0, 16, 16), Color.White * t);
                                     break;
                                 case (true, true, true, false):
                                     // top bottom right
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(36, 0, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(36, 0, 16, 16), Color.White * t);
                                     break;
                                 case (true, true, true, true):
                                     // top bottom right left
-                                    _spriteBatch.Draw(texture, boundsTile, new Rectangle(18, 18, 16, 16), Color.White * t);
+                                    SpriteBatch.Draw(texture, boundsTile, new Rectangle(18, 18, 16, 16), Color.White * t);
                                     break;
                             }
                         }
@@ -551,30 +506,150 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                         Rectangle boundsTile = new Rectangle(drawX, drawY, 16, 16);
 
                         Texture2D texture = TextureAssets.Actuator.Value;
-                        _spriteBatch.Draw(texture, boundsTile, Color.White * 0.6f);
+                        SpriteBatch.Draw(texture, boundsTile, Color.White * 0.6f);
                     }
                 }
             } 
             catch (Exception ex)
             {
                 TerrariaInGameWorldEditor.ModLogger.Error("Unknown error trying to draw TileCollection.", ex);
-                _spriteBatch.End();
+                SpriteBatch.End();
             }
-            _spriteBatch.End();
+            SpriteBatch.End();
+        }
+
+        public static void DrawTileCopyInUI(TileCopy tile, Rectangle dimensions, float opacity = 1f)
+        {
+            try
+            {
+                if (tile == null)
+                {
+                    return;
+                }
+
+                SpriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.UIScaleMatrix);
+                TilePaintSystemV2 ps = Main.instance.TilePaintSystem;
+                int tileSide = dimensions.Height;
+                int x = dimensions.X;
+                int y = dimensions.Y;
+
+                // wall part
+                if (tile.WallType != 0)
+                {
+                    // get wall texture with tilepaintsystem to get the texture with paint if it has any
+                    Main.instance.LoadWall(tile.WallType);
+                    Texture2D tileWallTex = ps.TryGetWallAndRequestIfNotReady(tile.WallType, tile.WallColor);
+                    if (tileWallTex != null)
+                    {
+                        // get texture from spritesheet with help from frameX and frameY and draw it
+                        SpriteBatch.Draw(tileWallTex, new Rectangle(x - (tileSide / 2), y - (tileSide / 2), tileSide * 2, tileSide * 2), new Rectangle(tile.WallFrameX, tile.WallFrameY, 16 * 2, 16 * 2), Color.White * opacity);
+                    }
+                }
+
+                // tile part
+                if (tile.HasTile)
+                {
+                    // get tile texture with tilepaintsystem to get the texture with paint if it has any
+                    if (tile.TileType != 696 && tile.TileType != 697 && tile.TileType != 698)
+                    {
+                        Main.instance.LoadTiles(tile.TileType);
+
+                    }
+                    Texture2D tileTex = ps.TryGetTileAndRequestIfNotReady(tile.TileType, tile.TileFrameNumber, tile.TileColor);
+
+                    if (tileTex != null)
+                    {
+                        // get texture from spritesheet with help from frameX and frameY and draw it
+                        SpriteBatch.Draw(tileTex, new Rectangle(x, y, tileSide, tileSide), new Rectangle(tile.TileFrameX, tile.TileFrameY, 16, 16), Color.White * opacity);
+
+                    }
+                }
+
+                // liquid
+                if (tile.LiquidAmount > 0)
+                {
+                    int num = 0;
+                    int height = (int)(((float)tile.LiquidAmount / 255) * 16);
+                    SpriteBatch.Draw(TextureAssets.Liquid[tile.LiquidType].Value, new Rectangle(x, y + (tileSide - (height * (tileSide / 16))), tileSide, tileSide), new Rectangle(0, num, 16, height), Color.White * 0.6f * opacity);
+                }
+
+                // wire
+                if (tile.HasWire)
+                {
+                    Rectangle boundsTile = new Rectangle(x, y, tileSide, tileSide);
+
+                    void DrawWire(string wireType, float t)
+                    {
+                        Texture2D texture;
+                        switch (wireType)
+                        {
+                            case "Red":
+                                texture = TextureAssets.Wire.Value;
+                                break;
+                            case "Blue":
+                                texture = TextureAssets.Wire2.Value;
+                                break;
+                            case "Green":
+                                texture = TextureAssets.Wire3.Value;
+                                break;
+                            case "Yellow":
+                                texture = TextureAssets.Wire4.Value;
+                                break;
+                            default:
+                                texture = TextureAssets.Wire.Value;
+                                break;
+                        }
+                        SpriteBatch.Draw(texture, boundsTile, new Rectangle(0, 54, 16, 16), Color.White * t * opacity);
+                    }
+
+                    // draw the wires
+                    if (tile.RedWire)
+                    {
+                        DrawWire("Red", 0.65f);
+                    }
+                    if (tile.BlueWire)
+                    {
+                        DrawWire("Blue", 0.4f);
+                    }
+                    if (tile.GreenWire)
+                    {
+                        DrawWire("Green", 0.4f);
+                    }
+                    if (tile.YellowWire)
+                    {
+                        DrawWire("Yellow", 0.4f);
+                    }
+                }
+
+                // actuator
+                if (tile.HasActuator)
+                {
+                    Rectangle boundsTile = new Rectangle(x, y, tileSide, tileSide);
+
+                    Texture2D texture = TextureAssets.Actuator.Value;
+                    SpriteBatch.Draw(texture, boundsTile, Color.White * 0.6f * opacity);
+                }
+            }
+            catch (Exception ex)
+            {
+                TerrariaInGameWorldEditor.ModLogger.Error("Unknown error trying to draw TileCopy in UI.", ex);
+                SpriteBatch.End();
+            }
+            SpriteBatch.End();
         }
 
         public static void DrawMiscOptions(Rectangle bounds, bool drawCenterLines, bool drawMeasureLines)
         {
             // rewrite all of this at some point it all sucks
-            _spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
+            SpriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
             bounds = new Rectangle(bounds.X * 16 - (int)Main.screenPosition.X, bounds.Y * 16 - (int)Main.screenPosition.Y, (bounds.Width + 1) * 16, (bounds.Height + 1) * 16);
 
             // add center lines
             if (drawCenterLines)
             {
                 Color color = new Color(45, 43, 46);
-                _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle(bounds.X + 2, bounds.Y + (bounds.Height / 2) - 1, bounds.Width - 4, 2), color); // horizontal line
-                _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle(bounds.X + (bounds.Width / 2) - 1, bounds.Y + 2, 2, bounds.Height - 4), color); // vertical line
+                SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle(bounds.X + 2, bounds.Y + (bounds.Height / 2) - 1, bounds.Width - 4, 2), color); // horizontal line
+                SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle(bounds.X + (bounds.Width / 2) - 1, bounds.Y + 2, 2, bounds.Height - 4), color); // vertical line
             }
 
             // measuring lines
@@ -603,9 +678,9 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 }
                 if (distance1 != -1)
                 {
-                    Terraria.Utils.DrawBorderStringFourWay(_spriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance1 > 100 ? ">100" : distance1), bounds.X * 16 - 6 * 16 - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
-                    _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16 - distance1 * 16) - (int)Main.screenPosition.X, (bounds.Y * 16) - (int)Main.screenPosition.Y, 2, bounds.Height * 16), color); // vertical line
-                    _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16 - distance1 * 16) - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y - 1, distance1 * 16 - 2, 2), color); // horizontal line
+                    Terraria.Utils.DrawBorderStringFourWay(SpriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance1 > 100 ? ">100" : distance1), bounds.X * 16 - 6 * 16 - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
+                    SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16 - distance1 * 16) - (int)Main.screenPosition.X, (bounds.Y * 16) - (int)Main.screenPosition.Y, 2, bounds.Height * 16), color); // vertical line
+                    SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16 - distance1 * 16) - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y - 1, distance1 * 16 - 2, 2), color); // horizontal line
                 }
 
                 // right line
@@ -625,9 +700,9 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 }
                 if (distance2 != -1)
                 {
-                    Terraria.Utils.DrawBorderStringFourWay(_spriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance2 > 100 ? ">100" : distance2), (bounds.X * 16 + bounds.Width * 16) + 16 - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
-                    _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16 + bounds.Width * 16 + distance2 * 16) - (int)Main.screenPosition.X - 2, (bounds.Y * 16) - (int)Main.screenPosition.Y, 2, bounds.Height * 16), color); // vertical line
-                    _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16 + bounds.Width * 16) - (int)Main.screenPosition.X + 2, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y - 1, distance2 * 16 - 2, 2), color); // horizontal line
+                    Terraria.Utils.DrawBorderStringFourWay(SpriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance2 > 100 ? ">100" : distance2), (bounds.X * 16 + bounds.Width * 16) + 16 - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
+                    SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16 + bounds.Width * 16 + distance2 * 16) - (int)Main.screenPosition.X - 2, (bounds.Y * 16) - (int)Main.screenPosition.Y, 2, bounds.Height * 16), color); // vertical line
+                    SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16 + bounds.Width * 16) - (int)Main.screenPosition.X + 2, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y - 1, distance2 * 16 - 2, 2), color); // horizontal line
                 }
 
                 // top line
@@ -647,9 +722,9 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 }
                 if (distance3 != -1)
                 {
-                    Terraria.Utils.DrawBorderStringFourWay(_spriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance3 > 100 ? ">100" : distance3), (bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X, (bounds.Y * 16) - 24 - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
-                    _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X - 1, (bounds.Y * 16 - distance3 * 16) - (int)Main.screenPosition.Y, 2, distance3 * 16 - 2), color); // vertical line
-                    _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16) - (int)Main.screenPosition.X, (bounds.Y * 16 - distance3 * 16) - (int)Main.screenPosition.Y, bounds.Width * 16, 2), color); // horizontal line
+                    Terraria.Utils.DrawBorderStringFourWay(SpriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance3 > 100 ? ">100" : distance3), (bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X, (bounds.Y * 16) - 24 - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
+                    SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X - 1, (bounds.Y * 16 - distance3 * 16) - (int)Main.screenPosition.Y, 2, distance3 * 16 - 2), color); // vertical line
+                    SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16) - (int)Main.screenPosition.X, (bounds.Y * 16 - distance3 * 16) - (int)Main.screenPosition.Y, bounds.Width * 16, 2), color); // horizontal line
                 }
 
                 // bottom line
@@ -669,12 +744,12 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 }
                 if (distance4 != -1)
                 {
-                    Terraria.Utils.DrawBorderStringFourWay(_spriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance4 > 100 ? ">100" : distance4), (bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X, (bounds.Y * 16 + bounds.Height * 16) + 8 - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
-                    _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X - 1, (bounds.Y * 16 + bounds.Height * 16) - (int)Main.screenPosition.Y + 2, 2, distance4 * 16 - 2), color); // vertical line
-                    _spriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16) - (int)Main.screenPosition.X, (bounds.Y * 16 + distance4 * 16 + bounds.Height * 16) - (int)Main.screenPosition.Y - 2, bounds.Width * 16, 2), color); // horizontal line
+                    Terraria.Utils.DrawBorderStringFourWay(SpriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance4 > 100 ? ">100" : distance4), (bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X, (bounds.Y * 16 + bounds.Height * 16) + 8 - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
+                    SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X - 1, (bounds.Y * 16 + bounds.Height * 16) - (int)Main.screenPosition.Y + 2, 2, distance4 * 16 - 2), color); // vertical line
+                    SpriteBatch.Draw((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Color"), new Rectangle((bounds.X * 16) - (int)Main.screenPosition.X, (bounds.Y * 16 + distance4 * 16 + bounds.Height * 16) - (int)Main.screenPosition.Y - 2, bounds.Width * 16, 2), color); // horizontal line
                 }
             }
-            _spriteBatch.End();
+            SpriteBatch.End();
         }
     }
 }

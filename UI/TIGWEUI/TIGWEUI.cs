@@ -16,17 +16,51 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         // events
         public event EventHandler OnShow;
         public event EventHandler OnHide;
+        public bool Visible
+        {
+            get => _visible;
+            set
+            {
+                if (_visible != value)
+                {
+                    if (value && _UI.CurrentState == null)
+                    {
+                        OnShow?.Invoke(this, EventArgs.Empty);
+                        _UI.SetState(this);
+                        SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
+                    }
+                    if (!value && _UI.CurrentState == this)
+                    {
+                        OnHide?.Invoke(this, EventArgs.Empty);
+                        _UI.SetState(null);
+                        SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
+                    }
+                    _visible = value;
+                }
+            }
+        }
+        public bool IsDragging { get; private set; } = false;
+        public string Title 
+        { 
+            get => _titleText.Text; 
+            set => _titleText.SetText(value);
+        }
+        public TIGWEImageResizeable Body;
 
-        // public
-        public bool Visible { get; set; } = false;
-        public bool IsDragging { get; set; } = false;
-        public string Title { get { return _titleText.Text; } set { _titleText.SetText(value); } }
-
-        // private
+        protected string _defaultTitle 
+        { 
+            set
+            { 
+                if (Title.Equals("")) 
+                { 
+                    Title = value; 
+                } 
+            } 
+        }
+        private bool _visible = false;
         private UserInterface _UI;
-        private TIGWEImageResizeable _body;
         private TIGWEButton _xButton;
-        private UIText _titleText;
+        private UIText _titleText = new UIText("");
         private (int Left, int Top) _offset;
 
         public override void OnInitialize()
@@ -37,20 +71,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             Width.Set(300, 0);
 
             // main body
-            _body = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TIGWEUIBody"), 42, 2);
-            _body.OnLeftMouseDown += (_, _) =>
-            {
-                IsDragging = true;
-                _offset = (Main.mouseX - (int)Left.Pixels, Main.mouseY - (int)Top.Pixels);
-            };
-            _body.OnLeftMouseUp += (_, _) =>
-            {
-                IsDragging = false;
-            };
-            Append(_body);
+            Body = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TIGWEUIBody"), 42, 2);
+            Append(Body);
 
             // title text
-            _titleText = new UIText("Title");
             _titleText.Left.Set(12, 0);
             _titleText.Top.Set(12, 0);
             _titleText.IgnoresMouseInteraction = true;
@@ -69,6 +93,17 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                 SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
             };
             Append(_xButton);
+        }
+
+        public void StartDrag()
+        {
+            IsDragging = true;
+            _offset = (Main.mouseX - (int)Left.Pixels, Main.mouseY - (int)Top.Pixels);
+        }
+
+        public void StopDrag()
+        {
+            IsDragging = false;
         }
 
         public override void Update(GameTime gameTime)
@@ -113,10 +148,10 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             base.Recalculate();
 
             // update title bar and body sizes and location to match resizes
-            _body?.Top.Set(0, 0);
-            _body?.Left.Set(0, 0);
-            _body?.Height.Set(Height.Pixels, 0);
-            _body?.Width.Set(Width.Pixels, 0);
+            Body?.Top.Set(0, 0);
+            Body?.Left.Set(0, 0);
+            Body?.Height.Set(Height.Pixels, 0);
+            Body?.Width.Set(Width.Pixels, 0);
             _xButton?.Height.Set(26, 0f);
             _xButton?.Width.Set(26, 0f);
             _xButton?.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);
@@ -130,20 +165,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
 
         public void UpdateUI(GameTime gametime)
         {
-            // handle visibility and stuff
-            if (Visible && _UI.CurrentState == null)
-            {
-                OnShow?.Invoke(this, EventArgs.Empty);
-                _UI.SetState(this);
-                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuOpen);
-            }
-            if (!Visible && _UI.CurrentState == this)
-            {
-                OnHide?.Invoke(this, EventArgs.Empty);
-                _UI.SetState(null);
-                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
-            }
-
             // update the UI
             if (Visible)
             {

@@ -16,7 +16,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             // main area
             Width.Set(700, 0);
             Height.Set(432, 0);
-            Title = "Settings";
+            _defaultTitle = "Settings";
 
             // color picker
             UIText colorText = new UIText("Tool color: ");
@@ -77,7 +77,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Settings
             otherOptions.Append(measureCheckBox);
 
             // update draw
-            UIText updateDrawnTilesText = new UIText("Update drawn tiles texture?");
+            UIText updateDrawnTilesText = new UIText("Update drawn/pasted tiles?");
             updateDrawnTilesText.Left.Set(40, 0);
             updateDrawnTilesText.Top.Set(155, 0);
             otherOptions.Append(updateDrawnTilesText);

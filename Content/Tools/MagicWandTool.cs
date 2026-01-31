@@ -34,7 +34,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             };
             _tileCapField.Width.Set(120, 0);
             _tileCapField.Height.Set(26, 0);
-            _tileCapField.ShowButtons = true;
             Settings.Add(("Select tile cap:", _tileCapField));
 
             // fill tiles connected at corners

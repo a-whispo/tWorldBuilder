@@ -7,6 +7,7 @@ using System.Linq;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
+using Terraria.Social.Base;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UI.Editor;
@@ -30,7 +31,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         }
         private BrushMode _mode;
         private TIGWENumberField _sizeField;
-        private TIGWEDropDown _modeDropDown;
+        private TIGWEDropDown<BrushMode> _modeDropDown;
 
         public BrushTool()
         {
@@ -39,21 +40,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
             // settings
             // mode
-            _modeDropDown = new TIGWEDropDown(["Selected Tile", "Clipboard"]);
-            _modeDropDown.ShowDropDownButton = true;
-            _modeDropDown.SetDefaultOption("Selected Tile");
-            _modeDropDown.OnOptionChanged += (string optionText) =>
+            _modeDropDown = new TIGWEDropDown<BrushMode>();
+            _modeDropDown.AddOption(BrushMode.SelectedTile, "Selected Tile");
+            _modeDropDown.AddOption(BrushMode.Clipboard, "Clipboard");
+            _modeDropDown.OnOptionChanged += (option) =>
             {
-                switch (optionText)
-                {
-                    case "Selected Tile":
-                        _mode = BrushMode.SelectedTile;
-                        break;
-
-                    case "Clipboard":
-                        _mode = BrushMode.Clipboard;
-                        break;
-                }
+                _mode = option.Value;
                 UpdateBrush();
             };
             _modeDropDown.Height.Set(26, 0f);
@@ -70,7 +62,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             };
             _sizeField.Width.Set(60, 0);
             _sizeField.Height.Set(26, 0);
-            _sizeField.ShowButtons = true;
             Settings.Add(("Size:", _sizeField));
 
             // when to update brush
@@ -152,7 +143,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 int height = (int)Math.Floor(_brush.GetHeight() / 2f);
 
                 // get brush as list for easier iteration
-                var brushList = _brush.ToNormalized().AsDictionary().ToList();
+                var brushList = _brush.ToNormalized().ToList();
 
                 foreach (Point point in pointsToDrawAt) {
 

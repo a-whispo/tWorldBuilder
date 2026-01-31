@@ -72,7 +72,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public void RemoveItem(PaletteItem item)
         {
-            if (_paletteGrid._items.Count > 0)
+            if (_paletteGrid.Count > 0)
             {
                 _paletteGrid.Remove(item);
                 Recalculate();

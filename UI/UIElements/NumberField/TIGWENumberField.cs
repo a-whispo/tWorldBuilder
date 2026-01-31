@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
@@ -22,11 +21,37 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
         public int Step { get; set; } = 1;
         public bool IsFocused { get; set; } = false;
         public bool CanFocus { get; set; } = true;
-        public int TextOffsetLeft { get { return (int)_tfText.Left.Pixels; } set { _tfText.Left.Set(value, 0f); } }
-        public int TextOffsetTop { get { return (int)_tfText.Top.Pixels; } set { _tfText.Top.Set(value, 0f); } }
-        public bool ShowButtons { get; set; } = false; // only really looks good if the height is 26
+        public int TextOffsetLeft 
+        { 
+            get => (int)_tfText.Left.Pixels;
+            set => _tfText.PaddingLeft = value;
+        }
+        public int TextOffsetTop 
+        { 
+            get => (int)_tfText.Top.Pixels;
+            set => _tfText.PaddingTop = value;
+        }
+        public bool ShowButtons {
+            get => _showButtons;
+            set 
+            { 
+                if (!ShowButtons) 
+                { 
+                    RemoveChild(_incrementButton); 
+                    RemoveChild(_decrementButton);
+                } 
+                else
+                {
+                    Append(_decrementButton);
+                    Append(_incrementButton);
+                }
+                _showButtons = value;
+            } 
+        } 
 
+        private bool _showButtons = true; // only really looks good if the height is 26
         private int _currentValue = 0;
+        private int _initialValue;
         private UIText _tfText;
         private TIGWEImageResizeable _background;
         private int _textBlink;
@@ -39,24 +64,31 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
             MaxValue = maxValue;
             MinValue = minValue;
             _currentValue = initialValue;
+            _initialValue = initialValue;
 
             // background of the field
             _background = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"));
             _background.TextureHover = ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureHover");
-            _background.OnLeftClick += (UIMouseEvent evt, UIElement listeningElement) =>
+            _background.OnLeftClick += (_, _) =>
             {
                 if (CanFocus)
                 {
                     IsFocused = true;
                 }
             };
-            _background.OnMouseOver += (UIMouseEvent evt, UIElement listeningElement) =>
+            _background.OnMouseOver += (_, _) =>
             {
-                // bring to front
                 RemoveChild(_background);
                 Append(_background);
                 RemoveChild(_tfText);
                 Append(_tfText);
+            };
+            _background.OnMouseOut += (_, _) =>
+            {
+                RemoveChild(_incrementButton);
+                Append(_incrementButton);
+                RemoveChild(_decrementButton);
+                Append(_decrementButton);
             };
             Append(_background);
 
@@ -71,11 +103,13 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
             _incrementButton.SetVisibility(1f, 1f);
             _incrementButton.Width.Set(14, 0f);
             _incrementButton.Height.Set(14, 0f);
-            _incrementButton.OnLeftClick += (UIMouseEvent evt, UIElement listeningElement) => 
+            _incrementButton.OnLeftClick += (_, _) => 
             { 
-                Increment(); 
+                Increment();
+                RemoveChild(_incrementButton);
+                Append(_incrementButton);
             };
-            _incrementButton.OnMouseOver += (UIMouseEvent evt, UIElement listeningElement) =>
+            _incrementButton.OnMouseOver += (_, _) =>
             {
                 // bring to front so the hover effect isnt cut off by the other button
                 RemoveChild(_incrementButton);
@@ -97,11 +131,13 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
             _decrementButton.SetVisibility(1f, 1f);
             _decrementButton.Width.Set(14, 0f);
             _decrementButton.Height.Set(14, 0f);
-            _decrementButton.OnLeftClick += (UIMouseEvent evt, UIElement listeningElement) => 
+            _decrementButton.OnLeftClick += (_, _) => 
             { 
-                Decrement(); 
+                Decrement();
+                RemoveChild(_decrementButton);
+                Append(_decrementButton);
             };
-            _decrementButton.OnMouseOver += (UIMouseEvent evt, UIElement listeningElement) =>
+            _decrementButton.OnMouseOver += (_, _) =>
             {
                 // bring to front so the hover effect isnt cut off by the other button
                 RemoveChild(_decrementButton);
@@ -137,7 +173,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
             base.Update(gameTime);
 
             // set text to placeholder text if we havent written anything
-            string text = "";
+            string text;
 
             if (IsFocused)
             {
@@ -152,14 +188,15 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
                 PlayerInput.WritingText = true;
                 Main.instance.HandleIME();
                 string newText = Main.GetInputText(_tfText.Text.Replace("|", ""));
-                int result = MinValue;
-                if (newText.Equals("") || int.TryParse(newText, out result))
+                int result = _initialValue;
+                if (newText.Equals("") || (newText.Equals("-") && IsFocused && MinValue < 0) || int.TryParse(newText, out result))
                 {
                     text = newText;
                     result = Math.Clamp(result, MinValue, MaxValue);
                     _currentValue = result;
                     OnValueChanged?.Invoke(result);
-                } else
+                } 
+                else
                 {
                     text = _currentValue.ToString();
                 }
@@ -174,7 +211,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
             {
                 text += "|";
             }
-            _tfText.SetText(text);
+            
 
             if (IsFocused)
             {
@@ -182,32 +219,16 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
                 {
                     if (Main.inputText.IsKeyDown(Keys.Back) && !Main.oldInputText.IsKeyDown(Keys.Back))
                     {
-                        _currentValue = MinValue;
-                        OnValueChanged?.Invoke(MinValue);
-                        _tfText.SetText("");
+                        _currentValue = _initialValue;
+                        OnValueChanged?.Invoke(_initialValue);
+                        text = "";
                     }
                 }
             }
+            _tfText.SetText(text);
 
             // this is kinda weird but ok
             _background.Texture = IsFocused ? _background.TextureHover : ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture");
-
-            // add/remove buttons
-            if (!ShowButtons)
-            {
-                RemoveChild(_incrementButton);
-                RemoveChild(_decrementButton);
-            } else
-            {
-                if (!Children.Contains(_decrementButton))
-                {
-                    Append(_decrementButton);
-                }
-                if (!Children.Contains(_incrementButton))
-                {
-                    Append(_incrementButton);
-                }
-            }
         }
 
         public override void Recalculate()
@@ -215,11 +236,11 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
             base.Recalculate();
 
             // update offsets
-            _incrementButton.Left.Set(Width.Pixels - 16, 0f);
+            _incrementButton.Left.Set(Width.Pixels - 14, 0f);
             _incrementButton.Top.Set(0, 0f);
-            _decrementButton.Left.Set(Width.Pixels - 16, 0f);
+            _decrementButton.Left.Set(Width.Pixels - 14, 0f);
             _decrementButton.Top.Set(12, 0f);
-            _background.Width.Set(Width.Pixels - 14, 0f);
+            _background.Width.Set(ShowButtons ? Width.Pixels - 12 : Width.Pixels, 0f);
             _background.Height.Set(Height.Pixels, 0f);
         }
 
@@ -238,7 +259,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.NumberField
         {
             _currentValue = Math.Clamp(value, MinValue, MaxValue);
             _tfText.SetText(_currentValue.ToString());
-            OnValueChanged?.Invoke(_currentValue);
+            OnValueChanged?.Invoke(value);
         }
     }
 }

@@ -1,123 +1,143 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Graphics;
+using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
+using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
+using Terraria.UI.Chat;
 using TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable;
+using TerrariaInGameWorldEditor.UI.UIElements.Scrollbar;
+using TerrariaInGameWorldEditor.UI.UIElements.SearchGrid;
 using TerrariaInGameWorldEditor.UI.UIElements.TextField;
 
 namespace TerrariaInGameWorldEditor.UI.UIElements.DropDown
 {
-    internal class TIGWEDropDown : UIElement
+    internal class TIGWEDropDown<T> : UIElement
     {
-        public delegate void OptionChangedEventHandler(string optionText);
+        public delegate void OptionChangedEventHandler(TIGWEDropDownItem<T> optionText);
         public event OptionChangedEventHandler OnOptionChanged;
-        public string SelectedOption { get; private set; }
-        public int SelectedOptionIndex { get; private set; } // this is kinda bad
-        public bool ShowDropDownButton { get { return HasChild(_dropDownButton); } set { Append(_dropDownButton); } } // just visual, only looks good with a height of 26 though
+        public TIGWEDropDownItem<T> SelectedOption { get; private set; }
+        public int MaxShownItems { get; set; } = 5;
+        public bool ShowDropDownButton // just visual, only looks good with a height of 26 though
+        {
+            get => HasChild(_dropDownButton);
+            set
+            {
+                if (value)
+                {
+                    Append(_dropDownButton);
+                    return;
+                }
+                RemoveChild(_dropDownButton);
+            }
+        }
+        public bool ShowScrollbar
+        {
+            get => _dropDown.HasChild(_scrollbar);
+            set
+            {
+                if (value)
+                {
+                    _dropDown.Append(_scrollbar);
+                    return;
+                }
+                _dropDown.RemoveChild(_scrollbar);
+            }
+        }
 
-        private TIGWETextField _selectedOption;
-        private List<TIGWEDropDownItem> _items = new List<TIGWEDropDownItem>();
+        private Dictionary<T, TIGWEDropDownItem<T>> _heldValues = new Dictionary<T, TIGWEDropDownItem<T>>();
+        private UIElement _dropDown;
+        private TIGWETextField _selectedOptionTextField;
+        private TIGWEScrollbar _scrollbar;
+        private TIGWESearchGrid _itemGrid;
         private TIGWEImageResizeable _border;
         private UIImageButton _dropDownButton;
+        private float _elementHeight;
+        private float _widestOptionWidth = 0;
         private bool _showingOptions = false;
-        private UIElement _lastHover;
-        private bool _lastMouseLeft = false;
-        private bool _lastHoveredParent = false;
 
-        public TIGWEDropDown(string[] items = null)
+        public TIGWEDropDown()
         {
-            _selectedOption = new TIGWETextField("");
-            _selectedOption.CanFocus = false;
-            _selectedOption.OnMouseOver += (UIMouseEvent evt, UIElement listeningElement) =>
+            _selectedOptionTextField = new TIGWETextField("");
+            _selectedOptionTextField.OnMouseOver += (_, _) =>
             {
-                // bring to front
-                RemoveChild(_selectedOption);
-                Append(_selectedOption);
+                RemoveChild(_selectedOptionTextField);
+                Append(_selectedOptionTextField);
             };
-            _selectedOption.OnLeftClick += (UIMouseEvent evt, UIElement listeningElement) =>
+            _selectedOptionTextField.OnLeftClick += (_, _) =>
             {
+                _selectedOptionTextField.SetText("");
+                _itemGrid.SetSearchBar(_selectedOptionTextField);
+                if (_selectedOptionTextField.IsFocused && _showingOptions)
+                {
+                    return;
+                }
                 LeftMouseClick();
             };
-            Append(_selectedOption);
+            Append(_selectedOptionTextField);
 
             _dropDownButton = new UIImageButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/DropDown/DropDownButton"));
             _dropDownButton.SetHoverImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/DropDown/DropDownButtonHover"));
             _dropDownButton.SetVisibility(1f, 1f);
             _dropDownButton.HAlign = 1f;
-            _dropDownButton.Width.Set(22, 0f);
-            _dropDownButton.Height.Set(26, 0f);
-            _dropDownButton.OnMouseOver += (UIMouseEvent evt, UIElement listeningElement) =>
+            _dropDownButton.Width.Set(22, 0);
+            _dropDownButton.Height.Set(26, 0);
+            _dropDownButton.OnMouseOver += (_, _) =>
             {
-                // bring to front
                 RemoveChild(_dropDownButton);
                 Append(_dropDownButton);
             };
-            _dropDownButton.OnLeftClick += (UIMouseEvent evt, UIElement listeningElement) =>
+            _dropDownButton.OnMouseOut += (_, _) =>
             {
+                RemoveChild(_selectedOptionTextField);
+                Append(_selectedOptionTextField);
+            };
+            _dropDownButton.OnLeftClick += (_, _) =>
+            {
+                _itemGrid.RemoveSearchBar(_selectedOptionTextField);
+                _itemGrid.SearchFor("");
                 LeftMouseClick();
             };
+            Append(_dropDownButton);
 
+            _dropDown = new UIElement();
             _border = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/DropDown/DropDownBorder"), 6, 4);
-            if (items != null)
+            _border.IgnoresMouseInteraction = true;
+            _dropDown.Append(_border);
+            _scrollbar = new TIGWEScrollbar();
+            _scrollbar.Width.Set(20, 0);
+            _dropDown.Append(_scrollbar);
+            _itemGrid = new TIGWESearchGrid((item, searchTerm) =>
             {
-                foreach (string item in items)
+                return ((TIGWEDropDownItem<T>)item).Text.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
+            });
+            if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)) || typeof(IComparable).IsAssignableFrom(typeof(T)))
+            {
+                _itemGrid.ManualSortMethod = (list) =>
                 {
-                    AddOption(item);
-                }
-                SetDefaultOption(items[0]);
+                    list.Sort((item1, item2) =>
+                    {
+                        return Comparer<T>.Default.Compare(((TIGWEDropDownItem<T>)item1).Value, ((TIGWEDropDownItem<T>)item2).Value);
+                    });
+                };
             }
+            _itemGrid.ListPadding = -2;
+            _itemGrid.PaddingLeft = -2;
+            _itemGrid.PaddingRight = -2;
+            _itemGrid.Left.Set(6, 0);
+            _itemGrid.Top.Set(4, 0);
+            _itemGrid.SetScrollbar(_scrollbar);
+            _dropDown.Append(_itemGrid);
         }
 
-        public override void Update(GameTime gameTime)
+        public override bool ContainsPoint(Vector2 point)
         {
-            base.Update(gameTime);
-
-            // some basic event handling in cases where the dropdown menu goes outside the ui since
-            // terraria doesnt handle those cases itself
-            if (_showingOptions)
-            {
-                UIElement hoveredElement = null;
-                foreach (TIGWEDropDownItem item in _items)
-                {
-                    if (item.ContainsPoint(new Vector2(Main.mouseX, Main.mouseY)))
-                    {
-                        hoveredElement = item;
-                        break;
-                    }
-                }
-
-                // only do events if we're outside the ui and need to do it ourselves
-                if (!Parent.ContainsPoint(new Vector2(Main.mouseX, Main.mouseY)))
-                {
-                    if (hoveredElement != null)
-                    {
-                        if (_lastHover != hoveredElement)
-                        {
-                            hoveredElement.MouseOver(new UIMouseEvent(hoveredElement, new Vector2(Main.mouseX, Main.mouseY)));
-                        }
-                        if (!_lastMouseLeft && Main.mouseLeft)
-                        {
-                            hoveredElement.LeftMouseDown(new UIMouseEvent(hoveredElement, new Vector2(Main.mouseX, Main.mouseY)));
-                        }
-                    }
-                }
-                if (_lastHover != hoveredElement && _lastHover != null && ((!_lastHoveredParent && Parent.ContainsPoint(new Vector2(Main.mouseX, Main.mouseY))) || !Parent.ContainsPoint(new Vector2(Main.mouseX, Main.mouseY))))
-                {
-                    _lastHover.MouseOut(new UIMouseEvent(_lastHover, new Vector2(Main.mouseX, Main.mouseY)));
-                }
-
-                _lastHoveredParent = Parent.ContainsPoint(new Vector2(Main.mouseX, Main.mouseY));
-                _lastMouseLeft = Main.mouseLeft;
-                _lastHover = hoveredElement;
-            }
-
-            if (!ContainsPoint(new Vector2(Main.mouseX, Main.mouseY)) && _showingOptions)
-            {
-                HideOptions();
-            } 
+            return base.ContainsPoint(point) || (_dropDown.ContainsPoint(point) && _showingOptions);
         }
 
         public override void Recalculate()
@@ -125,38 +145,36 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DropDown
             base.Recalculate();
 
             // update element dimensions
-            _border.Width.Set(this.Width.Pixels, 0f);
-            _border.Height.Set(Height.Pixels - _selectedOption.Height.Pixels, 0f);
-            _border.Top.Set(_selectedOption.Height.Pixels - 2, 0f);
-            if (!_showingOptions)
+            if (_showingOptions && _dropDown.Parent != null)
             {
-                _selectedOption.Height.Set(this.Height.Pixels, 0f);
-                _selectedOption.Width.Set(this.Width.Pixels + 2 - (ShowDropDownButton ? _dropDownButton.Width.Pixels : 0f), 0f);
-                RecalculateItems();
-            }
-        }
+                _dropDown.Width.Set(Math.Max(Width.Pixels, _widestOptionWidth), 0);
+                _dropDown.Height.Set((Math.Clamp(_itemGrid.ShownItems.Count, 1, MaxShownItems) * _elementHeight) - (Math.Clamp(_itemGrid.ShownItems.Count, 1, MaxShownItems) - 1) * 2 + 8, 0);
+                _dropDown.Top.Set(GetDimensions().Y + _elementHeight - 2 - _dropDown.Parent.Top.Pixels, 0);
+                _dropDown.Left.Set(GetDimensions().X - _dropDown.Parent.Left.Pixels, 0);
 
-        public void RecalculateItems()
-        {
-            _border.RemoveAllChildren();
-            foreach (TIGWEDropDownItem item in _items)
+                _border.Height.Set(_dropDown.Height.Pixels, 0);
+                _border.Width.Set(_dropDown.Width.Pixels - (ShowScrollbar ? _scrollbar.Width.Pixels : 0) + 2, 0);
+                _scrollbar.Left.Set(_border.Width.Pixels - 2, 0);
+                _scrollbar.Height.Set(_dropDown.Height.Pixels, 0);
+                _itemGrid.Width.Set(_border.Width.Pixels - 12, 0);
+                _itemGrid.Height.Set(_border.Height.Pixels - 8, 0);
+            }
+            else
             {
-                item.Top.Set(4 + _items.IndexOf(item) * (this.Height.Pixels - 2), 0f);
-                item.Left.Set(4, 0f);
-                item.Height.Set(this.Height.Pixels, 0f);
-                item.Width.Set(this.Width.Pixels - 8, 0f);
-                _border.Append(item);
+                _elementHeight = Height.Pixels;
+                _selectedOptionTextField.Height.Set(_elementHeight, 0);
+                _selectedOptionTextField.Width.Set(Width.Pixels + 2 - (ShowDropDownButton ? _dropDownButton.Width.Pixels : 0), 0);
             }
         }
 
         private void LeftMouseClick()
         {
-            if (_items.Count > 0)
+            if (_itemGrid.AllItems.Count > 0)
             {
                 if (!_showingOptions)
                 {
                     ShowOptions();
-                } 
+                }
                 else
                 {
                     HideOptions();
@@ -168,22 +186,37 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DropDown
         {
             if (!_showingOptions)
             {
-                UIElement parent = Parent;
-                parent.RemoveChild(this);
-                parent.Append(this);
                 _showingOptions = true;
-                Append(_border);
-                Height.Set(Height.Pixels + (_items.Count * Height.Pixels) - (_items.Count - 1) * 2 + 8, 0f);
-                if (_selectedOption.IsMouseHovering)
+
+                // get the topmost element so we can append _dropDown there causing it to render and handle input on top of everything else
+                UIElement top = this;
+                while (top.Parent != null)
                 {
-                    RemoveChild(_selectedOption);
-                    Append(_selectedOption);
+                    top = top.Parent;
                 }
-                if (_dropDownButton.IsMouseHovering)
+                top.Append(_dropDown);
+
+                // remove when clicking outside (also make sure the parent removes the event)
+                top.OnUpdate += CheckIfShouldHide;
+
+                // recalculate width and height of items
+                Recalculate();
+                foreach (TIGWEDropDownItem<T> item in _itemGrid.AllItems)
                 {
-                    RemoveChild(_dropDownButton);
-                    Append(_dropDownButton);
+                    item.Height.Set(_elementHeight, 0f);
+                    item.Width.Set(_dropDown.Width.Pixels - 8, 0f);
                 }
+            }
+        }
+
+        private void CheckIfShouldHide(UIElement element)
+        {
+            Vector2 mouse = new Vector2(Main.mouseX, Main.mouseY);
+            if ((!ContainsPoint(mouse) && _showingOptions && !_selectedOptionTextField.IsFocused && !_scrollbar.IsDragging) || (!ContainsPoint(mouse) && PlayerInput.ScrollWheelDelta != 0))
+            {
+                HideOptions();
+                _selectedOptionTextField.IsFocused = false;
+                element.OnUpdate -= CheckIfShouldHide;
             }
         }
 
@@ -192,79 +225,79 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DropDown
             if (_showingOptions)
             {
                 _showingOptions = false;
-                RemoveChild(_border);
-                Height.Set(_selectedOption.Height.Pixels, 0f);
+                _dropDown.Parent.OnUpdate -= CheckIfShouldHide;
+                _dropDown.Remove();
+                _selectedOptionTextField.SetText(SelectedOption.Text);
+                Recalculate();
             }
         }
 
-        public void SetDefaultOption(string option)
+        public void SetSelectedValue(T value)
         {
-            foreach (TIGWEDropDownItem item in _items)
+            if (_heldValues.TryGetValue(value, out TIGWEDropDownItem<T> item))
             {
-                if (item.Text.Equals(option))
-                {
-                    _selectedOption.SetText(option);
-                    SelectedOption = option;
-                    SelectedOptionIndex = _items.IndexOf(item);
-                    return;
-                }
+                _selectedOptionTextField.SetText(item.Text);
+                SelectedOption = item;
+                OnOptionChanged?.Invoke(item);
+                HideOptions();
+                return;
             }
         }
 
-        public void SetSelectedOption(string option)
+        public void SetSelectedOption(TIGWEDropDownItem<T> item)
         {
-            foreach (TIGWEDropDownItem item in _items)
+            _selectedOptionTextField.SetText(item.Text);
+            SelectedOption = item;
+            OnOptionChanged?.Invoke(item);
+            HideOptions();
+        }
+
+        public void AddOption(T value, string text)
+        {
+            if (_heldValues.ContainsKey(value))
             {
-                // make sure the option exists
-                if (item.Text.Equals(option))
-                {
-                    _selectedOption.SetText(option);
-                    HideOptions();
-                    SelectedOption = option;
-                    SelectedOptionIndex = _items.IndexOf(item);
-                    OnOptionChanged?.Invoke(option);
-                    return;
-                }
+                return;
+            }
+
+            // make sure to keep track of the widest option
+            DynamicSpriteFont spriteFont = FontAssets.MouseText.Value;
+            Vector2 bounds = ChatManager.GetStringSize(spriteFont, text, new Vector2(1));
+            _widestOptionWidth = Math.Max(_widestOptionWidth, bounds.X + 50);
+
+            // add
+            TIGWEDropDownItem<T> option = new TIGWEDropDownItem<T>(value, text);
+            option.Left.Set(4, 0f);
+            option.Height.Set(_elementHeight, 0f);
+            option.Width.Set(_dropDown.Width.Pixels - 8, 0f);
+            option.OnLeftClick += (_, _) =>
+            {
+                SetSelectedOption(option);
+            };
+            _itemGrid.Add(option);
+            _heldValues.Add(value, option);
+
+            // make sure we have a selected option
+            if (SelectedOption == null)
+            {
+                SelectedOption = option;
+                _selectedOptionTextField.SetText(SelectedOption.Text);
             }
         }
 
-        public void AddOption(string option)
+        public void RemoveOption(T value)
         {
-            // dont add if an option with the same text already exists
-            foreach (TIGWEDropDownItem item in _items)
+            if (!_heldValues.TryGetValue(value, out TIGWEDropDownItem<T> item))
             {
-                if (item.Text.Equals(option))
-                {
-                    return;
-                }
+                return;
             }
-
-            // add new option
-            TIGWEDropDownItem newItem = new TIGWEDropDownItem(option);
-            _items.Add(newItem);
-            newItem.Top.Set(4 +_items.IndexOf(newItem) * (this.Height.Pixels - 2), 0f);
-            newItem.Left.Set(4, 0f);
-            newItem.Height.Set(this.Height.Pixels, 0f);
-            newItem.Width.Set(this.Width.Pixels - 8, 0f);
-            _border.Append(newItem);
-            newItem.DropDownParent = this;
-        }
-
-        public void RemoveOption(string option)
-        {
-            foreach (TIGWEDropDownItem item in _items)
+            _itemGrid.Remove(item);
+            _heldValues.Remove(value);
+            if (SelectedOption.Value.Equals(value))
             {
-                if (item.Text.Equals(option))
-                {
-                    _items.Remove(item);
-                    if (SelectedOption.Equals(option))
-                    {
-                        SetSelectedOption(_items[0].Text);
-                    }
-                    break;
-                }
+                SelectedOption = (TIGWEDropDownItem<T>)_itemGrid.AllItems[0];
+                _selectedOptionTextField.SetText(SelectedOption.Text);
             }
-            RecalculateItems();
+            Recalculate();
         }
     }
 }

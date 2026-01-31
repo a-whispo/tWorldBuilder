@@ -1,4 +1,5 @@
 using log4net;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace TerrariaInGameWorldEditor

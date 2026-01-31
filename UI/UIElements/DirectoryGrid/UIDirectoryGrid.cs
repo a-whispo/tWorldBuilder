@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Terraria;
 using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.UI.UIElements.TextField;
@@ -26,7 +25,6 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
         public string DirectoryPath { get; private set; }
         public string FileSearchPattern { get; set; } = "*";
 
-        // all the items that are shown during a search (will only be files)
         private HashSet<UIDirectoryItem> _allItems = new HashSet<UIDirectoryItem>();
         
         public UIDirectoryGrid()
@@ -240,6 +238,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
             foreach (UIDirectoryItem item in _allItems)
             {
                 item.CanSelect = (item is UIDirectoryFolder && CanSelectFolders) || (item is UIDirectoryFile && CanSelectFiles);
+                item.Recalculate();
             }
         }
     }

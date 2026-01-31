@@ -1,12 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.IO;
 using System;
+using System.IO;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Terraria.UI;
 using TerrariaInGameWorldEditor.UI.Editor;
 using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.ButtonResizable;
@@ -21,18 +20,18 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
         private TIGWETextField _pathField;
         private TIGWETextField _saveAsField;
         private TIGWEImageButtonResizeable _saveButton;
-        private UIText _saveText;
         private SelectFolderUI _selectFolderUI;
 
         public override void OnInitialize()
         {
             base.OnInitialize();
+
             // main area
-            Title = "Save";
             Height.Set(168, 0);
             Width.Set(350, 0);
             Left.Set(750, 0);
             Top.Set(150, 0);
+            _defaultTitle = "Save";
 
             // save as
             UIText saveAsText = new UIText("Save selection as:");
@@ -84,10 +83,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
 
             // save button
             _saveButton = new TIGWEImageButtonResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"));
-            _saveText = new UIText("Save");
-            _saveText.Top.Set(5, 0);
-            _saveText.Left.Set(10, 0);
-            _saveButton.Append(_saveText);
+            _saveButton.Text = "Save";
             _saveButton.TextureHover = ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureHover");
             _saveButton.Left.Set(6, 0);
             _saveButton.Top.Set(_pathField.Top.Pixels + _pathField.Height.Pixels + 2, 0);
@@ -112,13 +108,11 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
                 {
                     _saveButton.IgnoresMouseInteraction = false;
                     _saveButton.SetVisibility(1f, 1f);
-                    _saveText.TextColor = Color.White;
                 }
                 else
                 {
                     _saveButton.IgnoresMouseInteraction = true;
                     _saveButton.SetVisibility(0.6f, 0.6f);
-                    _saveText.TextColor = Color.White * 0.6f;
                 }
             };
 

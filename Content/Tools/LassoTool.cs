@@ -77,7 +77,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 _selection.TryAddTiles(CalculateTilesInLine(new Point(selectionArray[selectionArray.Length - 1].Key.X, selectionArray[selectionArray.Length - 1].Key.Y), new Point(selectionArray[0].Key.X, selectionArray[0].Key.Y)).AsDictionary());
                 
                 // get 
-                var polygon = _selection.AsDictionary().ToList();
+                var polygon = _selection.ToList();
                 int width = _selection.GetWidth();
                 int height = _selection.GetHeight();
                 int offsetX = _selection.GetMinX();

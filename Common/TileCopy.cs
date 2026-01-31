@@ -1,9 +1,7 @@
-﻿using Microsoft.Build.Utilities;
-using System;
+﻿using System;
 using Terraria;
 using Terraria.GameContent.Drawing;
 using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
@@ -48,10 +46,10 @@ namespace TerrariaInGameWorldEditor.Common
         public bool IsTreeTrunk { get; set; } = false;
         public bool IsFlipped { get; set; } = false; // used to know if treebranch textures should be flipped
         public int TreeVariant { get; set; } // used to get the right tree trunk texture
-        public int TreeFrame { get; set; }// used to get treetop and tree branch textures
-        public int TreeFrameWidth { get; set; }// used to get treetop and tree branch textures
-        public int TreeFrameHeight { get; set; }// used to get treetop and tree branch textures
-        public int TreeStyle { get; set; }// used to get treetop and tree branch textures
+        public int TreeFrame { get; set; } // used to get treetop and tree branch textures
+        public int TreeFrameWidth { get; set; } // used to get treetop and tree branch textures
+        public int TreeFrameHeight { get; set; } // used to get treetop and tree branch textures
+        public int TreeStyle { get; set; } // used to get treetop and tree branch textures
         public int y2 { get; set; }
         public int TreeBiome { get; set; } = 0; // mostly used for help with drawing palm trees
 

@@ -17,9 +17,18 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.TextField
         public event TextChangedEventHandler OnTextChanged;
         public bool IsFocused { get; set; } = false;
         public bool CanFocus { get; set; } = true;
+        public bool ShowSearchIcon { get; set; } = false;
         public string PlaceholderText { get; set; }
-        public int TextOffsetLeft { get { return (int)_tfText.Left.Pixels; } set { _tfText.Left.Set(value, 0f); } }
-        public int TextOffsetTop { get { return (int)_tfText.Top.Pixels; } set { _tfText.Top.Set(value, 0f); } }
+        public int TextOffsetLeft 
+        { 
+            get => (int)_tfText.Left.Pixels; 
+            set => _tfText.PaddingLeft = value; 
+        }
+        public int TextOffsetTop 
+        { 
+            get => (int)_tfText.Top.Pixels; 
+            set => _tfText.PaddingTop = value;
+        }
 
         private bool _isPlaceholderTextActive;
         private int _maxTextLength;
@@ -27,13 +36,15 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.TextField
         private TIGWEImageResizeable _background;
         private int _textBlink;
         private string _currentText = "";
+        private Texture2D _searchIcon;
 
         public TIGWETextField(string placeholderText = "Enter text...", int maxTextLength = 30)
         {
-            this.PlaceholderText = placeholderText;
-            this._maxTextLength = maxTextLength;
+            PlaceholderText = placeholderText;
+            _maxTextLength = maxTextLength;
 
-            // background of the field
+            // textures
+            _searchIcon = (Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/TextField/SearchIcon");
             _background = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"));
             _background.TextureHover = ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TextureHover");
             _background.OnLeftClick += (UIMouseEvent evt, UIElement listeningElement) =>
@@ -53,6 +64,16 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.TextField
             // default offsets
             TextOffsetLeft = 10;
             TextOffsetTop = 5;
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+            if (ShowSearchIcon)
+            {
+                Rectangle dimensions = new Rectangle((int)GetDimensions().X + (int)Width.Pixels - 20, (int)GetDimensions().Y + 4, _searchIcon.Width, _searchIcon.Height);
+                spriteBatch.Draw(_searchIcon, dimensions, Color.White);
+            }
         }
 
         public override void Update(GameTime gameTime)
@@ -89,7 +110,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.TextField
                 text += "|";
             }
             _tfText.SetText(text);
-
+            
             if (IsFocused)
             {
                 if ((Main.inputText.IsKeyDown(Keys.LeftControl) || Main.inputText.IsKeyDown(Keys.RightControl)) && !(Main.inputText.IsKeyDown(Keys.LeftAlt) || Main.inputText.IsKeyDown(Keys.RightAlt)))
@@ -117,8 +138,8 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.TextField
             base.Recalculate();
 
             // update offset
-            _background.Width.Set(Width.Pixels, 0f);
-            _background.Height.Set(Height.Pixels, 0f);
+            _background.Width.Set(Width.Pixels, 0);
+            _background.Height.Set(Height.Pixels, 0);
         }
 
         public override void MouseOver(UIMouseEvent evt)
@@ -149,7 +170,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.TextField
         public virtual void SetText(string text)
         {
             _currentText = text;
-            OnTextChanged?.Invoke(_currentText);
+            OnTextChanged?.Invoke(text);
         }
     }
 }

@@ -11,6 +11,7 @@ using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Content.Tools;
+using TerrariaInGameWorldEditor.UI.UIElements;
 using TerrariaInGameWorldEditor.UI.UIElements.Button;
 using TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable;
 
@@ -39,7 +40,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             set
             {
                 _leftWidth = Math.Clamp(value, 34, Main.screenWidth / 8);
-                RecalculateSideDimensions();
+                Recalculate();
             }
         }
 
@@ -49,7 +50,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             set
             {
                 _rightWidth = Math.Clamp(value, 50, Main.screenWidth / 8);
-                RecalculateSideDimensions();
+                Recalculate();
             }
         }
 
@@ -59,7 +60,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             set
             {
                 _topHeight = Math.Clamp(value, 34, 34);
-                RecalculateSideDimensions();
+                Recalculate();
             }
         }
 
@@ -69,7 +70,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             set
             {
                 _bottomHeight = Math.Clamp(value, 34, Main.screenHeight / 8);
-                RecalculateSideDimensions();
+                Recalculate();
             }
         }
         #endregion
@@ -188,110 +189,13 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 EditorSystem.Local.ToggleWindow(EditorWindow.SelectTile);
             };
             // draw the selected tile
-            tileButton.OnPreDrawSelf += (SpriteBatch spriteBatch) =>
+            tileButton.OnDraw += (_) =>
             {
                 if (EditorSystem.Local.SelectedTile != null)
                 {
-                    TileCopy selectedTile = EditorSystem.Local.SelectedTile;
-                    TilePaintSystemV2 ps = Main.instance.TilePaintSystem;
-                    Rectangle tileButtonRect = tileButton.GetDimensions().ToRectangle();
-                    int x = tileButtonRect.X + tileButtonRect.Width / 2 - 16 / 2;
-                    int y = tileButtonRect.Y + tileButtonRect.Height / 2 - 16 / 2;
-
-                    // wall part
-                    if (selectedTile.WallType != 0)
-                    {
-
-                        // get wall texture with tilepaintsystem to get the texture with paint if it has any
-                        Texture2D tileWallTex = ps.TryGetWallAndRequestIfNotReady(selectedTile.WallType, selectedTile.WallColor);
-                        if (tileWallTex != null)
-                        {
-                            // get texture from spritesheet with help from frameX and frameY and draw it
-                            spriteBatch.Draw(tileWallTex, new Rectangle(x - 8, y - 8, 32, 32), new Rectangle(selectedTile.WallFrameX, selectedTile.WallFrameY, 32, 32), Color.White * (tileButton.IsMouseHovering ? 0.8f : 1f));
-                        }
-                    }
-
-                    // tile part
-                    if (selectedTile.HasTile)
-                    {
-                        // get tile texture with tilepaintsystem to get the texture with paint if it has any
-                        Texture2D tileTex = ps.TryGetTileAndRequestIfNotReady(selectedTile.TileType, selectedTile.TileFrameNumber, selectedTile.TileColor);
-
-                        if (tileTex != null)
-                        {
-                            // get texture from spritesheet with help from frameX and frameY and draw it
-                            spriteBatch.Draw(tileTex, new Rectangle(x, y, 16, 16), new Rectangle(selectedTile.TileFrameX, selectedTile.TileFrameY, 16, 16), Color.White * (tileButton.IsMouseHovering ? 0.8f : 1f));
-
-                        }
-                    }
-
-                    // liquid
-                    if (selectedTile.LiquidAmount > 0)
-                    {
-                        int num = 0;
-                        int height = (int)(((float)selectedTile.LiquidAmount / 255) * 16);
-                        if (height < 6)
-                        {
-                            height = 6;
-                        }
-                        spriteBatch.Draw(TextureAssets.Liquid[selectedTile.LiquidType].Value, new Rectangle(x, y + (16 - height), 16, height), new Rectangle(0, num, 16, height), Color.White * 0.6f * (tileButton.IsMouseHovering ? 0.8f : 1f));
-                    }
-
-                    // wire
-                    if ((selectedTile.GreenWire || selectedTile.RedWire || selectedTile.YellowWire || selectedTile.BlueWire))
-                    {
-                        Rectangle boundsTile = new Rectangle(x, y, 16, 16);
-
-                        void DrawWire(string wireType, float t)
-                        {
-                            Texture2D texture = TextureAssets.Wire.Value;
-                            switch (wireType)
-                            {
-                                case "Red":
-                                    texture = TextureAssets.Wire.Value;
-                                    break;
-                                case "Blue":
-                                    texture = TextureAssets.Wire2.Value;
-                                    break;
-                                case "Green":
-                                    texture = TextureAssets.Wire3.Value;
-                                    break;
-                                case "Yellow":
-                                    texture = TextureAssets.Wire4.Value;
-                                    break;
-                            }
-
-                            // none
-                            spriteBatch.Draw(texture, boundsTile, new Rectangle(0, 54, 16, 16), Color.White * t * (tileButton.IsMouseHovering ? 0.8f : 1f));
-                        }
-
-                        // draw the wires
-                        if (selectedTile.RedWire)
-                        {
-                            DrawWire("Red", 0.65f);
-                        }
-                        if (selectedTile.BlueWire)
-                        {
-                            DrawWire("Blue", 0.4f);
-                        }
-                        if (selectedTile.GreenWire)
-                        {
-                            DrawWire("Green", 0.4f);
-                        }
-                        if (selectedTile.YellowWire)
-                        {
-                            DrawWire("Yellow", 0.4f);
-                        }
-                    }
-
-                    // actuator
-                    if (selectedTile.HasActuator)
-                    {
-                        Rectangle boundsTile = new Rectangle(x, y, 16, 16);
-
-                        Texture2D texture = TextureAssets.Actuator.Value;
-                        spriteBatch.Draw(texture, boundsTile, Color.White * 0.6f * (tileButton.IsMouseHovering ? 0.8f : 1f));
-                    }
+                    CalculatedStyle tileButtonDimensions = tileButton.GetDimensions();
+                    Rectangle dimensions = new Rectangle((int)(tileButtonDimensions.X + tileButtonDimensions.Width / 2 - 16 / 2), (int)(tileButtonDimensions.Y + tileButtonDimensions.Height / 2 - 16 / 2), 16, 16);
+                    DrawUtils.DrawTileCopyInUI(EditorSystem.Local.SelectedTile, dimensions, (tileButton.IsMouseHovering ? 0.8f : 1f));
                 }
             };
             Append(tileButton);
@@ -326,8 +230,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     EditorSystem.Local.SelectedTile = item.TileCopy;
                 };
                 _palette.AddItem(item);
-                _palette.Recalculate();
-                RecalculateSideDimensions();
+                Recalculate();
                 SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
             };
             Append(saveTileButton);
@@ -458,7 +361,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             _bottom.Append(_toolInfoText);
 
             // update everything
-            RecalculateSideDimensions();
+            Recalculate();
         }
 
         public void PostUpdateInput()
@@ -504,7 +407,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
+            
             // update undo and redo buttons to match if we can undo or redo
             if (EditorSystem.Local.RedoHistory.Count > 0)
             {
@@ -532,9 +435,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            // should maybe not do this every frame but whatever
-            RecalculateSideDimensions();
-
             // draw the ui on top
             base.Draw(spriteBatch);
 
@@ -575,8 +475,16 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             }
         }
 
-        public void RecalculateSideDimensions()
+        public override void Recalculate()
         {
+            base.Recalculate();
+
+            // make sure we only do this after initialize
+            if (_bottom == null)
+            {
+                return;
+            }
+
             // resize sides
             _bottom.Width.Set(0, 1f);
             _bottom.Height.Set(BottomHeight, 0f);
@@ -609,7 +517,6 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             _innerBorder.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
 
             OnRecalculateSides?.Invoke(this, EventArgs.Empty);
-            Recalculate();
         }
     }
 }

@@ -42,7 +42,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             };
             _sizeField.Width.Set(60, 0);
             _sizeField.Height.Set(26, 0);
-            _sizeField.ShowButtons = true;
             Settings.Add(("Size:", _sizeField));
 
             // make sure brush is set at the start
@@ -96,7 +95,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 int height = (int)Math.Floor(_brush.GetHeight() / 2f);
 
                 // get brush as list for easier iteration
-                var brushList = _brush.ToNormalized().AsDictionary().ToList();
+                var brushList = _brush.ToNormalized().ToList();
 
                 foreach (Point point in pointsToDrawAt)
                 {

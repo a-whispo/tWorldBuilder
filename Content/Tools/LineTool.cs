@@ -37,7 +37,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         }
         private LineMode _mode;
         private TIGWENumberField _sizeField;
-        private TIGWEDropDown _modeDropDown;
+        private TIGWEDropDown<LineMode> _modeDropDown;
 
         public LineTool()
         {
@@ -46,21 +46,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
             // settings
             // mode
-            _modeDropDown = new TIGWEDropDown(["Selected Tile", "Clipboard"]);
-            _modeDropDown.ShowDropDownButton = true;
-            _modeDropDown.SetDefaultOption("Selected Tile");
-            _modeDropDown.OnOptionChanged += (string optionText) =>
+            _modeDropDown = new TIGWEDropDown<LineMode>();
+            _modeDropDown.AddOption(LineMode.SelectedTile, "Selected Tile");
+            _modeDropDown.AddOption(LineMode.Clipboard, "Clipboard");
+            _modeDropDown.OnOptionChanged += (option) =>
             {
-                switch (optionText)
-                {
-                    case "Selected Tile":
-                        _mode = LineMode.SelectedTile;
-                        break;
-
-                    case "Clipboard":
-                        _mode = LineMode.Clipboard;
-                        break;
-                }
+                _mode = option.Value;
                 UpdateBrush();
             };
             _modeDropDown.Height.Set(26, 0f);
@@ -77,7 +68,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             };
             _sizeField.Width.Set(60, 0);
             _sizeField.Height.Set(26, 0);
-            _sizeField.ShowButtons = true;
             Settings.Add(("Size:", _sizeField));
 
             // when to update brush
@@ -202,7 +192,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private TileCollection CalculateTilesInLine(Point origin, Point endpoint, TileCollection brush)
         {
             // algorithm from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C#
-            var brushList = brush.AsDictionary().ToList();
+            var brushList = brush.ToList();
             TileCollection tc = new TileCollection();
 
             _length = 0;

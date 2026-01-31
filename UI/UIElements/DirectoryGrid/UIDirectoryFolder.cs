@@ -57,7 +57,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
             // create the directory and UIDirectoryFolder
             Directory.CreateDirectory($"{FullPath}\\New Folder ({num})");
             UIDirectoryFolder folder = new UIDirectoryFolder($"{FullPath}\\New Folder ({num})");
-            folder.CanSelect = _canSelect;
+            folder.CanSelect = CanSelect;
             folder.AssignParentGrid(_parentGrid);
 
             // add item and open to show the new folder
@@ -148,8 +148,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
         public override void Recalculate()
         {
             base.Recalculate();
-
-            _createSubFolderButton.Left.Set(_canSelect ? _selectButton.Left.Pixels - _selectButton.Width.Pixels - 2 : _renameButton.Left.Pixels - _renameButton.Width.Pixels - 2, 0f);
+            _createSubFolderButton.Left.Set(CanSelect ? _selectButton.Left.Pixels - _selectButton.Width.Pixels - 2 : _renameButton.Left.Pixels - _renameButton.Width.Pixels - 2, 0f);
             _createSubFolderButton.Top.Set(6, 0f);
         }
     }

@@ -23,12 +23,13 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
         public override void OnInitialize()
         {
             base.OnInitialize();
+
             // main area
             Width.Set(700, 0);
             Height.Set(440, 0);
             Left.Set(750, 0);
             Top.Set(150, 0);
-            Title = "(Save) Select Folder";
+            _defaultTitle = "(Save) Select Folder";
 
             // open folder
             TIGWEButton openFolder = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/OpenFolder"));
@@ -71,19 +72,12 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
 
             // search bar
             TIGWETextField searchBar = new TIGWETextField("Search for files...", 100);
+            searchBar.ShowSearchIcon = true;
             searchBar.Width.Set(250, 0);
             searchBar.Height.Set(26, 0);
             searchBar.Top.Set(42, 0);
             searchBar.Left.Set(refresh.Left.Pixels + refresh.Width.Pixels + 2, 0);
             Append(searchBar);
-            UIImageButton searchIcon = new UIImageButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Search"));
-            searchIcon.SetHoverImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/SearchHover"));
-            searchIcon.Width.Set(26, 0);
-            searchIcon.Height.Set(26, 0);
-            searchIcon.Top.Set(42, 0);
-            searchIcon.Left.Set(searchBar.Left.Pixels + searchBar.Width.Pixels + 2, 0);
-            searchIcon.SetVisibility(0.7f, 1);
-            Append(searchIcon);
 
             // grid
             _grid = new UIDirectoryGrid();
@@ -104,7 +98,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Save
             _grid.OnSelectFolder += FolderSelected;
             _grid.RefreshContent();
             Append(_grid);
-            TIGWEScrollbar sb = new TIGWEScrollbar(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"), ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Scrollbar"));
+            TIGWEScrollbar sb = new TIGWEScrollbar();
             sb.Height.Set(_grid.Height.Pixels + 10, 0);
             sb.Width.Set(20, 0);
             sb.Top.Set(_grid.Top.Pixels - 4, 0);

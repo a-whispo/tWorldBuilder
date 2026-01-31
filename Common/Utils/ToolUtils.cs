@@ -14,7 +14,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
         public static void Paste(TileCollection tilesToPaste, Point point, bool saveToUndo = true, bool placeTileWithTileFraming = false) // takes point in terraria coordinates
         {
             TileCollection undoColl = new TileCollection();
-            List<KeyValuePair<Point, TileCopy>> tilesToPasteList = tilesToPaste.ToNormalized().AsDictionary().ToList();
+            List<KeyValuePair<Point, TileCopy>> tilesToPasteList = tilesToPaste.ToNormalized().ToList();
 
             // if we want to update the tiles we're pasting we need to make sure to grab a copy of what we're pasting over before we do the paste
             // as well as the tiles around it since those textures will also update

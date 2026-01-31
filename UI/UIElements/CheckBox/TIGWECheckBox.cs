@@ -12,8 +12,17 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.CheckBox
         public delegate void CheckedChangedEventHandler(bool isChecked);
         public event CheckedChangedEventHandler OnCheckedChanged;
         public string HoverText { get; set; }
-        public bool IsChecked { get; set; }
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                _isChecked = value;
+                SetImage(ModContent.Request<Texture2D>($"TerrariaInGameWorldEditor/UI/UIElements/CheckBox/{(IsChecked ? "CheckBoxChecked" : "CheckBoxUnchecked")}"));
+            }
+        }
 
+        private bool _isChecked;
         private static Asset<Texture2D> _texture = ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/CheckBox/CheckBoxUnchecked");
 
         public TIGWECheckBox(bool isChecked = false) : base(_texture)
@@ -43,27 +52,13 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.CheckBox
 
         public override void MouseOver(UIMouseEvent evt)
         {
-            if (IsChecked)
-            {
-                SetImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/CheckBox/CheckBoxCheckedHover"));
-            }
-            else
-            {
-                SetImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/CheckBox/CheckBoxUncheckedHover"));
-            }
+            SetImage(ModContent.Request<Texture2D>($"TerrariaInGameWorldEditor/UI/UIElements/CheckBox/{(IsChecked ? "CheckBoxCheckedHover" : "CheckBoxUncheckedHover")}"));
             base.MouseOver(evt);
         }
 
         public override void MouseOut(UIMouseEvent evt)
         {
-            if (IsChecked)
-            {
-                SetImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/CheckBox/CheckBoxChecked"));
-            }
-            else
-            {
-                SetImage(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIElements/CheckBox/CheckBoxUnchecked"));
-            }
+            SetImage(ModContent.Request<Texture2D>($"TerrariaInGameWorldEditor/UI/UIElements/CheckBox/{(IsChecked ? "CheckBoxChecked" : "CheckBoxUnchecked")}"));
             base.MouseOut(evt);
         }
 
@@ -71,7 +66,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.CheckBox
         {
             IsChecked = !IsChecked;
             OnCheckedChanged?.Invoke(IsChecked);
-            MouseOver(evt); // update texture
+            SetImage(ModContent.Request<Texture2D>($"TerrariaInGameWorldEditor/UI/UIElements/CheckBox/{(IsChecked ? "CheckBoxCheckedHover" : "CheckBoxUncheckedHover")}"));
         }
     }
 }

@@ -33,7 +33,6 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
         }
 
         protected bool _isHoveringOverButtons => (IsMouseHovering && !_texture.IsMouseHovering);
-        protected bool _canSelect = true;
         protected UIDirectoryFolder _parentFolder;
         protected UIDirectoryGrid _parentGrid;
         protected UIImage _icon;
@@ -41,6 +40,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.DirectoryGrid
         protected TIGWEButton _renameButton;
         protected TIGWEButton _selectButton;
 
+        private bool _canSelect = true;
         private UIText _nameText;
         private TIGWEImageResizeable _texture;
         private bool _isDeleting = false;

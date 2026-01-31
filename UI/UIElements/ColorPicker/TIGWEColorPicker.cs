@@ -274,7 +274,7 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ColorPicker
         protected override void DrawChildren(SpriteBatch spriteBatch)
         {
             // draw a background
-            UIElementsUtils.DrawTexture2DWithDimensions((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"), this.GetDimensions().ToRectangle(), spriteBatch);
+            UIElementsUtils.DrawTexture2DWithDimensions((Texture2D)ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"), this.GetDimensions().ToRectangle());
 
             // get bounds
             Rectangle bounds = _colorPane.GetViewCullingArea();

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
@@ -11,6 +12,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
     {
         public static TIGWEUISystem Local { get; private set; } // local instance
         public bool ShouldRenderUI { get; set; } = true;
+        public float Scale = 1f;
 
         // states
         private List<TIGWEUI> _states = [];
@@ -22,12 +24,22 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
             Local = this;
         }
 
+        public override void OnModUnload()
+        {
+            base.OnModUnload();
+            Local = null;
+        }
+
         public void RegisterUI(TIGWEUI ui)
         {
             ui.Activate();
             ui.OnShow += (_, _) =>
             {
                 MoveToTop(ui);
+            };
+            ui.OnHide += (_, _) =>
+            {
+                MoveToBottom(ui);
             };
             ui.OnLeftMouseDown += (_, _) =>
             {
@@ -36,9 +48,19 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                     MoveToTop(ui);
                 }
             };
-            ui.OnHide += (_, _) =>
+            ui.Body.OnLeftMouseDown += (_, _) =>
             {
-                MoveToBottom(ui);
+                if (IsMouseHoveringState(ui))
+                {
+                    ui.StartDrag();
+                }
+            };
+            ui.Body.OnLeftMouseUp += (_, _) =>
+            {
+                if (IsMouseHoveringState(ui))
+                {
+                    ui.StopDrag();
+                }
             };
             _states.Add(ui);
         }
@@ -50,10 +72,18 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                 return;
             }
 
-            // check if mouse is hovering over ui
+            // only update the state that the player is hovering, otherwise other states under it will also update its elements with click/hover events
             foreach (TIGWEUI state in _states.ToArray())
             {
-                Main.hasFocus = IsMouseHoveringState(state);
+                if (state.ContainsPoint(new Vector2(Main.mouseX, Main.mouseY)) && !IsMouseHoveringState(state) && state.Visible)
+                {
+                    UIElement element = state.GetElementAt(new Vector2(Main.mouseX, Main.mouseY));
+                    if (element.IsMouseHovering)
+                    {
+                        element.MouseOut(new UIMouseEvent(element, new Vector2(Main.mouseX, Main.mouseY)));
+                    }
+                    continue;
+                }
                 state.UpdateUI(gameTime);
             }
         }
@@ -74,9 +104,7 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
         {
             for (int i = _states.Count - 1; i >= 0; i--)
             {
-                // mouse over or dragging both count as the mouse hovering
-                // sometimes you might be dragging a state but still have the mouse be outside due to the states position not being updated yet
-                if (_states[i].GetDimensions().ToRectangle().Contains(Main.mouseX, Main.mouseY) || _states[i].IsDragging)
+                if (_states[i].ContainsPoint(new Vector2(Main.mouseX, Main.mouseY)) || _states[i].IsDragging)
                 {
                     return _states[i] == stateToCheck;
                 }
@@ -98,7 +126,6 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                     $"{TerrariaInGameWorldEditor.MODNAME}: UI",
                     delegate
                     {
-                        // setup spritebatch if we havent yet
                         _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
 
                         // temporarily adjust to make everything act as if the UI scale is 1f
@@ -107,18 +134,16 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI
                         float tempUIScale = Main.UIScale;
                         Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
                         Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
-                        Main.UIScale = 1f;
+                        Main.UIScale = Scale;
 
                         // start a new spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
                         _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
-
-                        // go over all the UIs
                         foreach (TIGWEUI state in _states)
                         {
                             state?.Draw(_spriteBatch, Main.gameTimeCache);
                         }
-
                         _spriteBatch.End();
+
                         // restore originals
                         Main.UIScale = tempUIScale;
                         Main.screenWidth = tempWidth;

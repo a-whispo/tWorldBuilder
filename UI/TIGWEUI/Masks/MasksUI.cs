@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
@@ -17,11 +19,11 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Masks
             base.OnInitialize();
 
             // main area
-            Title = "Masks";
             Height.Set(224, 0);
             Width.Set(424, 0);
             Left.Set(750, 0);
             Top.Set(150, 0);
+            _defaultTitle = "Masks";
 
             // what tiles to draw/paste
             TIGWEImageResizeable pasteTilesOptions = new TIGWEImageResizeable(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/Texture"));
@@ -122,13 +124,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Masks
             pasteOnTilesOptions.Append(modifyTilesOnText);
 
             // paste on tiles
-            TIGWEDropDown pasteOnTilesDropDown = new TIGWEDropDown(["Yes", "Any", "No"]);
+            TIGWEDropDown<Mask> pasteOnTilesDropDown = new TIGWEDropDown<Mask>();
+            pasteOnTilesDropDown.AddOption(Mask.Yes, "Yes");
+            pasteOnTilesDropDown.AddOption(Mask.Any, "Any");
+            pasteOnTilesDropDown.AddOption(Mask.No, "No");
+            pasteOnTilesDropDown.SetSelectedValue(Mask.Any);
             TIGWESettings.ShouldPasteOnTiles = Mask.Any;
-            pasteOnTilesDropDown.SetSelectedOption("Any");
-            pasteOnTilesDropDown.ShowDropDownButton = true;
-            pasteOnTilesDropDown.OnOptionChanged += (string option) =>
+            pasteOnTilesDropDown.OnOptionChanged += (option) =>
             {
-                TIGWESettings.ShouldPasteOnTiles = (Mask)pasteOnTilesDropDown.SelectedOptionIndex;
+                TIGWESettings.ShouldPasteOnTiles = option.Value;
             };
             pasteOnTilesDropDown.Height.Set(26, 0);
             pasteOnTilesDropDown.Width.Set(80, 0);
@@ -141,13 +145,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Masks
             pasteOnTilesOptions.Append(pasteOnTilesText);
 
             // paste on walls
-            TIGWEDropDown pasteOnWallsDropDown = new TIGWEDropDown(["Yes", "Any", "No"]);
+            TIGWEDropDown<Mask> pasteOnWallsDropDown = new TIGWEDropDown<Mask>();
+            pasteOnWallsDropDown.AddOption(Mask.Yes, "Yes");
+            pasteOnWallsDropDown.AddOption(Mask.Any, "Any");
+            pasteOnWallsDropDown.AddOption(Mask.No, "No");
+            pasteOnWallsDropDown.SetSelectedValue(Mask.Any);
             TIGWESettings.ShouldPasteOnWalls = Mask.Any;
-            pasteOnWallsDropDown.SetSelectedOption("Any");
-            pasteOnWallsDropDown.ShowDropDownButton = true;
-            pasteOnWallsDropDown.OnOptionChanged += (string option) =>
+            pasteOnWallsDropDown.OnOptionChanged += (option) =>
             {
-                TIGWESettings.ShouldPasteOnWalls = (Mask)pasteOnWallsDropDown.SelectedOptionIndex;
+                TIGWESettings.ShouldPasteOnWalls = option.Value;
             };
             pasteOnWallsDropDown.Height.Set(26, 0);
             pasteOnWallsDropDown.Width.Set(80, 0);
@@ -160,13 +166,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Masks
             pasteOnTilesOptions.Append(pasteOnWallsText);
 
             // paste on liquid
-            TIGWEDropDown pasteOnLiquidDropDown = new TIGWEDropDown(["Yes", "Any", "No"]);
+            TIGWEDropDown<Mask> pasteOnLiquidDropDown = new TIGWEDropDown<Mask>();
+            pasteOnLiquidDropDown.AddOption(Mask.Yes, "Yes");
+            pasteOnLiquidDropDown.AddOption(Mask.Any, "Any");
+            pasteOnLiquidDropDown.AddOption(Mask.No, "No");
+            pasteOnLiquidDropDown.SetSelectedValue(Mask.Any);
             TIGWESettings.ShouldPasteOnLiquid = Mask.Any;
-            pasteOnLiquidDropDown.SetSelectedOption("Any");
-            pasteOnLiquidDropDown.ShowDropDownButton = true;
-            pasteOnLiquidDropDown.OnOptionChanged += (string option) =>
+            pasteOnLiquidDropDown.OnOptionChanged += (option) =>
             {
-                TIGWESettings.ShouldPasteOnLiquid = (Mask)pasteOnLiquidDropDown.SelectedOptionIndex;
+                TIGWESettings.ShouldPasteOnLiquid = option.Value;
             };
             pasteOnLiquidDropDown.Height.Set(26, 0);
             pasteOnLiquidDropDown.Width.Set(80, 0);
@@ -179,13 +187,15 @@ namespace TerrariaInGameWorldEditor.UI.TIGWEUI.Masks
             pasteOnTilesOptions.Append(pasteOnLiquidText);
 
             // paste on wire
-            TIGWEDropDown pasteOnWireDropDown = new TIGWEDropDown(["Yes", "Any", "No"]);
+            TIGWEDropDown<Mask> pasteOnWireDropDown = new TIGWEDropDown<Mask>();
+            pasteOnWireDropDown.AddOption(Mask.Yes, "Yes");
+            pasteOnWireDropDown.AddOption(Mask.Any, "Any");
+            pasteOnWireDropDown.AddOption(Mask.No, "No");
+            pasteOnWireDropDown.SetSelectedValue(Mask.Any);
             TIGWESettings.ShouldPasteOnWires = Mask.Any;
-            pasteOnWireDropDown.SetSelectedOption("Any");
-            pasteOnWireDropDown.ShowDropDownButton = true;
-            pasteOnWireDropDown.OnOptionChanged += (string option) =>
+            pasteOnWireDropDown.OnOptionChanged += (option) =>
             {
-                TIGWESettings.ShouldPasteOnWires = (Mask)pasteOnWireDropDown.SelectedOptionIndex;
+                TIGWESettings.ShouldPasteOnWires = option.Value;
             };
             pasteOnWireDropDown.Height.Set(26, 0);
             pasteOnWireDropDown.Width.Set(80, 0);

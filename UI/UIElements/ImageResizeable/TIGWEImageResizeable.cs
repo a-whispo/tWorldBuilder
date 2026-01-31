@@ -26,14 +26,16 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.ImageResizeable
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
+            base.DrawSelf(spriteBatch);
+
             // draw textures
             if (ShouldResize)
             {
-                UIElementsUtils.DrawTexture2DWithDimensions(IsMouseHovering ? TextureHover.Value : Texture.Value, GetDimensions().ToRectangle(), spriteBatch, Color, CornerSize, BarSize);
+                UIElementsUtils.DrawTexture2DWithDimensions(IsMouseHovering ? TextureHover.Value : Texture.Value, GetDimensions().ToRectangle(), Color, CornerSize, BarSize);
             }
             else
             {
-                UIElementsUtils.DrawTexture(IsMouseHovering ? TextureHover.Value : Texture.Value, (int)Width.Pixels, (int)Height.Pixels, this, spriteBatch);
+                UIElementsUtils.DrawTexture(IsMouseHovering ? TextureHover.Value : Texture.Value, (int)Width.Pixels, (int)Height.Pixels, this);
             }
         }
     }

@@ -28,6 +28,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public static EditorSystem Local { get; private set; }
 
         // main ui
+        public float Scale = 1f;
         private EditorUIState _mainUIState;
         private UserInterface _mainUserInterface;
         private SpriteBatch _spriteBatch;
@@ -44,10 +45,9 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         private PasteTool _pasteTool = new PasteTool();
         private Tool _currentTool;
         public Tool CurrentTool { // current selected tool
-            get {
-                return _currentTool;
-            }
-            set {
+            get => _currentTool;
+            set 
+            {
                 _currentTool = value;
                 _mainUIState.RecalculateToolSettings();
             }
@@ -123,6 +123,12 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             Tools = new List<Tool> { new BrushTool(), new EraseTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() };
         }
 
+        public override void OnModUnload()
+        {
+            base.OnModUnload();
+            Local = null;
+        }
+
         public override void PostSetupContent()
         {
             base.PostSetupContent();
@@ -132,6 +138,11 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             _mainUIState.Activate();
             _mainUserInterface = new UserInterface();
             _selectTileUIState = new SelectTileUI();
+            _selectTileUIState.Title = "(Selected Tile) Tile Selector";
+            _selectTileUIState.OnTileConfirmed += (_, tileCopy) =>
+            {
+                SelectedTile = tileCopy;
+            };
             _settingsUIState = new SettingsUI();
             _blueprintsUIState = new BlueprintsUI();
             _saveUIState = new SaveUI();
@@ -213,7 +224,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                 float tempUIScale = Main.UIScale;
                 Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
                 Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
-                Main.UIScale = 1f;
+                Main.UIScale = Scale;
 
                 // do thing
                 _mainUserInterface.Update(gameTime);
@@ -232,24 +243,18 @@ namespace TerrariaInGameWorldEditor.UI.Editor
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // layer stuff
         {
-            // dont render if not visible
+            _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
             if (!_mainUIState.Visible)
             {
                 return;
             }
 
-            // setup spritebatch if we havent yet
-            _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
-
             // draw tools before the main ui
             if (Local.CurrentSelection?.Count > 0)
             {
-                // draw selection outline
                 DrawUtils.DrawTileCollectionOutline(Local.CurrentSelection, new Point(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
                 DrawUtils.DrawMiscOptions(new Rectangle(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY(), Local.CurrentSelection.GetWidth(), Local.CurrentSelection.GetHeight()), TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
             }
-
-            // draw current tool
             Local.CurrentTool?.Draw(_spriteBatch);
 
             // removes all layers except the cursor layer
@@ -274,7 +279,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                         float tempUIScale = Main.UIScale;
                         Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
                         Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
-                        Main.UIScale = 1f;
+                        Main.UIScale = Scale;
 
                         // start spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
                         _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
@@ -454,7 +459,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
         public override void PostUpdatePlayers()
         {
             base.PostUpdatePlayers();
-
+            
             // update tools
             Local.CurrentTool?.Update();
             if (Local.CurrentTool is SelectionTool selectionTool)
@@ -506,6 +511,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
                     break;
                 case EditorWindow.SelectTile:
                     _selectTileUIState.Visible = !_selectTileUIState.Visible;
+                    _selectTileUIState.SetCurrentTileCopy(SelectedTile);
                     break;
                 case EditorWindow.Masks:
                     _maskUIState.Visible = !_maskUIState.Visible;
@@ -566,7 +572,7 @@ namespace TerrariaInGameWorldEditor.UI.Editor
             TileCollection tileColl = new TileCollection();
 
             // faster to get index with list
-            List<KeyValuePair<Point, TileCopy>> tiles = tilesToDelete.AsDictionary().ToList();
+            List<KeyValuePair<Point, TileCopy>> tiles = tilesToDelete.ToList();
 
             // go over all the tiles in the most recently added tile collection to undo
             for (int i = 0; i < tiles.Count; i++)

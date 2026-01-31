@@ -58,7 +58,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 if (Keybinds.PasteMK.JustPressed && EditorSystem.Local.Clipboard != null)
                 {
                     Rectangle bounds = GetCurrentSelectionRectangle();
-                    ToolUtils.Paste(EditorSystem.Local.Clipboard, new Point(bounds.X, bounds.Y));
+                    ToolUtils.Paste(EditorSystem.Local.Clipboard, new Point(bounds.X, bounds.Y), true, TIGWESettings.ShouldUpdateDrawnTiles);
                 }
 
                 // rotate
@@ -66,6 +66,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 {
                     EditorSystem.Local.Clipboard = EditorSystem.Local.Clipboard.To90DegAntiClockwise();
                 }
+
                 // mirror
                 if (Keybinds.MirrorMK.JustPressed)
                 {

@@ -24,16 +24,16 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private bool _point2placed = false;
 
         private int _d = 4;
-        private enum Mode
+        private enum ShapeMode
         {
             Rectangle,
             RectangleFilled,
             Circle,
             CircleFilled
         }
-        private Mode mode = Mode.Rectangle;
+        private ShapeMode _mode = ShapeMode.Rectangle;
         private TIGWENumberField _sizeField;
-        private TIGWEDropDown _modeDropDown;
+        private TIGWEDropDown<ShapeMode> _modeDropDown;
         private Rectangle _selection;
 
         public ShapesTool()
@@ -43,26 +43,14 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
             // settings
             // mode
-            _modeDropDown = new TIGWEDropDown(["Rectangle", "Filled Rectangle", "Circle", "Filled Circle"]);
-            _modeDropDown.ShowDropDownButton = true;
-            _modeDropDown.SetDefaultOption("Rectangle");
-            _modeDropDown.OnOptionChanged += (string optionText) =>
+            _modeDropDown = new TIGWEDropDown<ShapeMode>();
+            _modeDropDown.AddOption(ShapeMode.Rectangle, "Rectangle");
+            _modeDropDown.AddOption(ShapeMode.RectangleFilled, "Filled Rectangle");
+            _modeDropDown.AddOption(ShapeMode.Circle, "Circle");
+            _modeDropDown.AddOption(ShapeMode.CircleFilled, "Filled Circle");
+            _modeDropDown.OnOptionChanged += (option) =>
             {
-                switch (optionText)
-                {
-                    case "Rectangle":
-                        mode = Mode.Rectangle;
-                        break;
-                    case "Filled Rectangle":
-                        mode = Mode.RectangleFilled;
-                        break;
-                    case "Circle":
-                        mode = Mode.Circle;
-                        break;
-                    case "Filled Circle":
-                        mode = Mode.CircleFilled;
-                        break;
-                }
+                _mode = option.Value;
             };
             _modeDropDown.Height.Set(26, 0f);
             _modeDropDown.Width.Set(170, 0f);
@@ -77,13 +65,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             };
             _sizeField.Width.Set(60, 0);
             _sizeField.Height.Set(26, 0);
-            _sizeField.ShowButtons = true;
             Settings.Add(("Size:", _sizeField));
         }
 
         public override string GetInfoText()
         {
-            return $"[c/EAD87A:Shape type:] {mode}, [c/EAD87A:Width:] {_selection.Width}, [c/EAD87A:Height:] {_selection.Height}";
+            return $"[c/EAD87A:Shape type:] {_mode}, [c/EAD87A:Width:] {_selection.Width}, [c/EAD87A:Height:] {_selection.Height}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -102,18 +89,18 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 Color color = TIGWESettings.ToolColor;
 
                 TileCollection tiles;
-                switch (mode)
+                switch (_mode)
                 {
-                    case Mode.Rectangle:
+                    case ShapeMode.Rectangle:
                         tiles = GetRectangleTileCollection(selection.Width, selection.Height, _d);
                         break;
-                    case Mode.RectangleFilled:
+                    case ShapeMode.RectangleFilled:
                         tiles = GetRectangleFilledTileCollection(selection.Width, selection.Height);
                         break;
-                    case Mode.CircleFilled:
+                    case ShapeMode.CircleFilled:
                         tiles = GetEllipseFilledTileCollection(selection.Width, selection.Height);
                         break;
-                    case Mode.Circle:
+                    case ShapeMode.Circle:
                         tiles = GetEllipseTileCollection(selection.Width, selection.Height, _d);
                         break;
                     default:

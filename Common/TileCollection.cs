@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
@@ -73,6 +74,11 @@ namespace TerrariaInGameWorldEditor.Common
         public Dictionary<Point, TileCopy> AsDictionary()
         {
             return _tiles;
+        }
+
+        public List<KeyValuePair<Point, TileCopy>> ToList()
+        {
+            return _tiles.ToList();
         }
 
         public List<Point> ToListOfPoints()

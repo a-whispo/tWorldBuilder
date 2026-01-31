@@ -13,9 +13,18 @@ namespace TerrariaInGameWorldEditor.UI.UIElements.Slider
 {
     internal class TIGWESlider : UIElement
     {
-        public Asset<Texture2D> Texture { set { _body.Texture = value; } }
-        public Asset<Texture2D> TextureHover { set { _body.TextureHover = value; } }
-        public bool ShouldResize { set { _body.ShouldResize = value; } }
+        public Asset<Texture2D> Texture 
+        { 
+            set => _body.Texture = value; 
+        }
+        public Asset<Texture2D> TextureHover 
+        { 
+            set => _body.TextureHover = value; 
+        }
+        public bool ShouldResize 
+        { 
+            set => _body.ShouldResize = value; 
+        }
 
         private TIGWEImageResizeable _body;
         private UIImage _point;
