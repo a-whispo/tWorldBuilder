@@ -5,9 +5,9 @@ using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
-using TerrariaInGameWorldEditor.UI.UIElements.Button;
+using TerrariaInGameWorldEditor.Editor;
+using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -18,7 +18,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         public PasteTool()
         {
-            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/PasteTool"));
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/PasteTool"));
             ToggleToolButton.HoverText = "Paste";
         }
 
@@ -72,12 +72,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 {
                     EditorSystem.Local.Clipboard = EditorSystem.Local.Clipboard.ToMirrored();
                 }
-            }
 
-            // change what corner you're pasting from
-            if (Keybinds.ChangeCornerOnPasteMK.JustPressed)
-            {
-                _pastingCorner = (_pastingCorner == 8 ? 0 : _pastingCorner + 1);
+                // change what corner you're pasting from
+                if (Keybinds.ChangeCornerOnPasteMK.JustPressed)
+                {
+                    _pastingCorner = (_pastingCorner == 8 ? 0 : _pastingCorner + 1);
+                }
             }
 
             // check arrow keys input

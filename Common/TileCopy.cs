@@ -29,7 +29,7 @@ namespace TerrariaInGameWorldEditor.Common
         public bool CheckingLiquid { get; set; }
         public Byte LiquidAmount { get; set; }
         public bool SkipLiquid { get; set; }
-        public int TileFrameNumber { get; set; } = 10;
+        public int TileFrameNumber { get; set; }
         public short TileFrameX { get; set; }
         public short TileFrameY { get; set; }
         public Byte WallColor { get; set; }

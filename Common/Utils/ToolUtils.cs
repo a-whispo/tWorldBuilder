@@ -1,11 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
-using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
+using TerrariaInGameWorldEditor.Editor;
+using TerrariaInGameWorldEditor.Editor.Windows.Settings;
 
 namespace TerrariaInGameWorldEditor.Common.Utils
 {
@@ -14,33 +14,32 @@ namespace TerrariaInGameWorldEditor.Common.Utils
         public static void Paste(TileCollection tilesToPaste, Point point, bool saveToUndo = true, bool placeTileWithTileFraming = false) // takes point in terraria coordinates
         {
             TileCollection undoColl = new TileCollection();
-            List<KeyValuePair<Point, TileCopy>> tilesToPasteList = tilesToPaste.ToNormalized().ToList();
 
             // if we want to update the tiles we're pasting we need to make sure to grab a copy of what we're pasting over before we do the paste
             // as well as the tiles around it since those textures will also update
             if (placeTileWithTileFraming)
             {
-                foreach (var tile in tilesToPasteList)
+                foreach (var tile in tilesToPaste.ToNormalized())
                 {
                     int x = tile.Key.X + point.X;
                     int y = tile.Key.Y + point.Y;
-                    if ((!EditorSystem.Local.CurrentSelection?.ContainsCoord(new Point(x, y)) ?? false) && (EditorSystem.Local.CurrentSelection?.Count > 0))
+                    if ((!EditorSystem.Local.CurrentSelection?.ContainsCoord(new Point16(x, y)) ?? false) && (EditorSystem.Local.CurrentSelection?.Count > 0))
                     {
                         continue;
                     }
-                    undoColl.TryAddTile(new Point(x, y), new TileCopy(Main.tile[x, y]));
-                    undoColl.TryAddTile(new Point(x + 1, y), new TileCopy(Main.tile[x + 1, y]));
-                    undoColl.TryAddTile(new Point(x - 1, y), new TileCopy(Main.tile[x - 1, y]));
-                    undoColl.TryAddTile(new Point(x, y + 1), new TileCopy(Main.tile[x, y + 1]));
-                    undoColl.TryAddTile(new Point(x, y - 1), new TileCopy(Main.tile[x, y - 1]));
+                    undoColl.TryAddTile(new Point16(x, y), new TileCopy(Main.tile[x, y]));
+                    undoColl.TryAddTile(new Point16(x + 1, y), new TileCopy(Main.tile[x + 1, y]));
+                    undoColl.TryAddTile(new Point16(x - 1, y), new TileCopy(Main.tile[x - 1, y]));
+                    undoColl.TryAddTile(new Point16(x, y + 1), new TileCopy(Main.tile[x, y + 1]));
+                    undoColl.TryAddTile(new Point16(x, y - 1), new TileCopy(Main.tile[x, y - 1]));
                 }
             }
 
-            foreach (var tile in tilesToPasteList)
+            foreach (var tile in tilesToPaste.ToNormalized())
             {
                 int x = tile.Key.X + point.X;
                 int y = tile.Key.Y + point.Y;
-                if ((!EditorSystem.Local.CurrentSelection?.ContainsCoord(new Point(x, y)) ?? false) && (EditorSystem.Local.CurrentSelection?.Count > 0))
+                if ((!EditorSystem.Local.CurrentSelection?.ContainsCoord(new Point16(x, y)) ?? false) && (EditorSystem.Local.CurrentSelection?.Count > 0))
                 {
                     continue;
                 }
@@ -48,7 +47,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 // if we dont want the pasted tiles to update just add to history as we paste the tiles
                 if (!placeTileWithTileFraming)
                 {
-                    undoColl.TryAddTile(new Point(x, y), new TileCopy(Main.tile[x, y]));
+                    undoColl.TryAddTile(new Point16(x, y), new TileCopy(Main.tile[x, y]));
                 }
 
                 TileCopy temp = new TileCopy(tile.Value.GetAsTile());
@@ -136,7 +135,6 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 }
             }
 
-            // add to undo history
             if (saveToUndo)
             {
                 EditorSystem.Local.UndoHistory.Add(undoColl);
@@ -231,7 +229,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
 
             void PlotTile(TileCollection tileColl, int x, int y)
             {
-                var key = new Point(x, y);
+                Point16 key = new Point16(x, y);
                 if (!tileColl.ContainsCoord(key))
                 {
                     tileColl.TryAddTile(key, tile);

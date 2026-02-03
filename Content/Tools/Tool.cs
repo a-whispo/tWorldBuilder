@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UI.UIElements.Button;
+using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {

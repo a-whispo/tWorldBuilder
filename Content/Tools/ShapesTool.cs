@@ -3,15 +3,16 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
-using TerrariaInGameWorldEditor.UI.UIElements.Button;
-using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
-using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
+using TerrariaInGameWorldEditor.Editor;
+using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.UIElements.Button;
+using TerrariaInGameWorldEditor.UIElements.DropDown;
+using TerrariaInGameWorldEditor.UIElements.NumberField;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -38,7 +39,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         public ShapesTool()
         {
-            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/ShapesTool"));
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/ShapesTool"));
             ToggleToolButton.HoverText = "Shapes";
 
             // settings
@@ -192,7 +193,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
             void PlotTile(TileCollection tileColl, int x, int y)
             {
-                Point coord = new Point(x, y);
+                Point16 coord = new Point16(x, y);
                 if (!tileColl.ContainsCoord(coord))
                 {
                     tileColl.TryAddTile(coord, EditorSystem.Local.SelectedTile);
@@ -296,13 +297,13 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 {
                     if ((0 <= x && x <= size - 1) || ((width - size) <= x && x <= (width - 1)))
                     {
-                        tileColl.TryAddTile(new Point(x, y), EditorSystem.Local.SelectedTile);
+                        tileColl.TryAddTile(new Point16(x, y), EditorSystem.Local.SelectedTile);
                     }
                     else
                     {
                         if ((0 <= y && y <= size - 1) || ((height - size) <= y && y <= (height - 1)))
                         {
-                            tileColl.TryAddTile(new Point(x, y), EditorSystem.Local.SelectedTile);
+                            tileColl.TryAddTile(new Point16(x, y), EditorSystem.Local.SelectedTile);
                         }
                     }
                 }
@@ -319,7 +320,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             {
                 for (int y = 0; y < height; y++)
                 {
-                    tileColl.TryAddTile(new Point(x, y), EditorSystem.Local.SelectedTile);
+                    tileColl.TryAddTile(new Point16(x, y), EditorSystem.Local.SelectedTile);
                 }
             }
 
@@ -368,7 +369,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
             void PlotTile(TileCollection tileColl, int x, int y)
             {
-                Point coord = new Point(x, y);
+                Point16 coord = new Point16(x, y);
                 if (!tileColl.ContainsCoord(coord))
                 {
                     tileColl.TryAddTile(coord, EditorSystem.Local.SelectedTile);

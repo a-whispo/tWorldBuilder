@@ -1,13 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
-using TerrariaInGameWorldEditor.UI.UIElements.Button;
+using TerrariaInGameWorldEditor.Editor;
+using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -15,7 +16,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
     {
         public TilePickerTool()
         {
-            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/TilePickerTool"));
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/TilePickerTool"));
             ToggleToolButton.HoverText = "Tile Picker";
         }
 
@@ -26,10 +27,10 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            Point point = new Point(Player.tileTargetX, Player.tileTargetY);
+            Point16 point = new Point16(Player.tileTargetX, Player.tileTargetY);
             TileCollection tc = new TileCollection();
             tc.TryAddTile(point, new TileCopy(Main.tile[point.X, point.Y]));
-            DrawUtils.DrawTileCollectionOutline(tc, point, TIGWESettings.ToolColor);
+            DrawUtils.DrawTileCollectionOutline(tc, point.ToPoint(), TIGWESettings.ToolColor);
         }
 
         public override void PostUpdateInput()

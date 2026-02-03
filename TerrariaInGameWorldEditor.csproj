@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<!-- Import tModLoader mod properties -->
 	<Import Project="..\tModLoader.targets" />
@@ -8,10 +8,10 @@
 		
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="UI\UIElements\CheckBox\CheckBoxChecked.png" />
-	  <None Remove="UI\UIElements\CheckBox\CheckBoxCheckedHover.png" />
-	  <None Remove="UI\UIElements\CheckBox\CheckBoxUnchecked.png" />
-	  <None Remove="UI\UIElements\CheckBox\CheckBoxUncheckedHover.png" />
+	  <None Remove="UIElements\CheckBox\CheckBoxChecked.png" />
+	  <None Remove="UIElements\CheckBox\CheckBoxCheckedHover.png" />
+	  <None Remove="UIElements\CheckBox\CheckBoxUnchecked.png" />
+	  <None Remove="UIElements\CheckBox\CheckBoxUncheckedHover.png" />
 	</ItemGroup>
 
 	<!-- References -->

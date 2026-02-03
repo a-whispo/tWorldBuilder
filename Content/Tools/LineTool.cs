@@ -2,17 +2,17 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Linq;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
-using TerrariaInGameWorldEditor.UI.UIElements.Button;
-using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
-using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
+using TerrariaInGameWorldEditor.Editor;
+using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.UIElements.Button;
+using TerrariaInGameWorldEditor.UIElements.DropDown;
+using TerrariaInGameWorldEditor.UIElements.NumberField;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -41,7 +41,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         public LineTool()
         {
-            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/LineTool"));
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/LineTool"));
             ToggleToolButton.HoverText = "Line";
 
             // settings
@@ -96,7 +96,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         _brush = new TileCollection(); // make sure to reset brush if its a reference to clipboard
                     }
                     _brush.Clear();
-                    _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
+                    _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile));
                     break;
 
                 case LineMode.Clipboard:
@@ -192,8 +192,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private TileCollection CalculateTilesInLine(Point origin, Point endpoint, TileCollection brush)
         {
             // algorithm from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C#
-            var brushList = brush.ToList();
-            TileCollection tc = new TileCollection();
+            TileCollection tileInLine = new TileCollection();
 
             _length = 0;
             int x0 = origin.X;
@@ -212,9 +211,9 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 // check if its worth doing calculations, if we havnt placed point 2 yet, if we have placed point 2 we obviously want to check where we should place all the tiles
                 if (_point2placed || !((((x0 * 16) + 64) < (Main.screenPosition.X - 32) || ((x0 * 16) - 64) > (Main.screenPosition.X + Main.screenWidth) || ((y0 * 16) + 64) < (Main.screenPosition.Y) || ((y0 * 16) - 64) > (Main.screenPosition.Y + Main.screenHeight))))
                 {
-                    for (int i = 0; i < brushList.Count; i++)
+                    foreach (var tile in brush)
                     {
-                        tc.TryAddTile(new Point(x0 + brushList[i].Key.X, y0 + brushList[i].Key.Y), brushList[i].Value);
+                        tileInLine.TryAddTile(new Point16(x0 + tile.Key.X, y0 + tile.Key.Y), tile.Value);
                     }
                 }
                 if (x0 == x1 && y0 == y1)
@@ -232,7 +231,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
             }
 
-            return tc;
+            return tileInLine;
         }
     }
 }

@@ -3,11 +3,12 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
-using TerrariaInGameWorldEditor.UI.UIElements.Button;
+using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -17,7 +18,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         public LassoTool()
         {
-            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/LassoTool"));
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/LassoTool"));
             ToggleToolButton.HoverText = "Lasso";
         }
 
@@ -26,7 +27,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             // draw a line from the first to the last point if we're selecting so you can see what the selection would be like
             if (_isSelecting)
             {
-                var selectionArray = _selection.AsDictionary().ToArray();
+                var selectionArray = _selection.ToArray();
                 Vector2 pointLast = new Vector2(selectionArray[selectionArray.Count() - 1].Key.X * 16 - Main.screenPosition.X + 8, selectionArray[selectionArray.Count() - 1].Key.Y * 16 - Main.screenPosition.Y + 8);
                 Vector2 pointFirst = new Vector2(selectionArray[0].Key.X * 16 - Main.screenPosition.X + 8, selectionArray[0].Key.Y * 16 - Main.screenPosition.Y + 8);
                 DrawUtils.DrawLine(pointLast, pointFirst, color: TIGWESettings.ToolColor);
@@ -55,7 +56,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             int err = (dx > dy ? dx : -dy) / 2, e2;
             for (; ; )
             {
-                tc.TryAddTile(new Point(x0, y0), new TileCopy(Main.tile[x0, y0]));
+                tc.TryAddTile(new Point16(x0, y0), new TileCopy(Main.tile[x0, y0]));
                 if (x0 == x1 && y0 == y1) break;
                 e2 = err;
                 if (e2 > -dx) { err -= dy; x0 += sx; }
@@ -73,8 +74,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 _isSelecting = false;
 
                 // add add a line from the last point to the first point to close the selection
-                var selectionArray = _selection.AsDictionary().ToArray();
-                _selection.TryAddTiles(CalculateTilesInLine(new Point(selectionArray[selectionArray.Length - 1].Key.X, selectionArray[selectionArray.Length - 1].Key.Y), new Point(selectionArray[0].Key.X, selectionArray[0].Key.Y)).AsDictionary());
+                var selectionArray = _selection.ToArray();
+                _selection.TryAddTiles(CalculateTilesInLine(new Point(selectionArray[selectionArray.Length - 1].Key.X, selectionArray[selectionArray.Length - 1].Key.Y), new Point(selectionArray[0].Key.X, selectionArray[0].Key.Y)));
                 
                 // get 
                 var polygon = _selection.ToList();
@@ -88,7 +89,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     for (int y = 0; y <= height; y++)
                     {
                         // test if tile is inside the polygon
-                        Point testPoint = new Point(x + offsetX, y + offsetY);
+                        Point16 testPoint = new Point16(x + offsetX, y + offsetY);
                         bool inside = false;
                         for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++)
                         {
@@ -119,19 +120,13 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
 
                 // add tile to selection and drag a line between it and the last point to make sure we have a complete outline
-                if (_selection.TryAddTile(new Point(Player.tileTargetX, Player.tileTargetY), new TileCopy(Main.tile[Player.tileTargetX, Player.tileTargetY])))
+                if (_selection.TryAddTile(new Point16(Player.tileTargetX, Player.tileTargetY), new TileCopy(Main.tile[Player.tileTargetX, Player.tileTargetY])))
                 {
-                    // dont bother if we dont have at least 2 points in the selection
                     if (_selection.Count >= 2)
                     {
-                        // fix all the gaps in the outline
-                        var selectionArray = _selection.AsDictionary().ToArray();
-
-                        // remove so the order of all the tiles arent messed up since this should be after the tiles in the line that we're adding
-                        _selection.RemoveTile(new Point(Player.tileTargetX, Player.tileTargetY));
-
-                        // draw line from the 2nd to last added tile and the tile that was just added and add the resulting tiles to the selection
-                        _selection.TryAddTiles(CalculateTilesInLine(new Point(selectionArray[selectionArray.Length - 2].Key.X, selectionArray[selectionArray.Length - 2].Key.Y), new Point(selectionArray[selectionArray.Length - 1].Key.X, selectionArray[selectionArray.Length - 1].Key.Y)).AsDictionary());
+                        var selectionArray = _selection.ToArray();
+                        _selection.RemoveTile(new Point16(Player.tileTargetX, Player.tileTargetY)); // remove so the order of all the tiles arent messed up since this should be after the tiles in the line that we're adding
+                        _selection.TryAddTiles(CalculateTilesInLine(new Point(selectionArray[selectionArray.Length - 2].Key.X, selectionArray[selectionArray.Length - 2].Key.Y), new Point(selectionArray[selectionArray.Length - 1].Key.X, selectionArray[selectionArray.Length - 1].Key.Y)));
                     }
                 }
             }

@@ -2,10 +2,12 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.UIElements.Button;
+using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
@@ -30,7 +32,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         public BoxSelectionTool()
         {
-            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/SelectTool"));
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/SelectTool"));
             ToggleToolButton.HoverText = "Box Selection";
         }
 
@@ -68,63 +70,46 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public override TileCollection GetSelection()
         {
             // no selection
-            if (!_point1placed)
+            if (!_point1placed || !_point2placed)
             {
                 return null;
-            }
-
-            // temp point at the cursor
-            if (!_point2placed)
-            {
-                _point2 = new Point(_canChangePoint2X ? Player.tileTargetX : _point1.X + _oldWidth, _canChangePoint2Y ? Player.tileTargetY : _point1.Y + _oldHeight);
-            }
-
-            // update selection
-            _selection.Clear();
-            Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
-            int width = selection.Width;
-            int height = selection.Height;
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    int newX = x + selection.X;
-                    int newY = y + selection.Y;
-                    _selection.TryAddTile(new Point(newX, newY), new TileCopy(Main.tile[newX, newY], newX, newY));
-                }
-            }
-
+            }            
             return _selection;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            // dont draw anything if we dont have both points placed
-            if (!_point1placed || !_point2placed)
+            if (!_point2placed)
             {
-                return;
+                _point2 = new Point(_canChangePoint2X ? Player.tileTargetX : _point1.X + _oldWidth, _canChangePoint2Y ? Player.tileTargetY : _point1.Y + _oldHeight);
+            }
+            Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
+
+            // draw a rectangle outline while we dont have anything actually selected
+            if (_point1placed && !_point2placed)
+            {
+                DrawUtils.DrawRectangleOutline(selection, TIGWESettings.ToolColor);
             }
 
             // draw hovering side highlight
-            if (HoveringAny)
+            if (HoveringAny && _point1placed && _point2placed)
             {
-                Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
                 spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.PointClamp, default, default, default, Main.GameViewMatrix.ZoomMatrix);
                 if (_hoveringTop)
                 {
-                    spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - 2 - (int)Main.screenPosition.X, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, selection.Width * 16 + 4, 6), Color.White * 0.8f);
+                    spriteBatch.Draw(DrawUtils.BlankTexture2D.Value, new Rectangle(selection.X * 16 - 2 - (int)Main.screenPosition.X, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, selection.Width * 16 + 4, 6), Color.White * 0.8f);
                 }
                 if (_hoveringLeft)
                 {
-                    spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - (int)Main.screenPosition.X - 2, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, 6, selection.Height * 16 + 4), Color.White * 0.8f);
+                    spriteBatch.Draw(DrawUtils.BlankTexture2D.Value, new Rectangle(selection.X * 16 - (int)Main.screenPosition.X - 2, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, 6, selection.Height * 16 + 4), Color.White * 0.8f);
                 }
                 if (_hoveringRight)
                 {
-                    spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 + selection.Width * 16 - 4 - (int)Main.screenPosition.X, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, 6, selection.Height * 16 + 4), Color.White * 0.8f);
+                    spriteBatch.Draw(DrawUtils.BlankTexture2D.Value, new Rectangle(selection.X * 16 + selection.Width * 16 - 4 - (int)Main.screenPosition.X, selection.Y * 16 - 2 - (int)Main.screenPosition.Y, 6, selection.Height * 16 + 4), Color.White * 0.8f);
                 }
                 if (_hoveringBottom)
                 {
-                    spriteBatch.Draw(DrawUtils.BlankTexture2D, new Rectangle(selection.X * 16 - 2 - (int)Main.screenPosition.X, selection.Y * 16 + selection.Height * 16 - 4 - (int)Main.screenPosition.Y, selection.Width * 16 + 4, 6), Color.White * 0.8f);
+                    spriteBatch.Draw(DrawUtils.BlankTexture2D.Value, new Rectangle(selection.X * 16 - 2 - (int)Main.screenPosition.X, selection.Y * 16 + selection.Height * 16 - 4 - (int)Main.screenPosition.Y, selection.Width * 16 + 4, 6), Color.White * 0.8f);
                 }
                 spriteBatch.End();
             }
@@ -181,7 +166,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     _hoveringBottom = false;
                     _hoveringLeft = false;
                     _hoveringRight = false;
-                } else
+                } 
+                else
                 {
                     if (!_point1placed || (_point1placed && _point2placed)) // if both points have aleady been placed, reset them and place point 1 again
                     {
@@ -195,6 +181,21 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         {
                             _point2 = new Point(_canChangePoint2X ? Player.tileTargetX : _point1.X + _oldWidth, _canChangePoint2Y ? Player.tileTargetY : _point1.Y + _oldHeight);
                             _point2placed = true;
+
+                            // update selection
+                            _selection.Clear();
+                            Rectangle selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
+                            int width = selection.Width;
+                            int height = selection.Height;
+                            for (int x = 0; x < width; x++)
+                            {
+                                for (int y = 0; y < height; y++)
+                                {
+                                    int newX = x + selection.X;
+                                    int newY = y + selection.Y;
+                                    _selection.TryAddTile(new Point16(newX, newY), new TileCopy(Main.tile[newX, newY], newX, newY));
+                                }
+                            }
                         }
                     }
                 }

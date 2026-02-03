@@ -1,132 +1,186 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using Terraria.DataStructures;
 using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
 {
-    public class TileCollection : TagSerializable
+    public class TileCollection : TagSerializable, IEnumerable<KeyValuePair<Point16, TileCopy>>
     {
         public EventHandler OnChanged;
-
-        // deserializer for the tagcompound
         public static Func<TagCompound, TileCollection> DESERIALIZER = s => DeserializeData(s);
-
+        public int Count => _tiles.Count;
+        
         // tiles stored
-        private Dictionary<Point, TileCopy> _tiles = new Dictionary<Point, TileCopy>();
+        private Dictionary<Point16, TileCopy> _tiles = new Dictionary<Point16, TileCopy>();
+        private TileCollection _cachedMirrored;
+        private TileCollection _cached90Deg;
+        private TileCollection _cachedNormalized;
 
         // min values
         private int _minX = int.MaxValue;
         private int _minY = int.MaxValue;
         private int _maxX = int.MinValue;
         private int _maxY = int.MinValue;
-        private bool _boundsDirty = false;
-
-        public int Count
-        {
-            get => _tiles.Count;
-        }
+        private bool _boundsDirty = true;
 
         public TileCollection ToMirrored()
         {
-            // recalculate if needed
+            if (_cachedMirrored != null)
+            {
+                return _cachedMirrored;
+            }
             if (_boundsDirty)
             {
                 RecalculateBounds();
             }
-
-            // new mirrored tile collection
-            TileCollection newTileColl = new TileCollection();
+            
+            _cachedMirrored = new TileCollection();
             int maxX = GetWidth() - 1;
-
-            // mirror
             foreach (var tile in _tiles)
             {
-                newTileColl.TryAddTile(new Point((maxX - tile.Key.X), tile.Key.Y), tile.Value);
+                _cachedMirrored.TryAddTile(new Point16((maxX - tile.Key.X), tile.Key.Y), tile.Value);
             }
 
-            return newTileColl;
+            return _cachedMirrored;
         }
 
         public TileCollection To90DegAntiClockwise()
         {
-            // recalculate if needed
+            if (_cached90Deg != null)
+            {
+                return _cached90Deg;
+            }
             if (_boundsDirty)
             {
                 RecalculateBounds();
             }
 
-            // new rotated tile collection
-            TileCollection newTileColl = new TileCollection();
+            _cached90Deg = new TileCollection();
             int maxX = GetWidth() - 1;
             int minX = GetMinX();
-
-            // rotate
             foreach (var tile in _tiles)
             {
-                newTileColl.TryAddTile(new Point(tile.Key.Y, (maxX + minX - tile.Key.X)), tile.Value);
+                _cached90Deg.TryAddTile(new Point16(tile.Key.Y, (maxX + minX - tile.Key.X)), tile.Value);
             }
 
-            return newTileColl;
-        }
-
-        public Dictionary<Point, TileCopy> AsDictionary()
-        {
-            return _tiles;
-        }
-
-        public List<KeyValuePair<Point, TileCopy>> ToList()
-        {
-            return _tiles.ToList();
-        }
-
-        public List<Point> ToListOfPoints()
-        {
-            List<Point> points = new List<Point>();
-            foreach (var tile in _tiles)
-            {
-                points.Add(tile.Key);
-            }
-            return points;
+            return _cached90Deg;
         }
 
         public TileCollection ToNormalized()
         {
-            // recalculate if needed
+            if (_cachedNormalized != null)
+            {
+                return _cachedNormalized;
+            }
             if (_boundsDirty)
             {
                 RecalculateBounds();
             }
 
-            // create a tilecollection with updated values
-            TileCollection normalizedCollection = new TileCollection();
-            foreach (var entry in _tiles)
+            _cachedNormalized = new TileCollection();
+            foreach (var tile in _tiles)
             {
-                normalizedCollection.TryAddTile(new Point(entry.Key.X - _minX, entry.Key.Y - _minY), entry.Value);
+                _cachedNormalized.TryAddTile(new Point16(tile.Key.X - _minX, tile.Key.Y - _minY), tile.Value);
             }
 
-            return normalizedCollection;
+            return _cachedNormalized;
         }
 
-        private void UpdateBounds(Point point)
+        public bool ContainsCoord(Point16 coord)
+        {
+            return _tiles.ContainsKey(coord);
+        }
+
+        public void TryAddTiles(IEnumerable<KeyValuePair<Point16, TileCopy>> tiles)
+        {
+            bool changed = false;
+            foreach (var tile in tiles)
+            {
+                if (_tiles.TryAdd(tile.Key, tile.Value))
+                {
+                    if (!_boundsDirty)
+                    {
+                        UpdateBounds(tile.Key);
+                    }
+                    changed = true;
+
+                }
+            }
+            if (changed)
+            {
+                InvalidateCaches();
+                OnChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public bool TryAddTile(Point16 coord, TileCopy tile)
+        {
+            if (_tiles.TryAdd(coord, tile))
+            {
+                if (!_boundsDirty)
+                {
+                    UpdateBounds(coord);
+                }
+                InvalidateCaches();
+                OnChanged?.Invoke(this, EventArgs.Empty);
+                return true;
+            }
+            return false;
+        }
+
+        public bool TryGetTile(Point16 coord, out TileCopy tile)
+        {
+            return _tiles.TryGetValue(coord, out tile);
+        }
+
+        public bool RemoveTile(Point16 coord)
+        {
+            if (_tiles.Remove(coord))
+            {
+                // if the tile we removed was on the bounds we need to recalculate them
+                if (coord.X == _minX || coord.X == _maxX || coord.Y == _minY || coord.Y == _maxY)
+                {
+                    _boundsDirty = true;
+                }
+                InvalidateCaches();
+                OnChanged?.Invoke(this, EventArgs.Empty);
+                return true;
+            }
+            return false;
+        }
+
+        public void Clear()
+        {
+            _tiles.Clear();
+            _minX = int.MaxValue;
+            _minY = int.MaxValue;
+            _maxX = int.MinValue;
+            _maxY = int.MinValue;
+            _boundsDirty = false;
+            InvalidateCaches();
+            OnChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void UpdateBounds(Point16 coord)
         {
             // just compare and update
-            if (point.X < _minX)
+            if (coord.X < _minX)
             {
-                _minX = point.X;
+                _minX = coord.X;
             }
-            if (point.X > _maxX)
+            if (coord.X > _maxX)
             {
-                _maxX = point.X;
+                _maxX = coord.X;
             }
-            if (point.Y < _minY)
+            if (coord.Y < _minY)
             {
-                _minY = point.Y;
+                _minY = coord.Y;
             }
-            if (point.Y > _maxY)
+            if (coord.Y > _maxY)
             {
-                _maxY = point.Y;
+                _maxY = coord.Y;
             }
         }
 
@@ -143,69 +197,14 @@ namespace TerrariaInGameWorldEditor.Common
             {
                 UpdateBounds(tile.Key);
             }
-
             _boundsDirty = false;
         }
 
-        public void TryAddTiles(Dictionary<Point, TileCopy> tilesToAdd)
+        private void InvalidateCaches()
         {
-            foreach (var tile in tilesToAdd)
-            {
-                TryAddTile(tile.Key, tile.Value);
-            }
-            OnChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        public bool TryAddTile(Point coords, TileCopy tileToAdd)
-        {
-            // update bounds if we added
-            if (_tiles.TryAdd(coords, tileToAdd))
-            {
-                if (!_boundsDirty)
-                {
-                    UpdateBounds(coords);
-                }
-                OnChanged?.Invoke(this, EventArgs.Empty);
-                return true;
-            }
-            return false;
-        }
-
-        public bool RemoveTile(Point coords)
-        {
-            if (_tiles.Remove(coords))
-            {
-                // check if the tile we remove was on the bounds
-                if (coords.X == _minX || coords.X == _maxX || coords.Y == _minY || coords.Y == _maxY)
-                {
-                    // if it was we need to recalculate the bounds
-                    _boundsDirty = true;
-                }
-                OnChanged?.Invoke(this, EventArgs.Empty);
-                return true;
-            }
-            return false;
-        }
-
-        public bool TryGetTile(Point coords, out TileCopy tile)
-        {
-            return _tiles.TryGetValue(coords, out tile);
-        }
-
-        public void Clear()
-        {
-            _tiles.Clear();
-            _minX = int.MaxValue;
-            _minY = int.MaxValue;
-            _maxX = int.MinValue;
-            _maxY = int.MinValue;
-            _boundsDirty = false;
-            OnChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        public bool ContainsCoord(Point coords)
-        {
-            return _tiles.ContainsKey(coords);
+            _cachedMirrored = null;
+            _cached90Deg = null;
+            _cachedNormalized = null;
         }
 
         public int GetMinX()
@@ -285,15 +284,25 @@ namespace TerrariaInGameWorldEditor.Common
             // deserialize the dict
             TileCollection tileColl = new TileCollection();
 
-            var list = tag.GetList<TagCompound>("Tiles");
+            IList<TagCompound> list = tag.GetList<TagCompound>("Tiles");
             foreach (var item in list)
             {
                 int x = item.GetInt("X");
                 int y = item.GetInt("Y");
                 TileCopy tileCopy = item.Get<TileCopy>("TileCopy");
-                tileColl.TryAddTile(new Point(x, y), tileCopy);
+                tileColl.TryAddTile(new Point16(x, y), tileCopy);
             }
             return tileColl;
+        }
+
+        public IEnumerator<KeyValuePair<Point16, TileCopy>> GetEnumerator()
+        {
+            return _tiles.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _tiles.GetEnumerator();
         }
     }
 }

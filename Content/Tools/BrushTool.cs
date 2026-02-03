@@ -3,24 +3,23 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ModLoader;
-using Terraria.Social.Base;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.UI.Editor;
-using TerrariaInGameWorldEditor.UI.TIGWEUI.Settings;
-using TerrariaInGameWorldEditor.UI.UIElements.Button;
-using TerrariaInGameWorldEditor.UI.UIElements.DropDown;
-using TerrariaInGameWorldEditor.UI.UIElements.NumberField;
+using TerrariaInGameWorldEditor.Editor;
+using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.UIElements.Button;
+using TerrariaInGameWorldEditor.UIElements.DropDown;
+using TerrariaInGameWorldEditor.UIElements.NumberField;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
     internal class BrushTool : Tool
     {
-        private Dictionary<Point, TileCopy> _currentDrawPreTilesPlaced = new Dictionary<Point, TileCopy>(); // the state of the tiles before we draw on them (for undo)
+        private Dictionary<Point16, TileCopy> _currentDrawPreTilesPlaced = new Dictionary<Point16, TileCopy>(); // the state of the tiles before we draw on them (for undo)
         private List<Point> _currentDrawLinePoints = new List<Point>(); // list of all the points the cursor passed over when we're drawing (used to make lines complete without gaps caused by 60 fps)
         private TileCollection _brush = new TileCollection(); // the brush itself, a collection of tiles in the shape of an ellipse
         private int _d; // diameter of the brush
@@ -35,7 +34,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         public BrushTool()
         {
-            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>("TerrariaInGameWorldEditor/UI/UIImages/BrushTool"));
+            ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/BrushTool"));
             ToggleToolButton.HoverText = "Brush";
 
             // settings
@@ -88,7 +87,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         _brush = new TileCollection(); // make sure to reset brush if its a reference to clipboard
                     }
                     _brush.Clear();
-                    _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile).AsDictionary());
+                    _brush.TryAddTiles(ToolUtils.GetEllipseFilledTileCollection(_d, _d, EditorSystem.Local.SelectedTile));
                     break;
 
                 case BrushMode.Clipboard:
@@ -118,9 +117,9 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 if (_currentDrawPreTilesPlaced.Count > 0)
                 {
                     // create a tile collection with all the affected tiles and add it to undo history
-                    TileCollection tileColl = new TileCollection();
-                    tileColl.TryAddTiles(_currentDrawPreTilesPlaced);
-                    EditorSystem.Local.UndoHistory.Add(tileColl);
+                    TileCollection undoColl = new TileCollection();
+                    undoColl.TryAddTiles(_currentDrawPreTilesPlaced);
+                    EditorSystem.Local.UndoHistory.Add(undoColl);
                     _currentDrawPreTilesPlaced.Clear();
                     _currentDrawLinePoints.Clear();
                 }
@@ -142,26 +141,23 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 int width = (int)Math.Floor(_brush.GetWidth() / 2f);
                 int height = (int)Math.Floor(_brush.GetHeight() / 2f);
 
-                // get brush as list for easier iteration
-                var brushList = _brush.ToNormalized().ToList();
-
                 foreach (Point point in pointsToDrawAt) {
 
                     // go over all the tiles and set coordinates
-                    foreach (var tile in brushList)
+                    foreach (var tile in _brush.ToNormalized())
                     {
                         int x = tile.Key.X + point.X - width;
                         int y = tile.Key.Y + point.Y - height;
 
-                        _currentDrawPreTilesPlaced.TryAdd(new Point(x, y), new TileCopy(Main.tile[x, y]));
+                        _currentDrawPreTilesPlaced.TryAdd(new Point16(x, y), new TileCopy(Main.tile[x, y]));
 
                         // we also need to add the tiles around it since those also get affected if we have update tiles on
                         if (TIGWESettings.ShouldUpdateDrawnTiles)
                         {
-                            _currentDrawPreTilesPlaced.TryAdd(new Point(x + 1, y), new TileCopy(Main.tile[x + 1, y]));
-                            _currentDrawPreTilesPlaced.TryAdd(new Point(x - 1, y), new TileCopy(Main.tile[x - 1, y]));
-                            _currentDrawPreTilesPlaced.TryAdd(new Point(x, y + 1), new TileCopy(Main.tile[x, y + 1]));
-                            _currentDrawPreTilesPlaced.TryAdd(new Point(x, y - 1), new TileCopy(Main.tile[x, y - 1]));
+                            _currentDrawPreTilesPlaced.TryAdd(new Point16(x + 1, y), new TileCopy(Main.tile[x + 1, y]));
+                            _currentDrawPreTilesPlaced.TryAdd(new Point16(x - 1, y), new TileCopy(Main.tile[x - 1, y]));
+                            _currentDrawPreTilesPlaced.TryAdd(new Point16(x, y + 1), new TileCopy(Main.tile[x, y + 1]));
+                            _currentDrawPreTilesPlaced.TryAdd(new Point16(x, y - 1), new TileCopy(Main.tile[x, y - 1]));
                         }
                     }
 
