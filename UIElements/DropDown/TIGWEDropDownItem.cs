@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UIElements;
 using TerrariaInGameWorldEditor.UIElements.ButtonResizable;
 
 namespace TerrariaInGameWorldEditor.UIElements.DropDown

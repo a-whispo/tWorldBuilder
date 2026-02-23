@@ -1,15 +1,16 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using System;
 using System.Globalization;
+using System.Linq;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UIElements;
+using TerrariaInGameWorldEditor.UIElements.ButtonResizable;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
+using TerrariaInGameWorldEditor.UIElements.NumberField;
 using TerrariaInGameWorldEditor.UIElements.Slider;
 using TerrariaInGameWorldEditor.UIElements.TextField;
 
@@ -19,183 +20,290 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
     {
         public delegate void ColorChangedEventHandler(Color color);
         public event ColorChangedEventHandler OnColorChanged;
-        public float DrawScale { get; set; }
 
-        private UIElement _colorPane;
-        private UIImage _colorDot;
-        private TIGWEImageResizeable _colorBorder;
-        private TIGWEImageResizeable _previewBorder;
-        private TIGWESlider _hueSlider;
-        private TIGWETextField _hexTextField;
-        private bool _isPressing = false;
-        private TIGWETextField _rTextField;
-        private TIGWETextField _gTextField;
-        private TIGWETextField _bTextField;
+        private bool _isShowingColorPicker = false;
+        private bool _isSelectingColor = false;
+        private TIGWEImageResizeable _colorPicker;
+        private UIElement _colorArea;
         private Asset<Texture2D> _color;
         private Asset<Texture2D> _gradient;
+        private UIImage _colorDot;
+        private TIGWETextField _hexTextField;
+        private TIGWENumberField _rNumberField;
+        private TIGWENumberField _gNumberField;
+        private TIGWENumberField _bNumberField;
+        private TIGWESlider _hueSlider;
 
         public TIGWEColorPicker()
         {
-            DrawScale = Main.UIScale;
+            Width.Set(26, 0);
+            Height.Set(26, 0);
 
-            // set width and height
-            Width.Set(350, 0);
-            Height.Set(120, 0);
+            // main button
+            TIGWEImageButtonResizeable colorPicker = new TIGWEImageButtonResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture"));
+            colorPicker.TextureHover = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/TextureHover");
+            colorPicker.Height.Set(26, 0);
+            colorPicker.Width.Set(26, 0);
+            Append(colorPicker);
+            colorPicker.OnLeftClick += (_, _) =>
+            {
+                ShowColorPicker();
+            };
 
-            // element to hold the border and the color dot
-            _colorPane = new UIElement();
-            _colorPane.Width.Set(100, 0);
-            _colorPane.Height.Set(100, 0);
-            _colorPane.Top.Set(10, 0);
-            _colorPane.Left.Set(10, 0);
-            Append(_colorPane);
+            // element/border to be the main color picker area
+            _colorPicker = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Border"), 6, 4);
+            _colorPicker.Width.Set(256, 0);
+            _colorPicker.Height.Set(146, 0);
 
-            // create the dot
+            // gradient and color
+            _color = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/Color");
+            _gradient = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/Gradient");
+            _colorArea = new UIElement();
+            _colorArea.Left.Set(8, 0);
+            _colorArea.Top.Set(8, 0);
+            _colorArea.Width.Set(110, 0);
+            _colorArea.Height.Set(110, 0);
+            _colorArea.OnDraw += DrawColorArea;
+            _colorArea.OnLeftMouseDown += (_, _) =>
+            {
+                _isSelectingColor = true;
+            };
+            _colorArea.OnLeftMouseUp += (_, _) =>
+            {
+                _isSelectingColor = false;
+            };
+            _colorPicker.Append(_colorArea);
+
+            // color picker dot
             _colorDot = new UIImage(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/ColorPickerDot"));
-            // place dot in top left by default
-            _colorDot.Left.Set(2, 0);
-            _colorDot.Top.Set(2, 0);
-            _colorPane.Append(_colorDot);
+            _colorDot.Left.Set(-4, 0);
+            _colorDot.Top.Set(-4, 0);
+            _colorArea.Append(_colorDot);
 
-            // create a border around the color
-            _colorBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Border"));
-            _colorBorder.Width.Set(100, 0);
-            _colorBorder.Height.Set(100, 0);
-            _colorBorder.IgnoresMouseInteraction = true;
-            _colorPane.Append(_colorBorder);
-
-            // create a border around the color
-            _previewBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Border"));
-            _previewBorder.Width.Set(30, 0);
-            _previewBorder.Height.Set(100, 0);
-            _previewBorder.Top.Set(10, 0);
-            _previewBorder.Left.Set(114, 0);
-            _previewBorder.IgnoresMouseInteraction = true;
-            Append(_previewBorder);
-
-            // hue slider and visualName
-            UIText hue = new UIText("Hue: ");
-            hue.Top.Set(15, 0);
-            hue.Left.Set(149, 0);
-            Append(hue);
-            _hueSlider = new TIGWESlider(150);
-            _hueSlider.Top.Set(15, 0);
-            _hueSlider.Left.Set(190, 0);
+            // hue slider
+            _hueSlider = new TIGWESlider();
+            _hueSlider.Height.Set(18, 0);
+            _hueSlider.Width.Set(240, 0);
+            _hueSlider.Top.Set(120, 0);
+            _hueSlider.Left.Set(8, 0);
             _hueSlider.Texture = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/HueSlider");
             _hueSlider.TextureHover = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/HueSlider");
             _hueSlider.ShouldResize = false;
-            Append(_hueSlider);
+            _colorPicker.Append(_hueSlider);
 
-            // hex textfield and visualName
-            UIText hex = new UIText("Hex: ");
-            hex.Top.Set(50, 0);
-            hex.Left.Set(149, 0);
-            Append(hex);
+            // hex textfield
+            UIText hex = new UIText("Hex:");
+            hex.Top.Set(12, 0);
+            hex.Left.Set(122, 0);
+            _colorPicker.Append(hex);
             _hexTextField = new TIGWETextField("", 6);
-            _hexTextField.TextOffsetLeft = 40;
-            _hexTextField.CanFocus = false;
-            _hexTextField.Width.Set(150, 0);
-            _hexTextField.Height.Set(32, 0);
-            _hexTextField.Top.Set(43, 0);
-            _hexTextField.Left.Set(190, 0);
-            Append(_hexTextField);
-            UIText number = new UIText("#");
-            number.Left.Set(10, 0);
-            number.Top.Set(7, 0);
-            number.IgnoresMouseInteraction = true;
-            _hexTextField.Append(number);
+            _hexTextField.OnTextChanged += (newText) =>
+            {
+                // validate input and make uppercase
+                char[] validatedChars = newText.Where((c, b) =>
+                {
+                    return Uri.IsHexDigit(c);
+                }).ToArray();
+                _hexTextField.SetText(new string(validatedChars).ToUpper(), false);
+                SetColor(HexToColor(newText));
+            };
+            _hexTextField.Width.Set(86, 0);
+            _hexTextField.Height.Set(26, 0);
+            _hexTextField.Top.Set(8, 0);
+            _hexTextField.Left.Set(162, 0);
+            _colorPicker.Append(_hexTextField);
 
-            // rgb textfields and visualName
-            UIText rgb = new UIText("Rgb: ");
-            rgb.Top.Set(85, 0);
-            rgb.Left.Set(149, 0);
-            Append(rgb);
-            
-            // r
-            _rTextField = new TIGWETextField("", 3);
-            _rTextField.CanFocus = false;
-            _rTextField.Width.Set(48, 0);
-            _rTextField.Height.Set(32, 0);
-            _rTextField.Top.Set(78, 0);
-            _rTextField.Left.Set(190, 0);
-            Append(_rTextField);
+            // rgb
+            UIText r = new UIText("R:");
+            r.Top.Set(40, 0);
+            r.Left.Set(122, 0);
+            _colorPicker.Append(r);
+            _rNumberField = new TIGWENumberField(0);
+            _rNumberField.OnValueChanged += (newValue) =>
+            {
+                SetColor(new Color(newValue, _gNumberField.GetValue(), _bNumberField.GetValue()));
+            };
+            _rNumberField.Top.Set(36, 0);
+            _rNumberField.Left.Set(162, 0);
+            _rNumberField.Width.Set(86, 0);
+            _rNumberField.Height.Set(26, 0);
+            _colorPicker.Append(_rNumberField);
+            UIText g = new UIText("G:");
+            g.Top.Set(68, 0);
+            g.Left.Set(122, 0);
+            _colorPicker.Append(g);
+            _gNumberField = new TIGWENumberField(0);
+            _gNumberField.OnValueChanged += (newValue) =>
+            {
+                SetColor(new Color(_rNumberField.GetValue(), newValue, _bNumberField.GetValue()));
+            };
+            _gNumberField.Top.Set(64, 0);
+            _gNumberField.Left.Set(162, 0);
+            _gNumberField.Width.Set(86, 0);
+            _gNumberField.Height.Set(26, 0);
+            _colorPicker.Append(_gNumberField);
+            UIText b = new UIText("B:");
+            b.Top.Set(96, 0);
+            b.Left.Set(122, 0);
+            _colorPicker.Append(b);
+            _bNumberField = new TIGWENumberField(0);
+            _bNumberField.OnValueChanged += (newValue) =>
+            {
+                SetColor(new Color(_rNumberField.GetValue(), _gNumberField.GetValue(), newValue));
+            };
+            _bNumberField.Top.Set(92, 0);
+            _bNumberField.Left.Set(162, 0);
+            _bNumberField.Width.Set(86, 0);
+            _bNumberField.Height.Set(26, 0);
+            _colorPicker.Append(_bNumberField);
+        }
 
-            // g
-            _gTextField = new TIGWETextField("", 3);
-            _gTextField.CanFocus = false;
-            _gTextField.Width.Set(48, 0);
-            _gTextField.Height.Set(32, 0);
-            _gTextField.Top.Set(78, 0);
-            _gTextField.Left.Set(241, 0);
-            Append(_gTextField);
+        private void DrawColorArea(UIElement element)
+        {
+            // set up spritebatch
+            SpriteBatch spriteBatch = new SpriteBatch(Main.graphics.GraphicsDevice);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
 
-            // b
-            _bTextField = new TIGWETextField("", 3);
-            _bTextField.CanFocus = false;
-            _bTextField.Width.Set(48, 0);
-            _bTextField.Height.Set(32, 0);
-            _bTextField.Top.Set(78, 0);
-            _bTextField.Left.Set(292, 0);
-            Append(_bTextField);
+            // draw the color and gradient
+            Rectangle bounds = element.GetViewCullingArea();
+            spriteBatch.Draw(_color.Value, bounds, HsvToColor(GetHue(), 100, 100));
+            spriteBatch.Draw(_gradient.Value, bounds, Color.White);
+            spriteBatch.End();
+            spriteBatch.Dispose();
+        }
 
-            _color = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/Color");
-            _gradient = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/Gradient");
+        private void ShowColorPicker()
+        {
+            if (!_isShowingColorPicker)
+            {
+                _isShowingColorPicker = true;
+
+                // get the topmost element so we can append _colorPicker there causing it to render and handle input on top of everything else
+                UIElement top = this;
+                while (top.Parent != null)
+                {
+                    top = top.Parent;
+                }
+                top.Append(_colorPicker);
+                top.OnUpdate += CheckIfShouldHide;
+            }
+        }
+
+        private void CheckIfShouldHide(UIElement element)
+        {
+            Vector2 mouse = new Vector2(Main.mouseX, Main.mouseY);
+            if (!_isSelectingColor && !_hueSlider.IsDragging && !ContainsPoint(mouse) && !_colorPicker.ContainsPoint(mouse))
+            {
+                HideColorPicker();
+            }
+        }
+
+        private void HideColorPicker()
+        {
+            if (_isShowingColorPicker && _colorPicker.Parent != null)
+            {
+                _isShowingColorPicker = false;
+                _hexTextField.IsFocused = false;
+                _rNumberField.IsFocused = false;
+                _gNumberField.IsFocused = false;
+                _bNumberField.IsFocused = false;
+                _colorPicker.Parent.OnUpdate -= CheckIfShouldHide;
+                _colorPicker.Remove();
+            }
         }
 
         public float GetHue()
         {
-            return _hueSlider.GetValue() * 3.6f; // returns hue (0 - 360)
+            // returns hue (0 - 360)
+            return _hueSlider.GetValue() * 3.6f;
         }
 
         public float GetSaturation()
         {
-            return (_colorDot.Left.Pixels - 2) / 84 * 100; // returns saturation (0 - 100)
+            // returns saturation (0 - 100)
+            return (_colorDot.Left.Pixels + 4) / (_colorArea.Width.Pixels - 2) * 100;
         }
 
         public float GetValue()
         {
-            return 100 - (_colorDot.Top.Pixels - 2) / 84 * 100; // returns value (0 - 100)
+            // returns value (0 - 100)
+            return 100 - (_colorDot.Top.Pixels + 4) / (_colorArea.Height.Pixels - 2) * 100;
         }
 
         public Color GetColor()
         {
-            int[] rgb = HsvToRgb(GetHue(), GetSaturation(), GetValue());
-            return new Color(rgb[0], rgb[1], rgb[2]);
+            return HsvToColor(GetHue(), GetSaturation(), GetValue());
         }
 
         public string GetHex()
         {
-            int[] rgb = HsvToRgb(GetHue(), GetSaturation(), GetValue());
-            
+            Color color = GetColor();
+
             // converts to hex values
-            string rHex = rgb[0].ToString("X");
+            string rHex = color.R.ToString("X");
             rHex = rHex.Length == 1 ? "0" + rHex : rHex;
-            string gHex = rgb[1].ToString("X");
+            string gHex = color.G.ToString("X");
             gHex = gHex.Length == 1 ? "0" + gHex : gHex;
-            string bHex = rgb[2].ToString("X");
+            string bHex = color.B.ToString("X");
             bHex = bHex.Length == 1 ? "0" + bHex : bHex;
 
             return rHex + gHex + bHex;
         }
 
-        private void SetSaturation(int saturation)
+        public override void Draw(SpriteBatch spriteBatch)
         {
-            saturation = Math.Clamp(saturation, 0, 100);
-            _colorDot.Left.Set(86 - saturation / 84 * 100, 0); // sets saturation (0 - 100)
+            base.Draw(spriteBatch);
+
+            // draw the color and gradient
+            Rectangle bounds = GetViewCullingArea();
+            bounds.X += 6;
+            bounds.Y += 6;
+            bounds.Width -= 12;
+            bounds.Height -= 12;
+            spriteBatch.Draw(_color.Value, bounds, GetColor());
         }
 
-        private void SetValue(int value)
+        public override void Update(GameTime gameTime)
         {
-            value = Math.Clamp(value, 0, 100);
-            _colorDot.Top.Set(2 + value / 84 * 100, 0); // sets value (0 - 100)
+            base.Update(gameTime);
+
+            // adjust color dot offset
+            if (_isSelectingColor) 
+            {
+                int offsetX = Main.mouseX - _colorArea.GetViewCullingArea().X;
+                int offsetY = Main.mouseY - _colorArea.GetViewCullingArea().Y;
+                _colorDot.Top.Set(Math.Clamp(offsetY - 7, -4, _colorArea.Height.Pixels - 6), 0);
+                _colorDot.Left.Set(Math.Clamp(offsetX - 7, -4, _colorArea.Width.Pixels - 6), 0);
+            }
+
+            // update color when changing color with the slider and color area
+            if (_hueSlider.IsDragging || _isSelectingColor)
+            {
+                SetColor(HsvToColor(GetHue(), GetSaturation(), GetValue()));
+            }
+
+            // set to a default value if we exit without typing anything
+            if (_hexTextField.GetText().Equals("") && !_hexTextField.IsFocused)
+            {
+                SetColor(new Color(255, 255, 255));
+            }
         }
 
-        private static int[] HsvToRgb(double h, double s, double v)
+        public override void Recalculate()
+        {
+            base.Recalculate();
+            if (_colorPicker.Parent != null)
+            {
+                _colorPicker.Top.Set(GetDimensions().Y - _colorPicker.Parent.Top.Pixels + 24, 0);
+                _colorPicker.Left.Set(GetDimensions().X - _colorPicker.Parent.Left.Pixels, 0);
+            }
+        }
+
+        private Color HsvToColor(double h, double s, double v)
         {
             s = s / 100;
             v = v / 100;
 
-            // using a formula i found on rapidtables
             double c = v * s;
             double x = c * (1 - Math.Abs(h / 60 % 2 - 1));
             double m = v - c;
@@ -205,35 +313,34 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             double b = 0;
             switch (h)
             {
-                case >=300: r = c; g = 0; b = x; break;
+                case >= 300: r = c; g = 0; b = x; break;
                 case >= 240: r = x; g = 0; b = c; break;
                 case >= 180: r = 0; g = x; b = c; break;
                 case >= 120: r = 0; g = c; b = x; break;
                 case >= 60: r = x; g = c; b = 0; break;
                 case >= 0: r = c; g = x; c = 0; break;
             }
-            return [(int)Math.Round((r + m) * 255), (int)Math.Round((g + m) * 255), (int)Math.Round((b + m) * 255)];
+            return new Color((int)Math.Round((r + m) * 255), (int)Math.Round((g + m) * 255), (int)Math.Round((b + m) * 255));
         }
 
-        private static int[] HexToRgb(string hex)
+        private Color HexToColor(string hex)
         {
-            hex = hex.Replace("|", "");
-            NumberStyles s = NumberStyles.HexNumber;
-
-            int r = int.Parse(hex.Substring(0, 2), s);
-            int g = int.Parse(hex.Substring(2, 2), s);
-            int b = int.Parse(hex.Substring(4, 2), s);
-
-            return [r, g, b];
+            if (hex.Length == 6)
+            {
+                int.TryParse(hex.Substring(0, 2), NumberStyles.HexNumber, null, out int r);
+                int.TryParse(hex.Substring(2, 2), NumberStyles.HexNumber, null, out int g);
+                int.TryParse(hex.Substring(4, 2), NumberStyles.HexNumber, null, out int b);
+                return new Color(r, g, b);
+            }
+            return new Color(255, 255, 255);
         }
 
-        private static int[] RgbToHsv(float r, float g, float b)
+        public void SetColor(Color color)
         {
-            float R = r / 255;
-            float G = g / 255;
-            float B = b / 255;
+            float R = (float)color.R / 255;
+            float G = (float)color.G / 255;
+            float B = (float)color.B / 255;
 
-            // using a formula i found on rapidtables
             float cMax = Math.Max(R, Math.Max(G, B));
             float cMin = Math.Min(R, Math.Min(G, B));
 
@@ -243,11 +350,12 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             float s = 0;
             float v = 0;
 
-            // calculate h
+            // calculate hue
             if (deltaC == 0)
             {
                 h = 0;
-            } else
+            }
+            else
             {
                 if (cMax == R)
                 {
@@ -261,93 +369,40 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
                 {
                     h = 60 * ((R - G) / deltaC + 4);
                 }
+                if (h < 0)
+                {
+                    h += 360;
+                }
             }
 
-            // calculate s
+            // calculate saturation
             if (cMax == 0)
             {
                 s = 0;
-            } else
+            }
+            else
             {
                 s = deltaC / cMax;
             }
 
-            // calculate v
+            // calculate value
             v = cMax;
-
-            return [(int)h, (int)(s * 100), (int)(v * 100)];
-        }
-
-        protected override void DrawChildren(SpriteBatch spriteBatch)
-        {
-            // draw a background
-            UIElementUtils.DrawTexture2DWithDimensions(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture").Value, GetDimensions().ToRectangle());
-
-            // get bounds
-            Rectangle bounds = _colorPane.GetViewCullingArea();
-
-            // draw the color of selected hue
-            int[] hue = HsvToRgb(GetHue(), 100, 100);
-            spriteBatch.Draw(_color.Value, new Rectangle(bounds.X + 6, bounds.Y + 6, bounds.Width - 10, bounds.Height - 10), new Color(hue[0], hue[1], hue[2])); // Set color to whatever hue we have selected
-
-            // draw color preview
-            spriteBatch.Draw(_color.Value, new Rectangle(bounds.X + 110, bounds.Y + 4, 20, 96), GetColor()); // Set color to whatever we have selected
-
-            // need to start a new spritebatch with nonpremultiplied blendstate to properly draw the gradient
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Matrix.CreateScale(DrawScale));
-            // draw gradient
-            spriteBatch.Draw(_gradient.Value, new Rectangle(bounds.X + 6, bounds.Y + 6, bounds.Width - 11, bounds.Height - 11), Color.White);
-
-            // start normal spritebatch again
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Matrix.CreateScale(DrawScale)); // make sure to go back to the normal spritebatch
-
-            // draw all children like border and dot after so they appear on top
-            base.DrawChildren(spriteBatch);
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-            if (!(Mouse.GetState().LeftButton == ButtonState.Pressed))
+            
+            // update
+            if (!_hueSlider.IsDragging && !_isSelectingColor)
             {
-                _isPressing = false;
+                _hueSlider.SetValue(h / 3.6f);
+                _colorDot.Left.Set(s * (_colorArea.Width.Pixels - 2) - 4, 0);
+                _colorDot.Top.Set(100 - v * (_colorArea.Height.Pixels - 2) + 4, 0);
             }
-            if (_isPressing) // checks if lmb is pressed down while hovering above the color area
+            if (!_hexTextField.IsFocused)
             {
-                // calculate offset depending on mouse location
-                int offsetX = (int)(Main.MouseWorld.X - Main.screenPosition.X) - _colorBorder.GetViewCullingArea().X;
-                int offsetY = (int)(Main.MouseWorld.Y - Main.screenPosition.Y) - _colorBorder.GetViewCullingArea().Y;
-                
-                // mouse picker circle to mouse location
-                _colorDot.Top.Set(Math.Clamp(offsetY - 6, 2, _colorPane.Height.Pixels - 14), 0);
-                _colorDot.Left.Set(Math.Clamp(offsetX - 6, 2, _colorPane.Width.Pixels - 14), 0);
+                _hexTextField.SetText(GetHex(), false);
             }
-
-            // TODO make it so you can change color with hex codes and rgb values as well
-            // set all the visualName fields
-            int[] rgb = HsvToRgb(GetHue(), GetSaturation(), GetValue());
-            _rTextField.SetText(rgb[0].ToString());
-            _gTextField.SetText(rgb[1].ToString());
-            _bTextField.SetText(rgb[2].ToString());
-            _hexTextField.SetText(GetHex());
-            OnColorChanged.Invoke(GetColor());
-        }
-
-        public override void LeftMouseDown(UIMouseEvent evt)
-        {
-            base.LeftMouseDown(evt);
-
-            // calculate bounds
-            Rectangle bounds = _colorBorder.GetViewCullingArea();
-            Rectangle newBounds = new Rectangle(bounds.X + 8, bounds.Y + 8, bounds.Width - 15, bounds.Height - 15); // same bounds as the color and gradient becuase we only want to move the dot when we click on those, not the border            
-
-            // checks if lmb is pressed down while hovering
-            if (newBounds.Contains((int)(Main.MouseWorld.X - Main.screenPosition.X), (int)(Main.MouseWorld.Y - Main.screenPosition.Y)) && Mouse.GetState().LeftButton == ButtonState.Pressed && !_isPressing) 
-            {
-                _isPressing = true;
-            }
+            _rNumberField.SetValue(color.R, false);
+            _gNumberField.SetValue(color.G, false);
+            _bNumberField.SetValue(color.B, false);
+            OnColorChanged?.Invoke(color);
         }
     }
 }

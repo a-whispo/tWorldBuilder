@@ -90,6 +90,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
 
         public void SetSearchBar(TIGWETextField searchBar)
         {
+            searchBar.OnTextChanged -= SearchFor;
             searchBar.OnTextChanged += SearchFor;
         }
 

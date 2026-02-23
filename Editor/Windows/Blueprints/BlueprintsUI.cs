@@ -28,8 +28,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             // main area
             Width.Set(700, 0);
             Height.Set(440, 0);
-            Left.Set(750, 0);
-            Top.Set(150, 0);
             _defaultTitle = "Blueprints";
 
             // open folder
@@ -37,7 +35,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             openFolder.Width.Set(26, 0);
             openFolder.Height.Set(26, 0);
             openFolder.Top.Set(42, 0);
-            openFolder.Left.Set(28, 0);
+            openFolder.Left.Set(6, 0);
             openFolder.SetVisibility(0.7f, 1);
             openFolder.HoverText = "Open save folder";
             openFolder.OnLeftClick += (evt, listeningElement) =>
@@ -84,7 +82,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             _grid = new TIGWEDirectoryGrid();
             _grid.Height.Set(354, 0);
             _grid.Width.Set(650, 0);
-            _grid.Left.Set(36, 0);
+            _grid.Left.Set(14, 0);
             _grid.Top.Set(74, 0);
             _grid.ListPadding = 2;
             _grid.PaddingTop = 2;
@@ -107,13 +105,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             };
             _grid.RefreshContent();
             Append(_grid);
-            TIGWEScrollbar sb = new TIGWEScrollbar();
-            sb.Height.Set(_grid.Height.Pixels + 10, 0);
-            sb.Width.Set(20, 0);
-            sb.Top.Set(_grid.Top.Pixels - 4, 0);
-            sb.Left.Set(_grid.Left.Pixels - sb.Width.Pixels - 10, 0);
-            Append(sb);
-            _grid.SetScrollbar(sb);
+            TIGWEScrollbar scrollbar = new TIGWEScrollbar();
+            scrollbar.Height.Set(_grid.Height.Pixels + 10, 0);
+            scrollbar.Width.Set(20, 0);
+            scrollbar.Top.Set(_grid.Top.Pixels - 4, 0);
+            scrollbar.Left.Set(_grid.Left.Pixels + _grid.Width.Pixels + 10, 0);
+            Append(scrollbar);
+            _grid.SetScrollbar(scrollbar);
             TIGWEImageResizeable border = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Border"), 6, 4);
             border.IgnoresMouseInteraction = true;
             border.Top.Set(_grid.Top.Pixels - 4, 0);

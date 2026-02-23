@@ -24,7 +24,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
         public UIElement PropertyUIElement { get; private set; }
         public TileCopy Tile { get; private set; }
 
-        private TIGWEImageResizeable _body;
         private int _textMarginTop = 10;
         private int _textMarginRight = 8;
         private UIText _propertyText;
@@ -169,26 +168,19 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             }
 
             // ui stuff
+            TIGWEImageResizeable body = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
+            body.Width.Set(0, 1);
+            body.Height.Set(0, 1);
+            Append(body);
             Width.Set(-4, 1);
             Height.Set(38, 0);
-            _body = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
-            _body.Width.Set(0, 1);
-            _body.Height.Set(0, 1);
-            Append(_body);
-            DynamicSpriteFont spriteFont = FontAssets.MouseText.Value;
-            _propertyTextSize = ChatManager.GetStringSize(spriteFont, $"{property.Name}:", new Vector2(1));
+            _propertyTextSize = ChatManager.GetStringSize(FontAssets.MouseText.Value, $"{property.Name}:", new Vector2(1));
             _propertyText = new UIText($"{property.Name}:");
             _propertyText.Top.Set(_textMarginTop, 0);
-            _propertyText.Left.Set(6, 0);
-            _body.Append(_propertyText);
-            _body.Append(PropertyUIElement);
-            if (_shouldFit)
-            {
-                PropertyUIElement.Width.Set(_body.GetDimensions().Width - _propertyTextSize.X - _textMarginRight - _propertyText.Left.Pixels - 4, 0);
-                PropertyUIElement.Height.Set(26, 0);
-            }
-            PropertyUIElement.Left.Set(_body.GetDimensions().Width - PropertyUIElement.Width.Pixels - 6, 0);
-            PropertyUIElement.Top.Set(6, 0);
+            _propertyText.Left.Set(10, 0);
+            Append(_propertyText);
+            Append(PropertyUIElement);
+            Recalculate();
         }
 
         public void UpdateProperty(TileCopy tile)
@@ -225,9 +217,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             base.Recalculate();
             if (_shouldFit)
             {
-                PropertyUIElement.Width.Set(_body.GetDimensions().Width - _propertyTextSize.X - _textMarginRight - _propertyText.Left.Pixels - 4, 0);
+                PropertyUIElement.Width.Set(GetDimensions().Width - _propertyTextSize.X - _textMarginRight - _propertyText.Left.Pixels - 4, 0);
+                PropertyUIElement.Height.Set(26, 0);
             }
-            PropertyUIElement.Left.Set(_body.GetDimensions().Width - PropertyUIElement.Width.Pixels - 6, 0);
+            PropertyUIElement.Left.Set(GetDimensions().Width - PropertyUIElement.Width.Pixels - 6, 0);
             PropertyUIElement.Top.Set(6, 0);
         }
     }

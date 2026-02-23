@@ -36,7 +36,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 Rectangle selection = GetCurrentSelectionRectangle();
                 Color color = TIGWESettings.ToolColor;
                 DrawUtils.DrawTileCollection(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), TIGWESettings.ShouldPasteTiles, TIGWESettings.ShouldPasteWalls, TIGWESettings.ShouldPasteLiquid, TIGWESettings.ShouldPasteWires);
-                DrawUtils.DrawRectangleOutline(new Rectangle(selection.X, selection.Y, selection.Width + 1, selection.Height + 1), color);
+                DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), color);
                 DrawUtils.DrawMiscOptions(selection, TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
             }  
         }

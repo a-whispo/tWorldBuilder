@@ -8,7 +8,6 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UIElements;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 
 namespace TerrariaInGameWorldEditor.UIElements.TextField
@@ -146,8 +145,14 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
 
         public override void MouseOver(UIMouseEvent evt)
         {
-            SoundEngine.PlaySound(new SoundStyle("Terraria/Sounds/Menu_Tick"));
             base.MouseOver(evt);
+            SoundEngine.PlaySound(new SoundStyle("Terraria/Sounds/Menu_Tick"));
+        }
+
+        public override void LeftClick(UIMouseEvent evt)
+        {
+            base.LeftClick(evt);
+            Main.GetInputText(_currentText);
         }
 
         public virtual string GetText()
@@ -169,10 +174,16 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
             }
         }
 
-        public virtual void SetText(string text)
+        public virtual void SetText(string text, bool raiseEvent = true)
         {
-            _currentText = text;
-            OnTextChanged?.Invoke(text);
+            if (!_currentText.Equals(text))
+            {
+                _currentText = text;
+                if (raiseEvent)
+                {
+                    OnTextChanged?.Invoke(text);
+                }
+            }
         }
     }
 }

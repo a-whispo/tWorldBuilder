@@ -2,18 +2,14 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.Creative;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
-using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
@@ -34,7 +30,8 @@ namespace TerrariaInGameWorldEditor.Editor
         public static EditorSystem Local { get; private set; }
 
         // main ui
-        public float Scale = 1f;
+        public float Scale { get; private set; } = 1f;
+        public bool IsEditorVisible => _mainUIState.Visible;
         private EditorUI _mainUIState;
         private UserInterface _mainUserInterface;
         private SpriteBatch _spriteBatch;
@@ -430,7 +427,7 @@ namespace TerrariaInGameWorldEditor.Editor
 
             if (_mainUIState.Visible)
             {
-                Main.screenPosition += _screenPositionOffset;
+                Main.screenPosition = _screenPositionOffset;
             }
         }
 
@@ -466,7 +463,7 @@ namespace TerrariaInGameWorldEditor.Editor
             {
                 CreativePowerManager.Instance.GetPower<CreativePowers.GodmodePower>().SetEnabledState(Main.LocalPlayer.whoAmI, true);
                 Main.ingameOptionsWindow = false;
-                _screenPositionOffset = Vector2.Zero;
+                _screenPositionOffset = Main.screenPosition;
                 Main.blockInput = true;
                 Main.SmartCursorWanted_Mouse = false;
             }
@@ -579,69 +576,6 @@ namespace TerrariaInGameWorldEditor.Editor
             if (save == true)
             {
                 UndoHistory.Add(undoColl);
-            }
-        }
-
-        public void Replace(TileCollection tilesToChange, TileCopy tileFrom, TileCopy tileTo, bool save = true)
-        {
-            TileCollection undoColl = new TileCollection();
-
-            // since we update the tiles as we replace we take a copy of the selected area for history before we replace anything
-            foreach (var tile in tilesToChange)
-            {
-                int x = tile.Key.X;
-                int y = tile.Key.Y;
-
-                // add tile to history
-                undoColl.TryAddTile(new Point16(x, y), new TileCopy(Main.tile[x, y]));
-            }
-            if (save == true)
-            {
-                UndoHistory.Add(undoColl);
-            }
-
-            // go over the collection
-            foreach (var tile in tilesToChange)
-            {
-                int x = tile.Key.X;
-                int y = tile.Key.Y;
-                TileCopy temp = new TileCopy(Main.tile[x, y]);
-
-                if (tile.Value.WallType == tileFrom.WallType)
-                {
-                    // get some temporary values
-                    temp.CopyWallData(tileTo.GetAsTile());
-                    temp.CopyTileData(Main.tile[x, y]); // copy tile data of tiles at the location we're pasting to so we dont replace them
-                    temp.CopyWireData(Main.tile[x, y]); // copy tile data of wires at the location we're pasting to so we dont replace them
-
-                    // set and update walls
-                    Main.tile[x, y].CopyFrom(temp.GetAsTile());
-                    WorldGen.SquareWallFrame(x, y, true);
-                }
-
-                if (tile.Value.TileType == tileFrom.TileType && tile.Value.HasTile == tileFrom.HasTile)
-                {
-                    // get some temporary values
-                    temp.CopyTileData(tileTo.GetAsTile()); // copy original tile data in case we replaced before when pasting walls
-                    temp.CopyWallData(Main.tile[x, y]);
-                    temp.CopyWireData(Main.tile[x, y]);
-
-                    // replace tile
-                    Main.tile[x, y].CopyFrom(temp.GetAsTile());
-
-                    // squareframe but with noBreak
-                    // update tiles
-                    bool isTileFrameImportant = Main.tileFrameImportant[tileTo.TileType];
-                    WorldGen.TileFrame(x, y, true, !isTileFrameImportant);
-                    WorldGen.TileFrame(x + 1, y, true, !isTileFrameImportant);
-                    WorldGen.TileFrame(x - 1, y, true, !isTileFrameImportant);
-                    WorldGen.TileFrame(x, y + 1, true, !isTileFrameImportant);
-                    WorldGen.TileFrame(x, y - 1, true, !isTileFrameImportant);
-                    WorldGen.TileFrame(x + 1, y + 1, true, !isTileFrameImportant);
-                    WorldGen.TileFrame(x - 1, y + 1, true, !isTileFrameImportant);
-                    WorldGen.TileFrame(x - 1, y - 1, true, !isTileFrameImportant);
-                    WorldGen.TileFrame(x + 1, y - 1, true, !isTileFrameImportant);
-                }
             }
         }
     }

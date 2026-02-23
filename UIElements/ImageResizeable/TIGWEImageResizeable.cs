@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UIElements;
 
 namespace TerrariaInGameWorldEditor.UIElements.ImageResizeable
 {

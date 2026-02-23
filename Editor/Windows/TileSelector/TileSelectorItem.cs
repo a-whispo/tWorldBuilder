@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
@@ -20,7 +19,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
         private int _createWall;
         private int _placeStyle;
         private Item _item;
-        private TIGWEImageResizeable _body = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
 
         public TileSelectorItem(int itemId)
         {
@@ -33,12 +31,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             _placeStyle = _item.placeStyle;
 
             // ui and events
+            TIGWEImageResizeable body = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
+            body.TextureHover = ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/TextureHover");
+            body.Width.Set(0, 1);
+            body.Height.Set(0, 1);
+            Append(body);
             Width.Set(44, 0);
             Height.Set(44, 0);
-            _body.Width.Set(44, 0);
-            _body.Height.Set(44, 0);
-            _body.IgnoresMouseInteraction = true;
-            Append(_body);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -50,19 +49,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             {
                 Main.instance.MouseText($"{Name}");
             }
-        }
-
-        public override void MouseOver(UIMouseEvent evt)
-        {
-            base.MouseOver(evt);
-            SoundEngine.PlaySound(SoundID.MenuTick);
-            _body.Texture = ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/TextureHover");
-        }
-
-        public override void MouseOut(UIMouseEvent evt)
-        {
-            base.MouseOut(evt);
-            _body.Texture = ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture");
         }
 
         public TileCopy GetAsTileCopy()

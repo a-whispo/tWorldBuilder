@@ -74,7 +74,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             // tile properties grid
             TIGWEImageResizeable propertiesGridBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Border"), 6, 4);
             propertiesGridBorder.IgnoresMouseInteraction = true;
-            propertiesGridBorder.Left.Set(28, 0);
+            propertiesGridBorder.Left.Set(6, 0);
             propertiesGridBorder.Top.Set(34, 0);
             propertiesGridBorder.Height.Set(300, 0);
             propertiesGridBorder.Width.Set(248, 0);
@@ -97,12 +97,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             tilePropertiesSearchBar.Top.Set(propertiesGridBorder.Top.Pixels - tilePropertiesSearchBar.Height.Pixels - 2, 0);
             tilePropertiesSearchBar.Left.Set(propertiesGridBorder.Left.Pixels, 0);
             border.Append(tilePropertiesSearchBar);
-            TIGWEScrollbar tilePropertiesScrollBar = new TIGWEScrollbar();
-            tilePropertiesScrollBar.Left.Set(propertiesGridBorder.Left.Pixels - tilePropertiesScrollBar.Width.Pixels - 2, 0);
-            tilePropertiesScrollBar.Top.Set(propertiesGridBorder.Top.Pixels, 0);
-            tilePropertiesScrollBar.Height.Set(propertiesGridBorder.Height.Pixels, 0);
-            tilePropertiesScrollBar.Width.Set(20, 0);
-            border.Append(tilePropertiesScrollBar);
+            TIGWEScrollbar propertiesScrollbar = new TIGWEScrollbar();
+            propertiesScrollbar.Left.Set(propertiesGridBorder.Left.Pixels + propertiesGridBorder.Width.Pixels + 2, 0);
+            propertiesScrollbar.Top.Set(propertiesGridBorder.Top.Pixels, 0);
+            propertiesScrollbar.Height.Set(propertiesGridBorder.Height.Pixels, 0);
+            propertiesScrollbar.Width.Set(20, 0);
+            border.Append(propertiesScrollbar);
             TIGWEButton tilePropertiesInfoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButton"));
             tilePropertiesInfoButton.HoverText = "[c/EAD87A:Note:] Modifying some values may \n cause problems. Be careful.";
             tilePropertiesInfoButton.SetVisibility(0.7f, 1);
@@ -112,16 +112,16 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             tilePropertiesInfoButton.Top.Set(tilePropertiesSearchBar.Top.Pixels, 0);
             tilePropertiesInfoButton.Left.Set(tilePropertiesSearchBar.Left.Pixels + tilePropertiesSearchBar.Width.Pixels + 2, 0);
             border.Append(tilePropertiesInfoButton);
-            propertiesGrid.SetScrollbar(tilePropertiesScrollBar);
+            propertiesGrid.SetScrollbar(propertiesScrollbar);
             propertiesGrid.SetSearchBar(tilePropertiesSearchBar);
 
             // select tile grid
             TIGWEImageResizeable tileGridBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Border"), 6, 4);
             tileGridBorder.IgnoresMouseInteraction = true;
-            tileGridBorder.Left.Set(propertiesGridBorder.Left.Pixels + propertiesGridBorder.Width.Pixels + 24, 0);
+            tileGridBorder.Left.Set(propertiesScrollbar.Left.Pixels + propertiesScrollbar.Width.Pixels + 2, 0);
             tileGridBorder.Top.Set(34, 0);
             tileGridBorder.Height.Set(300, 0);
-            tileGridBorder.Width.Set(border.Width.Pixels - tileGridBorder.Left.Pixels - 6, 0);
+            tileGridBorder.Width.Set(border.Width.Pixels - tileGridBorder.Left.Pixels - 28, 0);
             border.Append(tileGridBorder);
             TIGWESearchGrid tileGrid = new TIGWESearchGrid((item, searchTerm) => 
             {
@@ -151,12 +151,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             tileSearchBar.Top.Set(tileGridBorder.Top.Pixels - tileSearchBar.Height.Pixels - 2, 0);
             tileSearchBar.Left.Set(tileGridBorder.Left.Pixels, 0);
             border.Append(tileSearchBar);
-            TIGWEScrollbar tileScrollBar = new TIGWEScrollbar();
-            tileScrollBar.Left.Set(tileGridBorder.Left.Pixels - tileScrollBar.Width.Pixels - 2, 0);
-            tileScrollBar.Top.Set(tileGridBorder.Top.Pixels, 0);
-            tileScrollBar.Height.Set(tileGridBorder.Height.Pixels, 0);
-            tileScrollBar.Width.Set(20, 0);
-            border.Append(tileScrollBar);
+            TIGWEScrollbar tileScrollbar = new TIGWEScrollbar();
+            tileScrollbar.Left.Set(tileGridBorder.Left.Pixels + tileGridBorder.Width.Pixels + 2, 0);
+            tileScrollbar.Top.Set(tileGridBorder.Top.Pixels, 0);
+            tileScrollbar.Height.Set(tileGridBorder.Height.Pixels, 0);
+            tileScrollbar.Width.Set(20, 0);
+            border.Append(tileScrollbar);
             TIGWEButton tileInfoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButton"));
             tileInfoButton.HoverText = "[c/EAD87A:Note:] Will default to the top left part on \ntiles bigger than 1x1. Might not always work.";
             tileInfoButton.SetVisibility(0.7f, 1);
@@ -166,7 +166,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             tileInfoButton.Top.Set(tileSearchBar.Top.Pixels, 0);
             tileInfoButton.Left.Set(tileSearchBar.Left.Pixels + tileSearchBar.Width.Pixels + 2, 0);
             border.Append(tileInfoButton);
-            tileGrid.SetScrollbar(tileScrollBar);
+            tileGrid.SetScrollbar(tileScrollbar);
             tileGrid.SetSearchBar(tileSearchBar);
 
             Task task = new Task(() =>

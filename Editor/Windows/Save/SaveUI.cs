@@ -26,9 +26,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
 
             // main area
             Height.Set(168, 0);
-            Width.Set(350, 0);
-            Left.Set(750, 0);
-            Top.Set(150, 0);
+            Width.Set(330, 0);
             _defaultTitle = "Save";
 
             // save as
@@ -69,7 +67,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             Append(pathSelect);
 
             // path reset button
-            TIGWEButton pathReset = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/ResetPathButton"));
+            TIGWEButton pathReset = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/RefreshButton"));
             pathReset.SetVisibility(0.8f, 1f);
             pathReset.Left.Set(pathSelect.Left.Pixels + pathSelect.Width.Pixels + 2, 0);
             pathReset.Top.Set(_pathField.Top.Pixels, 0);
@@ -115,6 +113,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             };
 
             Height.Set(_saveButton.Top.Pixels + _saveButton.Height.Pixels + _saveButton.Left.Pixels, 0);
+            Width.Set(pathReset.Left.Pixels + pathReset .Width.Pixels + 6, 0);
         }
 
         private void SelectPath()

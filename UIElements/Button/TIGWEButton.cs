@@ -8,10 +8,31 @@ namespace TerrariaInGameWorldEditor.UIElements.Button
     public class TIGWEButton : UIImageButton
     {
         public string HoverText { get; set; }
+        public string Text
+        {
+            get => _btnText.Text;
+            set => _btnText.SetText(value);
+        }
+        public int TextOffsetLeft
+        {
+            get => (int)_btnText.Left.Pixels;
+            set => _btnText.PaddingLeft = value;
+        }
+        public int TextOffsetTop
+        {
+            get => (int)_btnText.Top.Pixels;
+            set => _btnText.PaddingTop = value;
+        }
+
+        private UIText _btnText;
 
         public TIGWEButton(Asset<Texture2D> texture) : base(texture)
         {
-            
+            _btnText = new UIText("");
+            _btnText.IgnoresMouseInteraction = true;
+            Append(_btnText);
+            TextOffsetLeft = 10;
+            TextOffsetTop = 5;
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)

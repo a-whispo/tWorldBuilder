@@ -6,6 +6,9 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
     public static class TIGWESettings
     {
         public static Color ToolColor { get; set; }
+        public static Color PrimaryColor { get; set; }
+        public static Color SecondaryColor { get; set; }
+        public static Theme CurrentTheme { get; set; }
         public static bool ShowCenterLines { get; set; }
         public static bool ShowMeasureLines { get; set; }
         public static bool ShouldPasteTiles { get; set; }
@@ -19,5 +22,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         public static Mask ShouldPasteOnWires { get; set; }
         public static bool ShouldUpdateDrawnTiles { get; set; }
         public static bool ShouldTeleportOnEditorClosed { get; set; } = true;
+        public static bool FullbrightEnabled { get; set; }
     }
 }

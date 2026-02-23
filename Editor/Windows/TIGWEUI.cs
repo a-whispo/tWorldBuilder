@@ -66,9 +66,9 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
         public override void OnInitialize()
         {
             base.OnInitialize();
+            Left.Set(250, 0);
+            Top.Set(250, 0);
             _UI = new UserInterface();
-            Height.Set(300, 0);
-            Width.Set(300, 0);
 
             // main body
             Body = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/TIGWEUIBody"), 42, 2);

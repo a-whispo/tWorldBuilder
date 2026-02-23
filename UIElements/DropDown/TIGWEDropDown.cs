@@ -10,7 +10,6 @@ using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
-using TerrariaInGameWorldEditor.UIElements;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 using TerrariaInGameWorldEditor.UIElements.Scrollbar;
 using TerrariaInGameWorldEditor.UIElements.SearchGrid;
@@ -60,7 +59,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
         private UIImageButton _dropDownButton;
         private float _elementHeight;
         private float _widestOptionWidth = 0;
-        private bool _showingOptions = false;
+        private bool _isShowingOptions = false;
 
         public TIGWEDropDown()
         {
@@ -72,9 +71,9 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
             };
             _selectedOptionTextField.OnLeftClick += (_, _) =>
             {
-                _selectedOptionTextField.SetText("");
                 _itemGrid.SetSearchBar(_selectedOptionTextField);
-                if (_selectedOptionTextField.IsFocused && _showingOptions)
+                _selectedOptionTextField.SetText("");
+                if (_selectedOptionTextField.IsFocused && _isShowingOptions)
                 {
                     return;
                 }
@@ -107,7 +106,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
             Append(_dropDownButton);
 
             _dropDown = new UIElement();
-            _border = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DropDown/DropDownBorder"), 6, 4);
+            _border = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Border"), 6, 4);
             _border.IgnoresMouseInteraction = true;
             _dropDown.Append(_border);
             _scrollbar = new TIGWEScrollbar();
@@ -138,7 +137,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
 
         public override bool ContainsPoint(Vector2 point)
         {
-            return base.ContainsPoint(point) || _dropDown.ContainsPoint(point) && _showingOptions;
+            return base.ContainsPoint(point) || _dropDown.ContainsPoint(point) && _isShowingOptions;
         }
 
         public override void Recalculate()
@@ -146,7 +145,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
             base.Recalculate();
 
             // update element dimensions
-            if (_showingOptions && _dropDown.Parent != null)
+            if (_isShowingOptions && _dropDown.Parent != null)
             {
                 _dropDown.Width.Set(Math.Max(Width.Pixels, _widestOptionWidth), 0);
                 _dropDown.Height.Set(Math.Clamp(_itemGrid.ShownItems.Count, 1, MaxShownItems) * _elementHeight - (Math.Clamp(_itemGrid.ShownItems.Count, 1, MaxShownItems) - 1) * 2 + 8, 0);
@@ -172,7 +171,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
         {
             if (_itemGrid.AllItems.Count > 0)
             {
-                if (!_showingOptions)
+                if (!_isShowingOptions)
                 {
                     ShowOptions();
                 }
@@ -185,9 +184,9 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
 
         private void ShowOptions()
         {
-            if (!_showingOptions)
+            if (!_isShowingOptions)
             {
-                _showingOptions = true;
+                _isShowingOptions = true;
 
                 // get the topmost element so we can append _dropDown there causing it to render and handle input on top of everything else
                 UIElement top = this;
@@ -213,19 +212,18 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
         private void CheckIfShouldHide(UIElement element)
         {
             Vector2 mouse = new Vector2(Main.mouseX, Main.mouseY);
-            if (!ContainsPoint(mouse) && _showingOptions && !_selectedOptionTextField.IsFocused && !_scrollbar.IsDragging || !ContainsPoint(mouse) && PlayerInput.ScrollWheelDelta != 0)
+            if (!ContainsPoint(mouse) && _isShowingOptions && !_selectedOptionTextField.IsFocused && !_scrollbar.IsDragging || !ContainsPoint(mouse) && PlayerInput.ScrollWheelDelta != 0)
             {
                 HideOptions();
                 _selectedOptionTextField.IsFocused = false;
-                element.OnUpdate -= CheckIfShouldHide;
             }
         }
 
         private void HideOptions()
         {
-            if (_showingOptions)
+            if (_isShowingOptions && _dropDown.Parent != null)
             {
-                _showingOptions = false;
+                _isShowingOptions = false;
                 _dropDown.Parent.OnUpdate -= CheckIfShouldHide;
                 _dropDown.Remove();
                 _selectedOptionTextField.SetText(SelectedOption.Text);

@@ -92,8 +92,6 @@ namespace TerrariaInGameWorldEditor.Editor
         public override void OnInitialize()
         {
             base.OnInitialize();
-            Left.Set(0, 0f);
-            Top.Set(0, 0f);
 
             // main body
             _bottom = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/EditorColor"), 1, 1);

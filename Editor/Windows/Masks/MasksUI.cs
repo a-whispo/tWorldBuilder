@@ -1,8 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
-using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Editor.Windows.Settings;
@@ -21,8 +18,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             // main area
             Height.Set(224, 0);
             Width.Set(424, 0);
-            Left.Set(750, 0);
-            Top.Set(150, 0);
             _defaultTitle = "Masks";
 
             // what tiles to draw/paste

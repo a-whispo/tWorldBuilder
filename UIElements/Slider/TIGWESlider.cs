@@ -7,13 +7,13 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UIElements;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 
 namespace TerrariaInGameWorldEditor.UIElements.Slider
 {
     internal class TIGWESlider : UIElement
     {
+        public bool IsDragging { get; private set; } = false;
         public Asset<Texture2D> Texture 
         { 
             set => _body.Texture = value; 
@@ -29,15 +29,12 @@ namespace TerrariaInGameWorldEditor.UIElements.Slider
 
         private TIGWEImageResizeable _body;
         private UIImage _point;
-        private bool _isPressing = false;
-
-        public TIGWESlider(int width = 100)
+        
+        public TIGWESlider()
         {
-            Width.Set(width, 0);
             Height.Set(18, 0);
-
             _body = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture"));
-            _body.Width.Set(width, 0);
+            _body.Width.Set(0, 1);
             _body.Height.Set(14, 0);
             _body.Top.Set(2, 0);
             Append(_body);
@@ -50,13 +47,13 @@ namespace TerrariaInGameWorldEditor.UIElements.Slider
 
         public float GetValue()
         {
-            return _point.Left.Pixels / (Width.Pixels - 7) * 100; // returns where the point is on the slider from 0 - 100 (0 being at the start and 100 being at the end)
+            return _point.Left.Pixels / (Width.Pixels - _point.Width.Pixels) * 100; // returns where the point is on the slider from 0 - 100 (0 being at the start and 100 being at the end)
         }
 
-        public void SetValue(int value)
+        public void SetValue(float value)
         {
             value = Math.Clamp(value, 0, 100);
-            _point.Left.Set(value / 100 * (Width.Pixels - 7), 0);
+            _point.Left.Set((value / 100) * (Width.Pixels - _point.Width.Pixels), 0);
         }
 
         public override void Update(GameTime gameTime)
@@ -64,21 +61,19 @@ namespace TerrariaInGameWorldEditor.UIElements.Slider
             base.Update(gameTime);
             if (!(Mouse.GetState().LeftButton == ButtonState.Pressed))
             {
-                _isPressing = false;
+                IsDragging = false;
             }
-            if (_isPressing)
+            if (IsDragging)
             {
-                // calculate offset depending on mouse location
-                int offsetX = (int)(Main.MouseWorld.X - Main.screenPosition.X) - GetViewCullingArea().X;
-
-                // mouse picker circle to mouse location
+                int offsetX = Main.mouseX - GetViewCullingArea().X;
                 _point.Left.Set(Math.Clamp(offsetX - 6, 0, Width.Pixels - _point.Width.Pixels), 0); // clamp is so it doesnt go too far to the left
             }
         }
+
         public override void LeftMouseDown(UIMouseEvent evt)
         {
             base.LeftMouseDown(evt);
-            _isPressing = true;
+            IsDragging = true;
         }
     }
 }
