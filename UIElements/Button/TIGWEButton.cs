@@ -37,16 +37,13 @@ namespace TerrariaInGameWorldEditor.UIElements.Button
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
             base.DrawSelf(spriteBatch);
             if (HoverText != null && IsMouseHovering)
             {
                 Main.instance.MouseText(HoverText);
             }
-        }
-
-        protected override void DrawChildren(SpriteBatch spriteBatch)
-        {
-            base.DrawChildren(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
     }
 }

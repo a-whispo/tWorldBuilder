@@ -67,9 +67,16 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
             TextOffsetTop = 5;
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            base.Draw(spriteBatch);
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
+        }
+
+        protected override void DrawChildren(SpriteBatch spriteBatch)
+        {
+            base.DrawChildren(spriteBatch);
             if (ShowSearchIcon)
             {
                 Rectangle dimensions = new Rectangle((int)GetDimensions().X + (int)Width.Pixels - 20, (int)GetDimensions().Y + 4, _searchIcon.Value.Width, _searchIcon.Value.Height);

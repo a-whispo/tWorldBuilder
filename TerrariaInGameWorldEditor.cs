@@ -1,4 +1,5 @@
 using log4net;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.UIElements;
 

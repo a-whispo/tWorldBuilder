@@ -5,14 +5,20 @@ using TerrariaInGameWorldEditor.UIElements.ButtonResizable;
 
 namespace TerrariaInGameWorldEditor.UIElements.DropDown
 {
-    internal class TIGWEDropDownItem<T> : TIGWEImageButtonResizeable
+    internal class TIGWEDropDownItem<T> : UIElement
     {
         public T Value { get; set; }
+        public string Text => _body.Text;
+        private TIGWEImageButtonResizeable _body;
 
-        public TIGWEDropDownItem(T value, string text) : base(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture"))
+        public TIGWEDropDownItem(T value, string text)
         {
-            TextureHover = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/TextureHover");
-            Text = text;
+            _body = new TIGWEImageButtonResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture"));
+            _body.Width.Set(0, 1);
+            _body.Height.Set(0, 1);
+            _body.TextureHover = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/TextureHover");
+            _body.Text = text;
+            Append(_body);
             Value = value;
         }
 
@@ -22,6 +28,13 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
             UIElement parent = Parent;
             Remove();
             parent.Append(this);
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
     }
 }

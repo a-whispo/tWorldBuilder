@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria.ModLoader;
-using TerrariaInGameWorldEditor.UIElements;
 
 namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
 {

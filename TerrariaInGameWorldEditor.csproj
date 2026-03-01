@@ -8,10 +8,6 @@
 		
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="UIElements\CheckBox\CheckBoxChecked.png" />
-	  <None Remove="UIElements\CheckBox\CheckBoxCheckedHover.png" />
-	  <None Remove="UIElements\CheckBox\CheckBoxUnchecked.png" />
-	  <None Remove="UIElements\CheckBox\CheckBoxUncheckedHover.png" />
 	</ItemGroup>
 
 	<!-- References -->

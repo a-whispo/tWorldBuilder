@@ -4,8 +4,10 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
+using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI.Elements;
+using Terraria.Social.Base;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Content.Tools;
@@ -426,7 +428,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 _undoButton.SetVisibility(0.6f, 0.6f);
             }
             _toolInfoText.SetText($"([c/EAD87A:X:] {Player.tileTargetX}, [c/EAD87A:Y:] {Player.tileTargetY}) {EditorSystem.Local.CurrentTool?.GetInfoText()}");
-            _toolInfoText.Left.Set(LeftWidth + 4, 0f);
+            _toolInfoText.Left.Set(4, 0f);
             _toolInfoText.Recalculate();
         }
 
@@ -487,31 +489,31 @@ namespace TerrariaInGameWorldEditor.Editor
                 Width.Set(Main.screenWidth * Main.UIScale, 1f);
                 Height.Set(Main.screenHeight * Main.UIScale, 1f);
             }
-            
+
             // resize sides
-            _bottom.Width.Set(0, 1f);
-            _bottom.Height.Set(BottomHeight, 0f);
-            _bottom.Left.Set(0, 0f);
-            _bottom.Top.Set(Height.Pixels - _bottom.Height.Pixels, 0f);
-
-            _left.Width.Set(LeftWidth, 0f);
-            _left.Height.Set(0, 1f);
-            _left.Left.Set(0, 0f);
-            _left.Top.Set(0, 0f);
-
-            _right.Width.Set(RightWidth, 0f);
-            _right.Height.Set(0, 1f);
-            _right.Left.Set(Width.Pixels - _right.Width.Pixels, 0f);
-            _right.Top.Set(0, 0f);
-
             _titleBar.Width.Set(0, 1f);
             _titleBar.Height.Set(40, 0f);
             _titleBar.Left.Set(0, 0f);
             _titleBar.Top.Set(0, 0f);
 
-            _top.Width.Set(0, 1f);
+            _bottom.Width.Set(- LeftWidth - RightWidth, 1f);
+            _bottom.Height.Set(BottomHeight, 0f);
+            _bottom.Left.Set(LeftWidth, 0f);
+            _bottom.Top.Set(Height.Pixels - _bottom.Height.Pixels, 0f);
+
+            _left.Width.Set(LeftWidth, 0f);
+            _left.Height.Set(0, 1f);
+            _left.Left.Set(0, 0f);
+            _left.Top.Set(_titleBar.Height.Pixels, 0f);
+
+            _right.Width.Set(RightWidth, 0f);
+            _right.Height.Set(0, 1f);
+            _right.Left.Set(Width.Pixels - _right.Width.Pixels, 0f);
+            _right.Top.Set(_titleBar.Height.Pixels, 0f);
+
+            _top.Width.Set(- LeftWidth - RightWidth, 1f);
             _top.Height.Set(TopHeight, 0f);
-            _top.Left.Set(0, 0f);
+            _top.Left.Set(LeftWidth, 0f);
             _top.Top.Set(_titleBar.Height.Pixels, 0f);
 
             _innerBorder.Width.Set(Width.Pixels - _left.Width.Pixels - _right.Width.Pixels, 0f);

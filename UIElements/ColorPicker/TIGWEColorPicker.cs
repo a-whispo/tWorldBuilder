@@ -4,6 +4,7 @@ using ReLogic.Content;
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
@@ -33,6 +34,7 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
         private TIGWENumberField _gNumberField;
         private TIGWENumberField _bNumberField;
         private TIGWESlider _hueSlider;
+        private TIGWESlider _alphaSlider;
 
         public TIGWEColorPicker()
         {
@@ -53,7 +55,7 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             // element/border to be the main color picker area
             _colorPicker = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Border"), 6, 4);
             _colorPicker.Width.Set(256, 0);
-            _colorPicker.Height.Set(146, 0);
+            _colorPicker.Height.Set(170, 0);
 
             // gradient and color
             _color = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/Color");
@@ -81,18 +83,34 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             _colorArea.Append(_colorDot);
 
             // hue slider
+            UIText hue = new UIText("H:");
+            hue.Top.Set(122, 0);
+            hue.Left.Set(12, 0);
+            _colorPicker.Append(hue);
             _hueSlider = new TIGWESlider();
             _hueSlider.Height.Set(18, 0);
-            _hueSlider.Width.Set(240, 0);
-            _hueSlider.Top.Set(120, 0);
-            _hueSlider.Left.Set(8, 0);
+            _hueSlider.Width.Set(208, 0);
+            _hueSlider.Top.Set(122, 0);
+            _hueSlider.Left.Set(40, 0);
             _hueSlider.Texture = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/HueSlider");
-            _hueSlider.TextureHover = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/HueSlider");
             _hueSlider.ShouldResize = false;
             _colorPicker.Append(_hueSlider);
 
+            // alpha slider
+            UIText alpha = new UIText("A:");
+            alpha.Top.Set(144, 0);
+            alpha.Left.Set(12, 0);
+            _colorPicker.Append(alpha);
+            _alphaSlider = new TIGWESlider();
+            _alphaSlider.Height.Set(18, 0);
+            _alphaSlider.Width.Set(208, 0);
+            _alphaSlider.Top.Set(144, 0);
+            _alphaSlider.Left.Set(40, 0);
+            _alphaSlider.SetValue(100);
+            _colorPicker.Append(_alphaSlider);
+
             // hex textfield
-            UIText hex = new UIText("Hex:");
+            UIText hex = new UIText("#:");
             hex.Top.Set(12, 0);
             hex.Left.Set(122, 0);
             _colorPicker.Append(hex);
@@ -107,10 +125,10 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
                 _hexTextField.SetText(new string(validatedChars).ToUpper(), false);
                 SetColor(HexToColor(newText));
             };
-            _hexTextField.Width.Set(86, 0);
+            _hexTextField.Width.Set(98, 0);
             _hexTextField.Height.Set(26, 0);
             _hexTextField.Top.Set(8, 0);
-            _hexTextField.Left.Set(162, 0);
+            _hexTextField.Left.Set(150, 0);
             _colorPicker.Append(_hexTextField);
 
             // rgb
@@ -121,11 +139,11 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             _rNumberField = new TIGWENumberField(0);
             _rNumberField.OnValueChanged += (newValue) =>
             {
-                SetColor(new Color(newValue, _gNumberField.GetValue(), _bNumberField.GetValue()));
+                SetColor(new Color(newValue, _gNumberField.GetValue(), _bNumberField.GetValue(), (int)(GetAlpha() * 255f)));
             };
             _rNumberField.Top.Set(36, 0);
-            _rNumberField.Left.Set(162, 0);
-            _rNumberField.Width.Set(86, 0);
+            _rNumberField.Left.Set(150, 0);
+            _rNumberField.Width.Set(98, 0);
             _rNumberField.Height.Set(26, 0);
             _colorPicker.Append(_rNumberField);
             UIText g = new UIText("G:");
@@ -135,11 +153,11 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             _gNumberField = new TIGWENumberField(0);
             _gNumberField.OnValueChanged += (newValue) =>
             {
-                SetColor(new Color(_rNumberField.GetValue(), newValue, _bNumberField.GetValue()));
+                SetColor(new Color(_rNumberField.GetValue(), newValue, _bNumberField.GetValue(), (int)(GetAlpha() * 255f)));
             };
             _gNumberField.Top.Set(64, 0);
-            _gNumberField.Left.Set(162, 0);
-            _gNumberField.Width.Set(86, 0);
+            _gNumberField.Left.Set(150, 0);
+            _gNumberField.Width.Set(98, 0);
             _gNumberField.Height.Set(26, 0);
             _colorPicker.Append(_gNumberField);
             UIText b = new UIText("B:");
@@ -149,11 +167,11 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             _bNumberField = new TIGWENumberField(0);
             _bNumberField.OnValueChanged += (newValue) =>
             {
-                SetColor(new Color(_rNumberField.GetValue(), _gNumberField.GetValue(), newValue));
+                SetColor(new Color(_rNumberField.GetValue(), _gNumberField.GetValue(), newValue, (int)(GetAlpha() * 255f)));
             };
             _bNumberField.Top.Set(92, 0);
-            _bNumberField.Left.Set(162, 0);
-            _bNumberField.Width.Set(86, 0);
+            _bNumberField.Left.Set(150, 0);
+            _bNumberField.Width.Set(98, 0);
             _bNumberField.Height.Set(26, 0);
             _colorPicker.Append(_bNumberField);
         }
@@ -192,9 +210,15 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
         private void CheckIfShouldHide(UIElement element)
         {
             Vector2 mouse = new Vector2(Main.mouseX, Main.mouseY);
-            if (!_isSelectingColor && !_hueSlider.IsDragging && !ContainsPoint(mouse) && !_colorPicker.ContainsPoint(mouse))
+            if (!_isSelectingColor && !_hueSlider.IsDragging && !_alphaSlider.IsDragging && !ContainsPoint(mouse) && !_colorPicker.ContainsPoint(mouse))
             {
                 HideColorPicker();
+
+                // set to a default value if we exit without typing anything
+                if (string.IsNullOrEmpty(_hexTextField.GetText()) && !_hexTextField.IsFocused)
+                {
+                    SetColor(new Color(255, 255, 255));
+                }
             }
         }
 
@@ -230,9 +254,15 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             return 100 - (_colorDot.Top.Pixels + 4) / (_colorArea.Height.Pixels - 2) * 100;
         }
 
+        public float GetAlpha()
+        {
+            // returns alpha (0 - 1)
+            return _alphaSlider.GetValue() / 100f;
+        }
+
         public Color GetColor()
         {
-            return HsvToColor(GetHue(), GetSaturation(), GetValue());
+            return HsvToColor(GetHue(), GetSaturation(), GetValue()) * GetAlpha();
         }
 
         public string GetHex()
@@ -240,63 +270,14 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             Color color = GetColor();
 
             // converts to hex values
-            string rHex = color.R.ToString("X");
+            string rHex = _rNumberField.GetValue().ToString("X");
             rHex = rHex.Length == 1 ? "0" + rHex : rHex;
-            string gHex = color.G.ToString("X");
+            string gHex = _gNumberField.GetValue().ToString("X");
             gHex = gHex.Length == 1 ? "0" + gHex : gHex;
-            string bHex = color.B.ToString("X");
+            string bHex = _bNumberField.GetValue().ToString("X");
             bHex = bHex.Length == 1 ? "0" + bHex : bHex;
 
             return rHex + gHex + bHex;
-        }
-
-        public override void Draw(SpriteBatch spriteBatch)
-        {
-            base.Draw(spriteBatch);
-
-            // draw the color and gradient
-            Rectangle bounds = GetViewCullingArea();
-            bounds.X += 6;
-            bounds.Y += 6;
-            bounds.Width -= 12;
-            bounds.Height -= 12;
-            spriteBatch.Draw(_color.Value, bounds, GetColor());
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            // adjust color dot offset
-            if (_isSelectingColor) 
-            {
-                int offsetX = Main.mouseX - _colorArea.GetViewCullingArea().X;
-                int offsetY = Main.mouseY - _colorArea.GetViewCullingArea().Y;
-                _colorDot.Top.Set(Math.Clamp(offsetY - 7, -4, _colorArea.Height.Pixels - 6), 0);
-                _colorDot.Left.Set(Math.Clamp(offsetX - 7, -4, _colorArea.Width.Pixels - 6), 0);
-            }
-
-            // update color when changing color with the slider and color area
-            if (_hueSlider.IsDragging || _isSelectingColor)
-            {
-                SetColor(HsvToColor(GetHue(), GetSaturation(), GetValue()));
-            }
-
-            // set to a default value if we exit without typing anything
-            if (_hexTextField.GetText().Equals("") && !_hexTextField.IsFocused)
-            {
-                SetColor(new Color(255, 255, 255));
-            }
-        }
-
-        public override void Recalculate()
-        {
-            base.Recalculate();
-            if (_colorPicker.Parent != null)
-            {
-                _colorPicker.Top.Set(GetDimensions().Y - _colorPicker.Parent.Top.Pixels + 24, 0);
-                _colorPicker.Left.Set(GetDimensions().X - _colorPicker.Parent.Left.Pixels, 0);
-            }
         }
 
         private Color HsvToColor(double h, double s, double v)
@@ -387,22 +368,72 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
 
             // calculate value
             v = cMax;
-            
+
             // update
-            if (!_hueSlider.IsDragging && !_isSelectingColor)
+            if (!_hueSlider.IsDragging && !_alphaSlider.IsDragging && !_isSelectingColor)
             {
                 _hueSlider.SetValue(h / 3.6f);
+                _alphaSlider.SetValue((color.A / 255f) * 100);
                 _colorDot.Left.Set(s * (_colorArea.Width.Pixels - 2) - 4, 0);
                 _colorDot.Top.Set(100 - v * (_colorArea.Height.Pixels - 2) + 4, 0);
-            }
-            if (!_hexTextField.IsFocused)
-            {
-                _hexTextField.SetText(GetHex(), false);
             }
             _rNumberField.SetValue(color.R, false);
             _gNumberField.SetValue(color.G, false);
             _bNumberField.SetValue(color.B, false);
-            OnColorChanged?.Invoke(color);
+            if (!_hexTextField.IsFocused)
+            {
+                _hexTextField.SetText(GetHex(), false);
+            }
+            OnColorChanged?.Invoke(GetColor());
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            // adjust color dot offset
+            if (_isSelectingColor)
+            {
+                int offsetX = Main.mouseX - _colorArea.GetViewCullingArea().X;
+                int offsetY = Main.mouseY - _colorArea.GetViewCullingArea().Y;
+                _colorDot.Top.Set(Math.Clamp(offsetY - 7, -4, _colorArea.Height.Pixels - 6), 0);
+                _colorDot.Left.Set(Math.Clamp(offsetX - 7, -4, _colorArea.Width.Pixels - 6), 0);
+            }
+
+            // update color when changing color with the slider and color area
+            if (_hueSlider.IsDragging || _alphaSlider.IsDragging || _isSelectingColor)
+            {
+                SetColor(HsvToColor(GetHue(), GetSaturation(), GetValue()));
+            }
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+            // draw the color and gradient
+            Rectangle bounds = GetViewCullingArea();
+            bounds.X += 6;
+            bounds.Y += 6;
+            bounds.Width -= 12;
+            bounds.Height -= 12;
+            spriteBatch.Draw(_color.Value, bounds, GetColor());
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
+        }
+
+        public override void Recalculate()
+        {
+            base.Recalculate();
+            if (_colorPicker.Parent != null)
+            {
+                _colorPicker.Top.Set(GetDimensions().Y - _colorPicker.Parent.Top.Pixels + 24, 0);
+                _colorPicker.Left.Set(GetDimensions().X - _colorPicker.Parent.Left.Pixels, 0);
+            }
         }
     }
 }

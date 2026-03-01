@@ -10,6 +10,7 @@ using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
+using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 using TerrariaInGameWorldEditor.UIElements.Scrollbar;
 using TerrariaInGameWorldEditor.UIElements.SearchGrid;
@@ -56,7 +57,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
         private TIGWEScrollbar _scrollbar;
         private TIGWESearchGrid _itemGrid;
         private TIGWEImageResizeable _border;
-        private UIImageButton _dropDownButton;
+        private TIGWEButton _dropDownButton;
         private float _elementHeight;
         private float _widestOptionWidth = 0;
         private bool _isShowingOptions = false;
@@ -81,7 +82,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
             };
             Append(_selectedOptionTextField);
 
-            _dropDownButton = new UIImageButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DropDown/DropDownButton"));
+            _dropDownButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DropDown/DropDownButton"));
             _dropDownButton.SetHoverImage(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DropDown/DropDownButtonHover"));
             _dropDownButton.SetVisibility(1f, 1f);
             _dropDownButton.HAlign = 1f;
@@ -297,6 +298,13 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
                 _selectedOptionTextField.SetText(SelectedOption.Text);
             }
             Recalculate();
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
     }
 }

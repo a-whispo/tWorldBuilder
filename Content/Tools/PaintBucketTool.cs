@@ -58,7 +58,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 TileCopy clickedTile = new TileCopy(Main.tile[point.X, point.Y]);
 
                 int count = 0;
-                TileCollection undoColl = new TileCollection();
+                TileCollection tilesToFill = new TileCollection();
 
                 Queue<Point16> queue = new Queue<Point16>();
                 queue.Enqueue(new Point16(point.X, point.Y));
@@ -95,7 +95,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     if (IsMatch(coords))
                     {
                         // if we dont already have it added, add it
-                        if (undoColl.TryAddTile(coords, new TileCopy(Main.tile[coords.X, coords.Y])))
+                        if (tilesToFill.TryAddTile(coords, EditorSystem.Local.SelectedTile))
                         {
                             count++;
                         }
@@ -120,7 +120,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
                         foreach (Point16 direction in directions)
                         {
-                            if (!undoColl.ContainsCoord(direction) && !queue.Contains(direction))
+                            if (!tilesToFill.ContainsCoord(direction) && !queue.Contains(direction))
                             {
                                 queue.Enqueue(direction);
                             }
@@ -131,34 +131,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 // if we didnt hit the cap, fill all the tiles with the selected tile
                 if (count < _tileCap)
                 {
-                    // go over all the tile we want to change
-                    foreach (var tile in undoColl)
-                    {
-                        int x = tile.Key.X;
-                        int y = tile.Key.Y;
-
-                        Main.tile[tile.Key.X, tile.Key.Y].CopyFrom(EditorSystem.Local.SelectedTile.GetAsTile());
-
-                        // update tiles
-                        if (TIGWESettings.ShouldUpdateDrawnTiles)
-                        {
-                            // squareframe but with noBreak
-                            // update tiles
-                            bool isTileFrameImportant = Main.tileFrameImportant[EditorSystem.Local.SelectedTile.TileType];
-                            WorldGen.TileFrame(x, y, true, !isTileFrameImportant);
-                            WorldGen.TileFrame(x + 1, y, true, !isTileFrameImportant);
-                            WorldGen.TileFrame(x - 1, y, true, !isTileFrameImportant);
-                            WorldGen.TileFrame(x, y + 1, true, !isTileFrameImportant);
-                            WorldGen.TileFrame(x, y - 1, true, !isTileFrameImportant);
-                            WorldGen.TileFrame(x + 1, y + 1, true, !isTileFrameImportant);
-                            WorldGen.TileFrame(x - 1, y + 1, true, !isTileFrameImportant);
-                            WorldGen.TileFrame(x - 1, y - 1, true, !isTileFrameImportant);
-                            WorldGen.TileFrame(x + 1, y - 1, true, !isTileFrameImportant);
-                        }
-                    }
-
-                    // add the information about the tiles we changed to our undo history so we can undo later
-                    EditorSystem.Local.UndoHistory.Add(undoColl);
+                    ToolUtils.Paste(tilesToFill, new Point(tilesToFill.GetMinX(), tilesToFill.GetMinY()), true, TIGWESettings.ShouldUpdateDrawnTiles);
                 }
                 else
                 {

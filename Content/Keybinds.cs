@@ -17,8 +17,9 @@ namespace TerrariaInGameWorldEditor.Content
         public static ModKeybind RedoMK { get; private set; }
         public static ModKeybind SaveMK { get; private set; }
 
-        public override void Load()
+        public override void OnModLoad()
         {
+            base.OnModLoad();
             OpenEditorMK = KeybindLoader.RegisterKeybind(Mod, "Open Editor", Keys.P); // open editor
             DeleteMK = KeybindLoader.RegisterKeybind(Mod, "Delete (Ctrl + Key)", Keys.Delete); // delete keybind
             CopyMK = KeybindLoader.RegisterKeybind(Mod, "Copy (Ctrl + Key)", Keys.C); // copy keybind

@@ -33,6 +33,7 @@ namespace TerrariaInGameWorldEditor.UIElements.Scrollbar
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
             CalculatedStyle innerDimensions = GetInnerDimensions();
             if ((bool)_isDraggingField.GetValue(this))
             {
@@ -41,10 +42,11 @@ namespace TerrariaInGameWorldEditor.UIElements.Scrollbar
             }
 
             CalculatedStyle dimensionsRectangle = new CalculatedStyle(GetDimensions().X, GetDimensions().Y, GetDimensions().Width, GetDimensions().Height);
-            UIElementUtils.DrawTexture2DWithDimensions(_texture.Value, dimensionsRectangle.ToRectangle());
+            UIElementUtils.DrawTexture2DWithDimensions(spriteBatch, _texture.Value, dimensionsRectangle.ToRectangle());
 
             CalculatedStyle handleRectangle = new CalculatedStyle((int)GetInnerDimensions().X + 6, (int)(GetInnerDimensions().Y + 1 + GetInnerDimensions().Height * (ViewPosition / MaxViewSize)), 8, (int)(GetInnerDimensions().Height * (ViewSize / MaxViewSize)) - 1);
-            UIElementUtils.DrawTexture2DWithDimensions(_innerTexture.Value, handleRectangle.ToRectangle(), default, 4, 8);
+            UIElementUtils.DrawTexture2DWithDimensions(spriteBatch, _innerTexture.Value, handleRectangle.ToRectangle(), default, 4, 8);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
     }
 }

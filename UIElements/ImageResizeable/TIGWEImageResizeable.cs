@@ -9,34 +9,25 @@ namespace TerrariaInGameWorldEditor.UIElements.ImageResizeable
     {
         public int CornerSize { get; set; }
         public int BarSize { get; set; }
-        public bool ShouldResize { get; set; }
         public Color Color { get; set; } = Color.White;
         public Asset<Texture2D> Texture { get; set; }
         public Asset<Texture2D> TextureHover { get; set; }
 
-        public TIGWEImageResizeable(Asset<Texture2D> texture, int cornerSize = 8, int barSize = 16, bool shouldResize = true)
+        public TIGWEImageResizeable(Asset<Texture2D> texture, int cornerSize = 8, int barSize = 16)
         {
             Texture = texture;
             TextureHover = texture;
             CornerSize = cornerSize;
             BarSize = barSize;
-            ShouldResize = shouldResize;
             OverrideSamplerState = SamplerState.PointClamp;
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
             base.DrawSelf(spriteBatch);
-
-            // draw textures
-            if (ShouldResize)
-            {
-                UIElementUtils.DrawTexture2DWithDimensions(IsMouseHovering ? TextureHover.Value : Texture.Value, GetDimensions().ToRectangle(), Color, CornerSize, BarSize);
-            }
-            else
-            {
-                UIElementUtils.DrawTexture(IsMouseHovering ? TextureHover.Value : Texture.Value, (int)Width.Pixels, (int)Height.Pixels, this);
-            }
+            UIElementUtils.DrawTexture2DWithDimensions(spriteBatch, IsMouseHovering ? TextureHover.Value : Texture.Value, GetDimensions().ToRectangle(), Color, CornerSize, BarSize);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
     }
 }

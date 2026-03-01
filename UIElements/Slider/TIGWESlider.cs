@@ -14,19 +14,31 @@ namespace TerrariaInGameWorldEditor.UIElements.Slider
     internal class TIGWESlider : UIElement
     {
         public bool IsDragging { get; private set; } = false;
+        public bool ShouldResize
+        {
+            get => _shouldResize;
+            set
+            {
+                if (!value)
+                {
+                    RemoveChild(_body);
+                }
+                else
+                {
+                    Append(_body);
+                    RemoveChild(_point);
+                    Append(_point);
+                }
+                _shouldResize = value;
+            }
+        }
         public Asset<Texture2D> Texture 
-        { 
+        {
+            get => _body.Texture;
             set => _body.Texture = value; 
         }
-        public Asset<Texture2D> TextureHover 
-        { 
-            set => _body.TextureHover = value; 
-        }
-        public bool ShouldResize 
-        { 
-            set => _body.ShouldResize = value; 
-        }
 
+        private bool _shouldResize = true;
         private TIGWEImageResizeable _body;
         private UIImage _point;
         
@@ -47,7 +59,7 @@ namespace TerrariaInGameWorldEditor.UIElements.Slider
 
         public float GetValue()
         {
-            return _point.Left.Pixels / (Width.Pixels - _point.Width.Pixels) * 100; // returns where the point is on the slider from 0 - 100 (0 being at the start and 100 being at the end)
+            return (float)(_point.Left.Pixels / (float)(Width.Pixels - _point.Width.Pixels)) * 100f; // returns where the point is on the slider from 0 - 100 (0 being at the start and 100 being at the end)
         }
 
         public void SetValue(float value)
@@ -74,6 +86,29 @@ namespace TerrariaInGameWorldEditor.UIElements.Slider
         {
             base.LeftMouseDown(evt);
             IsDragging = true;
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            if (!ShouldResize)
+            {
+                CalculatedStyle dimensions = GetDimensions();
+                spriteBatch.Draw(Texture.Value, new Rectangle((int)dimensions.X, (int)dimensions.Y + 2, (int)dimensions.Width, (int)dimensions.Height - 4), Color.White);
+            }
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+        }
+
+        protected override void DrawChildren(SpriteBatch spriteBatch)
+        {
+            base.DrawChildren(spriteBatch);
         }
     }
 }

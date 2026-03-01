@@ -49,12 +49,14 @@ namespace TerrariaInGameWorldEditor.UIElements.ButtonResizable
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
             base.DrawSelf(spriteBatch);
             Color = Color.White * (IsMouseHovering ? _visibilityActive : _visibilityInactive);
             if (HoverText != null && IsMouseHovering)
             {
                 Main.instance.MouseText(HoverText);
             }
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
 
         public override void MouseOver(UIMouseEvent evt)

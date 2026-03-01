@@ -83,6 +83,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
             // x button
             _xButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/XButton"));
             _xButton.SetVisibility(0.8f, 1f);
+            _xButton.HoverText = "Close";
             _xButton.Width.Set(26, 0f);
             _xButton.Height.Set(26, 0f);
             _xButton.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);

@@ -1,14 +1,18 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent.UI.Elements;
+using Terraria.GameContent.UI.States;
+using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI.Elements;
+using Terraria.UI;
+using TerrariaInGameWorldEditor.UIElements;
 using TerrariaInGameWorldEditor.UIElements.CheckBox;
 using TerrariaInGameWorldEditor.UIElements.ColorPicker;
 using TerrariaInGameWorldEditor.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 using TerrariaInGameWorldEditor.UIElements.Scrollbar;
-using TerrariaInGameWorldEditor.UIElements.SearchGrid;
 using TerrariaInGameWorldEditor.UIElements.TextField;
 
 namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
@@ -95,13 +99,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             // general
             SettingsCategory general = new SettingsCategory("General");
             general.SetOptionsGrid(optionsGrid);
-            SettingsOption<TIGWECheckBox> updateDraw = new SettingsOption<TIGWECheckBox>("Update drawn/pasted tiles:", new TIGWECheckBox(false));
+            SettingsOption<TIGWECheckBox> updateDraw = new SettingsOption<TIGWECheckBox>("Update drawn/pasted tiles:", new TIGWECheckBox(TIGWESettings.ShouldUpdateDrawnTiles));
             updateDraw.OptionElement.OnCheckedChanged += (check) =>
             {
                 TIGWESettings.ShouldUpdateDrawnTiles = check;
             };
             general.AddOption(updateDraw);
-            SettingsOption<TIGWECheckBox> teleport = new SettingsOption<TIGWECheckBox>("Teleport to editor location when closing editor:", new TIGWECheckBox(true));
+            SettingsOption<TIGWECheckBox> teleport = new SettingsOption<TIGWECheckBox>("Teleport to editor location when closing editor:", new TIGWECheckBox(TIGWESettings.ShouldTeleportOnEditorClosed));
             teleport.OptionElement.OnCheckedChanged += (check) =>
             {
                 TIGWESettings.ShouldTeleportOnEditorClosed = check;
@@ -112,38 +116,42 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             // visual
             SettingsCategory visual = new SettingsCategory("Visual");
             visual.SetOptionsGrid(optionsGrid);
-            SettingsOption<TIGWECheckBox> centerLines = new SettingsOption<TIGWECheckBox>("Add center lines to selection:", new TIGWECheckBox(false));
+
+            SettingsOption<TIGWECheckBox> centerLines = new SettingsOption<TIGWECheckBox>("Add center lines to selection:", new TIGWECheckBox(TIGWESettings.ShowCenterLines));
             centerLines.OptionElement.OnCheckedChanged += (check) =>
             {
                 TIGWESettings.ShowCenterLines = check;
             };
             visual.AddOption(centerLines);
-            SettingsOption<TIGWECheckBox> measuringLines = new SettingsOption<TIGWECheckBox>("Show measuring lines:", new TIGWECheckBox(false));
+
+            SettingsOption<TIGWECheckBox> measuringLines = new SettingsOption<TIGWECheckBox>("Show measuring lines:", new TIGWECheckBox(TIGWESettings.ShowMeasureLines));
             measuringLines.OptionElement.OnCheckedChanged += (check) =>
             {
                 TIGWESettings.ShowMeasureLines = check;
             };
             visual.AddOption(measuringLines);
-            SettingsOption<TIGWECheckBox> fullbright = new SettingsOption<TIGWECheckBox>("Fullbright enabled:", new TIGWECheckBox(false));
+
+            SettingsOption<TIGWECheckBox> fullbright = new SettingsOption<TIGWECheckBox>("Fullbright enabled:", new TIGWECheckBox(TIGWESettings.FullbrightEnabled));
             fullbright.OptionElement.OnCheckedChanged += (check) =>
             {
                 TIGWESettings.FullbrightEnabled = check;
             };
             visual.AddOption(fullbright);
-            SettingsOption<TIGWEColorPicker> toolColor = new SettingsOption<TIGWEColorPicker>("Tool color:", new TIGWEColorPicker());
-            toolColor.OptionElement.OnColorChanged += (color) =>
+
+            SettingsOption<TIGWEColorPicker> toolColorPrimary = new SettingsOption<TIGWEColorPicker>("Tool color:", new TIGWEColorPicker());
+            toolColorPrimary.OptionElement.SetColor(TIGWESettings.ToolColor);
+            toolColorPrimary.OptionElement.OnColorChanged += (color) =>
             {
                 TIGWESettings.ToolColor = color;
             };
-            visual.AddOption(toolColor);
-            settingCategories.Add(visual);
+            visual.AddOption(toolColorPrimary);
 
             SettingsGroup themeOptions = new SettingsGroup();
             SettingsOption<TIGWEDropDown<Theme>> theme = new SettingsOption<TIGWEDropDown<Theme>>("Theme:", new TIGWEDropDown<Theme>());
             theme.OptionElement.AddOption(Theme.Default, "Default");
-            theme.OptionElement.AddOption(Theme.Vanilla, "Vanilla");
             theme.OptionElement.AddOption(Theme.TexturePack, "Texture pack");
             theme.OptionElement.AddOption(Theme.Custom, "Custom");
+            theme.OptionElement.SetSelectedValue(TIGWESettings.CurrentTheme);
             theme.OptionElement.Height.Set(26, 0);
             theme.OptionElement.Width.Set(150, 0);
             themeOptions.AddNode(theme);
@@ -152,22 +160,37 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             themeOptions.AddNode(primaryColor);
             primaryColor.OptionElement.OnColorChanged += (color) =>
             {
-                TIGWESettings.PrimaryColor = color;
+                UIElementUtils.PrimaryColor = color;
+                TIGWESettings.MainPrimaryColor = color;
             };
+            primaryColor.OptionElement.SetColor(TIGWESettings.MainPrimaryColor);
             SettingsOption<TIGWEColorPicker> secondaryColor = new SettingsOption<TIGWEColorPicker>("Secondary color:", new TIGWEColorPicker());
             secondaryColor.Enabled = false;
             themeOptions.AddNode(secondaryColor);
             secondaryColor.OptionElement.OnColorChanged += (color) =>
             {
-                TIGWESettings.SecondaryColor = color;
+                UIElementUtils.SecondaryColor = color;
+                TIGWESettings.MainSecondaryColor = color;
             };
+            secondaryColor.OptionElement.SetColor(TIGWESettings.MainSecondaryColor);
             theme.OptionElement.OnOptionChanged += (selectedTheme) =>
             {
                 primaryColor.Enabled = selectedTheme.Value == Theme.Custom;
                 secondaryColor.Enabled = selectedTheme.Value == Theme.Custom;
+                switch (selectedTheme.Value)
+                {
+                    case Theme.Default:
+                        primaryColor.OptionElement.SetColor(new Color(43, 56, 101));
+                        secondaryColor.OptionElement.SetColor(new Color(72, 92, 168));
+                        break;
+                    case Theme.TexturePack:
+                        // fix logic
+                        break;
+                }
                 TIGWESettings.CurrentTheme = selectedTheme.Value;
             };
             visual.AddOption(themeOptions);
+            settingCategories.Add(visual);
 
             // default to general
             general.SetSelected();

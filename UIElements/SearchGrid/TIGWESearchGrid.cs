@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
@@ -80,6 +81,13 @@ namespace TerrariaInGameWorldEditor.UIElements.SearchGrid
                 base.Clear();
                 base.AddRange(matchingItems);
             }
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
     }
 }

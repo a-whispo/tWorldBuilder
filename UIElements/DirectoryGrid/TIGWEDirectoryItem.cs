@@ -7,7 +7,6 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UIElements;
 using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 using TerrariaInGameWorldEditor.UIElements.TextField;
@@ -233,6 +232,13 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
                 _deleteButton.HoverText = "Delete";
                 _deleteButton.SetImage(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/Delete"));
             }
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
 
         public override void Recalculate()

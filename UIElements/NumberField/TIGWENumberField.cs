@@ -8,11 +8,12 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
+using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 
 namespace TerrariaInGameWorldEditor.UIElements.NumberField
 {
-    public class TIGWENumberField : UIElement
+    internal class TIGWENumberField : UIElement
     {
         public delegate void TextChangedEventHandler(int newValue);
         public event TextChangedEventHandler OnValueChanged;
@@ -55,8 +56,8 @@ namespace TerrariaInGameWorldEditor.UIElements.NumberField
         private UIText _numText;
         private TIGWEImageResizeable _background;
         private int _textBlink;
-        private UIImageButton _incrementButton;
-        private UIImageButton _decrementButton;
+        private TIGWEButton _incrementButton;
+        private TIGWEButton _decrementButton;
 
 
         public TIGWENumberField(int initialValue, int maxValue = int.MaxValue, int minValue = int.MinValue)
@@ -91,7 +92,7 @@ namespace TerrariaInGameWorldEditor.UIElements.NumberField
             Append(_numText);
 
             // increment button
-            _incrementButton = new UIImageButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/NumberField/IncrementButton"));
+            _incrementButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/NumberField/IncrementButton"));
             _incrementButton.SetHoverImage(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/NumberField/IncrementButtonHover"));
             _incrementButton.SetVisibility(1f, 1f);
             _incrementButton.Width.Set(14, 0f);
@@ -119,7 +120,7 @@ namespace TerrariaInGameWorldEditor.UIElements.NumberField
             Append(_incrementButton);
 
             // decrement button
-            _decrementButton = new UIImageButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/NumberField/DecrementButton"));
+            _decrementButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/NumberField/DecrementButton"));
             _decrementButton.SetHoverImage(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/NumberField/DecrementButtonHover"));
             _decrementButton.SetVisibility(1f, 1f);
             _decrementButton.Width.Set(14, 0f);
@@ -243,6 +244,13 @@ namespace TerrariaInGameWorldEditor.UIElements.NumberField
         {
             SoundEngine.PlaySound(new SoundStyle("Terraria/Sounds/Menu_Tick"));
             base.MouseOver(evt);
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.Draw(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
 
         public int GetValue()

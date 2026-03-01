@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Terraria.ModLoader.UI.Elements;
@@ -241,6 +242,13 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
                 item.CanSelect = item is TIGWEDirectoryFolder && CanSelectFolders || item is TIGWEDirectoryFile && CanSelectFiles;
                 item.Recalculate();
             }
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
         }
     }
 }
