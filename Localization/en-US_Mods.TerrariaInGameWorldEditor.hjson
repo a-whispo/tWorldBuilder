@@ -22,4 +22,5 @@ Keybinds: {
 	"Undo (Ctrl + Key).DisplayName": Undo ( Ctrl +  Key)
 	"Redo (Ctrl + Key).DisplayName": Redo ( Ctrl +  Key)
 	"Save (Ctrl + Key).DisplayName": Save ( Ctrl +  Key)
+	"Move faster in editor.DisplayName": Move faster in editor
 }

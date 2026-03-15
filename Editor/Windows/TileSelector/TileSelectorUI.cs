@@ -191,7 +191,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
                     }
                     catch (Exception ex)
                     {
-                        TerrariaInGameWorldEditor.ModLogger.Warn($"Failed to load item {(item != null ? $"\"{item.Name}\"" : "(item was null)")}, with ID {i}.", ex);
+                        TerrariaInGameWorldEditor.Warn($"Failed to load item {(item != null ? $"\"{item.Name}\"" : "(item was null)")}, with ID {i}.", ex);
                     }
                 }
                 tileGrid.UpdateOrder();

@@ -119,7 +119,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     // create a tile collection with all the affected tiles and add it to undo history
                     TileCollection undoColl = new TileCollection();
                     undoColl.TryAddTiles(_currentDrawPreTilesPlaced);
-                    EditorSystem.Local.UndoHistory.Add(undoColl);
+                    EditorSystem.Local.AddToUndoHistory(undoColl);
                     _currentDrawPreTilesPlaced.Clear();
                     _currentDrawLinePoints.Clear();
                 }

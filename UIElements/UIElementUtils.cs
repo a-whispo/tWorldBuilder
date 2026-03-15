@@ -40,11 +40,11 @@ namespace TerrariaInGameWorldEditor.UIElements
             try
             {
                 spriteBatch.End();
-                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, default, new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true }, ThemeEffect, Main.UIScaleMatrix);
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, default, new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true }, ThemeEffect, Main.UIScaleMatrix);
             } 
             catch (Exception ex)
             {
-                TerrariaInGameWorldEditor.ModLogger.Error("Failed to set spritebatch to theme.", ex);
+                TerrariaInGameWorldEditor.Error("Failed to set spritebatch to theme.", ex);
             }
         }
 
@@ -53,11 +53,11 @@ namespace TerrariaInGameWorldEditor.UIElements
             try
             {
                 spriteBatch.End();
-                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true }, null, Main.UIScaleMatrix);
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true }, default, Main.UIScaleMatrix);
             }
             catch (Exception ex)
             {
-                TerrariaInGameWorldEditor.ModLogger.Error("Failed to set spritebatch to normal.", ex);
+                TerrariaInGameWorldEditor.Error("Failed to set spritebatch to normal.", ex);
             }
         }
 
@@ -73,7 +73,7 @@ namespace TerrariaInGameWorldEditor.UIElements
             Point bottomRight = new Point(topLeft.X + dimensions.Width - cornerSize, topLeft.Y + dimensions.Height - cornerSize);
 
             // middle part
-            spriteBatch.Draw(texture, new Rectangle(topLeft.X + cornerSize, topLeft.Y + cornerSize, dimensions.Width - cornerSize * 2, dimensions.Height - cornerSize * 2), new Rectangle(cornerSize, cornerSize, Math.Max(barSize, 2), Math.Max(barSize, 2)), color); // middle part
+            spriteBatch.Draw(texture, new Rectangle(topLeft.X + cornerSize, topLeft.Y + cornerSize, dimensions.Width - cornerSize * 2, dimensions.Height - cornerSize * 2), new Rectangle(cornerSize + 1, cornerSize + 1, Math.Max(barSize - 2, 0), Math.Max(barSize - 2, 0)), color); // middle part
 
             // corners
             spriteBatch.Draw(texture, new Rectangle(topLeft.X, topLeft.Y, cornerSize, cornerSize), new Rectangle(0, 0, cornerSize, cornerSize), color); // top left
@@ -86,8 +86,8 @@ namespace TerrariaInGameWorldEditor.UIElements
             spriteBatch.Draw(texture, new Rectangle(topLeft.X + cornerSize, bottomRight.Y, dimensions.Width - cornerSize * 2, cornerSize), new Rectangle(cornerSize, cornerSize + barSize, barSize, cornerSize), color); // bottom
 
             // left and right
-            spriteBatch.Draw(texture, new Rectangle(topLeft.X, topLeft.Y + cornerSize, cornerSize, dimensions.Height - cornerSize * 2), new Rectangle(0, cornerSize, cornerSize, barSize), color); // left
-            spriteBatch.Draw(texture, new Rectangle(bottomRight.X, topLeft.Y + cornerSize, cornerSize, dimensions.Height - cornerSize * 2), new Rectangle(cornerSize + barSize, cornerSize, cornerSize, barSize), color); // right
+            spriteBatch.Draw(texture, new Rectangle(topLeft.X, topLeft.Y + cornerSize, cornerSize, dimensions.Height - cornerSize * 2), new Rectangle(0, cornerSize, cornerSize, barSize - 1), color); // left
+            spriteBatch.Draw(texture, new Rectangle(bottomRight.X, topLeft.Y + cornerSize, cornerSize, dimensions.Height - cornerSize * 2), new Rectangle(cornerSize + barSize, cornerSize, cornerSize, barSize - 1), color); // right
         }
     }
 }

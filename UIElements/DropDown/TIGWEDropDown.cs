@@ -141,6 +141,12 @@ namespace TerrariaInGameWorldEditor.UIElements.DropDown
             return base.ContainsPoint(point) || _dropDown.ContainsPoint(point) && _isShowingOptions;
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            Main.LocalPlayer.mouseInterface = _dropDown.IsMouseHovering || Main.LocalPlayer.mouseInterface;
+        }
+
         public override void Recalculate()
         {
             base.Recalculate();

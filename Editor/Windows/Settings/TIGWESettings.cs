@@ -14,7 +14,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         public static bool ShowMeasureLines { get; set; } = false;
         public static bool ShouldUpdateDrawnTiles { get; set; } = false;
         public static bool ShouldTeleportOnEditorClosed { get; set; } = true;
+        public static bool ForceScaleUI { get; set; } = false;
         public static bool FullbrightEnabled { get; set; } = false;
+        public static int HistoryLimit { get; set; } = 1000;
+        public static bool ShouldShowMessages { get; set; } = false;
+        public static bool ShouldShowErrors { get; set; } = true;
+        public static bool ShouldShowFatalErrors { get; set; } = false;
 
         // mask settings
         public static bool ShouldPasteTiles { get; set; }

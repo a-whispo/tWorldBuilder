@@ -189,8 +189,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
                 }
                 catch (Exception ex)
                 {
-                    TerrariaInGameWorldEditor.ModLogger.Warn($"Failed to rename.", ex);
-                    Main.NewText("Failed to rename, a file or folder with that name likely already exist.", Color.Red);
+                    TerrariaInGameWorldEditor.Warn($"Failed to rename, a file or folder with that name likely already exist.", ex);
                     return;
                 }
             }

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
 {
-    public class TileCollection : TagSerializable, IEnumerable<KeyValuePair<Point16, TileCopy>>
+    public class TileCollection : IEnumerable<KeyValuePair<Point16, TileCopy>>
     {
         public EventHandler OnChanged;
-        public static Func<TagCompound, TileCollection> DESERIALIZER = s => DeserializeData(s);
         public int Count => _tiles.Count;
         
         // tiles stored
@@ -261,38 +262,28 @@ namespace TerrariaInGameWorldEditor.Common
             return _maxY - _minY;
         }
 
-        public TagCompound SerializeData()
+        public static void WriteTileCollection(BinaryWriter bw, TileCollection tc)
         {
-            // serialize the dict with help of a list
-            var tag = new TagCompound();
-            var list = new List<TagCompound>();
-
-            foreach (var item in _tiles)
+            bw.Write(tc.Count);
+            foreach (var item in tc)
             {
-                list.Add(new TagCompound() {
-                    { "X", item.Key.X },
-                    { "Y", item.Key.Y },
-                    { "TileCopy", item.Value },
-                });
+                bw.Write(item.Key.X);
+                bw.Write(item.Key.Y);
+                TileCopy.WriteTileCopy(bw, item.Value);
             }
-            tag["Tiles"] = list;
-            return tag;
         }
 
-        public static TileCollection DeserializeData(TagCompound tag)
+        public static TileCollection ReadTileCollection(BinaryReader br)
         {
-            // deserialize the dict
-            TileCollection tileColl = new TileCollection();
-
-            IList<TagCompound> list = tag.GetList<TagCompound>("Tiles");
-            foreach (var item in list)
+            TileCollection tc = new TileCollection();
+            int count = br.ReadInt32();
+            for (int i = 0; i < count; i++)
             {
-                int x = item.GetInt("X");
-                int y = item.GetInt("Y");
-                TileCopy tileCopy = item.Get<TileCopy>("TileCopy");
-                tileColl.TryAddTile(new Point16(x, y), tileCopy);
+                int x = br.ReadInt16();
+                int y = br.ReadInt16();
+                tc.TryAddTile(new Point16(x, y), TileCopy.ReadTileCopy(br));
             }
-            return tileColl;
+            return tc;
         }
 
         public IEnumerator<KeyValuePair<Point16, TileCopy>> GetEnumerator()

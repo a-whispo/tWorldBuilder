@@ -164,69 +164,6 @@ namespace TerrariaInGameWorldEditor.UIElements.NumberField
             OnValueChanged?.Invoke(_currentValue);
         }
 
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            // set text to placeholder text if we havent written anything
-            string text;
-
-            if (IsFocused)
-            {
-                // unfocus if enter or escape is pressed
-                // check where player clicked, if its outside the textfield, unfocus
-                if (Main.keyState.IsKeyDown(Keys.Enter) || Main.keyState.IsKeyDown(Keys.Escape) || Mouse.GetState().LeftButton == ButtonState.Pressed && !_background.IsMouseHovering)
-                {
-                    IsFocused = false;
-                }
-
-                // check if text should be placeholder text or the typed string
-                PlayerInput.WritingText = true;
-                Main.instance.HandleIME();
-                string newText = Main.GetInputText(_numText.Text.Replace("|", ""));
-                int result = _initialValue;
-                if (newText.Equals("") || newText.Equals("-") && IsFocused && MinValue < 0 || int.TryParse(newText, out result))
-                {
-                    text = newText;
-                    result = Math.Clamp(result, MinValue, MaxValue);
-                    _currentValue = result;
-                    OnValueChanged?.Invoke(result);
-                } 
-                else
-                {
-                    text = _currentValue.ToString();
-                }
-            } 
-            else
-            {
-                text = _currentValue.ToString();
-            }
-
-            // text blinker thing
-            if (++_textBlink / 30 % 2 == 0 && IsFocused)
-            {
-                text += "|";
-            }
-            
-
-            if (IsFocused)
-            {
-                if ((Main.inputText.IsKeyDown(Keys.LeftControl) || Main.inputText.IsKeyDown(Keys.RightControl)) && !(Main.inputText.IsKeyDown(Keys.LeftAlt) || Main.inputText.IsKeyDown(Keys.RightAlt)))
-                {
-                    if (Main.inputText.IsKeyDown(Keys.Back) && !Main.oldInputText.IsKeyDown(Keys.Back))
-                    {
-                        _currentValue = _initialValue;
-                        OnValueChanged?.Invoke(_initialValue);
-                        text = "";
-                    }
-                }
-            }
-            _numText.SetText(text);
-
-            // this is kinda weird but ok
-            _background.Texture = IsFocused ? _background.TextureHover : ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture");
-        }
-
         public override void Recalculate()
         {
             base.Recalculate();
@@ -248,6 +185,60 @@ namespace TerrariaInGameWorldEditor.UIElements.NumberField
 
         public override void Draw(SpriteBatch spriteBatch)
         {
+            string text;
+            if (IsFocused)
+            {
+                // unfocus if enter or escape is pressed
+                // check where player clicked, if its outside the textfield, unfocus
+                if (Main.keyState.IsKeyDown(Keys.Enter) || Main.keyState.IsKeyDown(Keys.Escape) || Mouse.GetState().LeftButton == ButtonState.Pressed && !_background.IsMouseHovering)
+                {
+                    IsFocused = false;
+                }
+
+                // check if text should be placeholder text or the typed string
+                PlayerInput.WritingText = true;
+                Main.instance.HandleIME();
+                string newText = Main.GetInputText(_numText.Text.Replace("|", ""));
+                int result = _initialValue;
+                if (newText.Equals("") || newText.Equals("-") && IsFocused && MinValue < 0 || int.TryParse(newText, out result))
+                {
+                    text = newText;
+                    result = Math.Clamp(result, MinValue, MaxValue);
+                    _currentValue = result;
+                    OnValueChanged?.Invoke(result);
+                }
+                else
+                {
+                    text = _currentValue.ToString();
+                }
+            }
+            else
+            {
+                text = _currentValue.ToString();
+            }
+
+            // text blinker thing
+            if (++_textBlink / 30 % 2 == 0 && IsFocused)
+            {
+                text += "|";
+            }
+
+            if (IsFocused)
+            {
+                if ((Main.inputText.IsKeyDown(Keys.LeftControl) || Main.inputText.IsKeyDown(Keys.RightControl)) && !(Main.inputText.IsKeyDown(Keys.LeftAlt) || Main.inputText.IsKeyDown(Keys.RightAlt)))
+                {
+                    if (Main.inputText.IsKeyDown(Keys.Back) && !Main.oldInputText.IsKeyDown(Keys.Back))
+                    {
+                        _currentValue = _initialValue;
+                        OnValueChanged?.Invoke(_initialValue);
+                        text = "";
+                    }
+                }
+            }
+            _numText.SetText(text);
+
+            // this is kinda weird but ok
+            _background.Texture = IsFocused ? _background.TextureHover : ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture");
             UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
             base.Draw(spriteBatch);
             UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);

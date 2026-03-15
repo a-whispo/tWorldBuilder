@@ -517,7 +517,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
             } 
             catch (Exception ex)
             {
-                TerrariaInGameWorldEditor.ModLogger.Error("Unknown error trying to draw TileCollection.", ex);
+                TerrariaInGameWorldEditor.Error("Unknown error trying to draw TileCollection.", ex);
                 SpriteBatch.End();
             }
             SpriteBatch.End();
@@ -637,7 +637,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
             }
             catch (Exception ex)
             {
-                TerrariaInGameWorldEditor.ModLogger.Error("Unknown error trying to draw TileCopy in UI.", ex);
+                TerrariaInGameWorldEditor.Error("Unknown error trying to draw TileCopy in UI.", ex);
                 SpriteBatch.End();
             }
             SpriteBatch.End();

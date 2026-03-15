@@ -1,12 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoMod.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.Creative;
+using Terraria.GameContent.UI.Chat;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -30,11 +31,40 @@ namespace TerrariaInGameWorldEditor.Editor
         public static EditorSystem Local { get; private set; }
 
         // main ui
-        public float Scale { get; private set; } = 1f;
+        public float Scale
+        {
+            get => _scale;
+            set
+            {
+                if (UseCustomScale)
+                {
+                    Main.UIScale = value;
+                    _scale = value;
+                }
+            }
+        }
+        private float _scale = 1f;
+        private float _actualScale = Main.UIScale;
+        public bool UseCustomScale
+        {
+            get => _useCustomScale;
+            set
+            {
+                if (_useCustomScale != value)
+                {
+                    if (!_useCustomScale)
+                    {
+                        _actualScale = Main.UIScale;
+                    }
+                    Main.UIScale = value ? Scale : _actualScale;
+                    _useCustomScale = value;
+                }
+            }
+        }
+        private bool _useCustomScale = false;
         public bool IsEditorVisible => _mainUIState.Visible;
         private EditorUI _mainUIState;
         private UserInterface _mainUserInterface;
-        private SpriteBatch _spriteBatch;
 
         // windows
         private TileSelectorUI _selectTileUIState;
@@ -44,12 +74,13 @@ namespace TerrariaInGameWorldEditor.Editor
         private MaskUI _maskUIState;
 
         // tools
-        public List<Tool> Tools { get; private set; } 
+        public List<Tool> Tools { get; private set; }
         private PasteTool _pasteTool = new PasteTool();
         private Tool _currentTool;
-        public Tool CurrentTool { // current selected tool
+        public Tool CurrentTool
+        { // current selected tool
             get => _currentTool;
-            set 
+            set
             {
                 _currentTool = value;
                 _mainUIState.RecalculateToolSettings();
@@ -116,8 +147,10 @@ namespace TerrariaInGameWorldEditor.Editor
         private Vector2 _screenPositionOffset;
 
         // redo undo
-        public List<TileCollection> UndoHistory { get; set; } = new List<TileCollection>();
-        public List<TileCollection> RedoHistory { get; set; } = new List<TileCollection>(); 
+        public int UndoCount => _undoHistory.Count;
+        private List<TileCollection> _undoHistory = new List<TileCollection>();
+        public int RedoCount => _redoHistory.Count;
+        private List<TileCollection> _redoHistory = new List<TileCollection>();
 
         public override void OnModLoad()
         {
@@ -155,12 +188,14 @@ namespace TerrariaInGameWorldEditor.Editor
             TIGWEUISystem.Local.RegisterUI(_blueprintsUIState);
             TIGWEUISystem.Local.RegisterUI(_saveUIState);
             TIGWEUISystem.Local.RegisterUI(_maskUIState);
+            IL_RemadeChatMonitor.DrawChat += DrawChat;
+            IL_Main.DrawPlayerChat += DrawPlayerChat;
 
-            // for testing
+            // default
             Tile tile = new Tile();
             tile.HasTile = true;
-            tile.TileType = 0;
-            tile.WallType = 0;
+            tile.TileType = TileID.Dirt;
+            tile.WallType = WallID.None;
             tile.TileFrameX = 18;
             tile.TileFrameY = 18;
             SelectedTile = new TileCopy(tile);
@@ -179,6 +214,48 @@ namespace TerrariaInGameWorldEditor.Editor
             orig(self, ref smartCursorWanted);
         }
 
+        private void DrawPlayerChat(ILContext il)
+        {
+            try
+            {
+                ILCursor c = new ILCursor(il);
+                for (int i = 0; i < 5; i++)
+                {
+                    c.GotoNext(i => i.MatchNewobj<Vector2>());
+                    c.Index++;
+                    c.EmitDelegate<Func<Vector2, Vector2>>((position) =>
+                    {
+                        return _mainUIState.Visible ? new Vector2(position.X + _mainUIState.LeftWidth - 70, position.Y - 2 - _mainUIState.BottomHeight) : position;
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                MonoModHooks.DumpIL(ModContent.GetInstance<TerrariaInGameWorldEditor>(), il);
+                TerrariaInGameWorldEditor.Error("Error IL editing DrawPlayerChat.", ex);
+            }
+        }
+
+        private void DrawChat(ILContext il)
+        {
+            try
+            {
+                ILCursor c = new ILCursor(il);
+                c.GotoNext(i => i.MatchNewobj<Vector2>());
+                c.Index++;
+                c.EmitLdloc3();
+                c.EmitDelegate<Func<Vector2, int, Vector2>>((position, num5) =>
+                {
+                    return _mainUIState.Visible ? new Vector2(_mainUIState.LeftWidth + 12, Main.screenHeight - _mainUIState.BottomHeight - (Main.drawingPlayerChat ? 60 : 30) - num5 * 21) : position;
+                });
+            }
+            catch (Exception ex)
+            {
+                MonoModHooks.DumpIL(ModContent.GetInstance<TerrariaInGameWorldEditor>(), il);
+                TerrariaInGameWorldEditor.Error("Error IL editing DrawChat.", ex);
+            }
+        }
+
         public override void UpdateUI(GameTime gameTime)
         {
             // update UI
@@ -190,24 +267,7 @@ namespace TerrariaInGameWorldEditor.Editor
                     TIGWEUISystem.Local.ShouldRenderUI = true;
                     return;
                 }
-
-                // temporarily adjust to make everything act as if the UI scale is 1f
-                Main.mouseX = (int)(Main.mouseX * Main.UIScale);
-                Main.mouseY = (int)(Main.mouseY * Main.UIScale);
-                int tempWidth = Main.screenWidth;
-                int tempHeight = Main.screenHeight;
-                float tempUIScale = Main.UIScale;
-                Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
-                Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
-                Main.UIScale = Scale;
-
-                // do thing
                 _mainUserInterface.Update(gameTime);
-
-                // restore originals
-                Main.UIScale = tempUIScale;
-                Main.screenWidth = tempWidth;
-                Main.screenHeight = tempHeight;
             }
             else
             {
@@ -218,7 +278,6 @@ namespace TerrariaInGameWorldEditor.Editor
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) // layer stuff
         {
-            _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
             if (!_mainUIState.Visible)
             {
                 return;
@@ -230,13 +289,12 @@ namespace TerrariaInGameWorldEditor.Editor
                 DrawUtils.DrawTileCollectionOutline(Local.CurrentSelection, new Point(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
                 DrawUtils.DrawMiscOptions(new Rectangle(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY(), Local.CurrentSelection.GetWidth(), Local.CurrentSelection.GetHeight()), TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
             }
-            Local.CurrentTool?.Draw(_spriteBatch);
+            Local.CurrentTool?.Draw(Main.spriteBatch);
 
-            // removes all layers except the cursor layer
+            // removes all layers except the ones we want
             layers.RemoveAll(layer =>
             {
-                // Vanilla: Interface Logic 4 is the mouse text, idk why
-                return !(layer.Name.Equals("Vanilla: Cursor") || layer.Name.Equals($"{TerrariaInGameWorldEditor.MODNAME}: UI") || layer.Name.Equals("Vanilla: Interface Logic 4") || layer.Name.Equals("Vanilla: Tile Grid Option"));
+                return !(layer.Name.Equals("Vanilla: Player Chat") || layer.Name.Equals("Vanilla: Cursor") || layer.Name.Equals($"{TerrariaInGameWorldEditor.MODNAME}: UI") || layer.Name.Equals("Vanilla: Interface Logic 4") || layer.Name.Equals("Vanilla: Tile Grid Option"));
             });
 
             // insert our layer before the cursor layer but after the tile grid option layer so the tile grid isnt drawn over our UI
@@ -246,25 +304,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 {
                     if (_mainUserInterface.CurrentState != null)
                     {
-                        // temporarily adjust to make everything act as if the UI scale is 1f
-                        Main.mouseX = (int)(Main.mouseX * Main.UIScale);
-                        Main.mouseY = (int)(Main.mouseY * Main.UIScale);
-                        int tempWidth = Main.screenWidth;
-                        int tempHeight = Main.screenHeight;
-                        float tempUIScale = Main.UIScale;
-                        Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
-                        Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
-                        Main.UIScale = Scale;
-
-                        // start spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
-                        _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
-                        _mainUserInterface.Draw(_spriteBatch, Main.gameTimeCache);
-                        _spriteBatch.End();
-
-                        // restore originals
-                        Main.UIScale = tempUIScale;
-                        Main.screenWidth = tempWidth;
-                        Main.screenHeight = tempHeight;
+                        _mainUserInterface.Draw(Main.spriteBatch, Main.gameTimeCache);
                     }
                     return true;
                 },
@@ -310,18 +350,28 @@ namespace TerrariaInGameWorldEditor.Editor
                 // undo
                 if (Keybinds.UndoMK.JustPressed)
                 {
-                    if (UndoHistory.Count > 0)
+                    if (_undoHistory.Count > 0)
                     {
                         Undo();
+                        TerrariaInGameWorldEditor.NewText($"Undid.");
+                    }
+                    else
+                    {
+                        TerrariaInGameWorldEditor.NewText($"Nothing left to undo.");
                     }
                 }
 
                 // redo
                 if (Keybinds.RedoMK.JustPressed)
                 {
-                    if (RedoHistory.Count > 0)
+                    if (_redoHistory.Count > 0)
                     {
                         Redo();
+                        TerrariaInGameWorldEditor.NewText($"Redid.");
+                    }
+                    else
+                    {
+                        TerrariaInGameWorldEditor.NewText($"Nothing left to redo.");
                     }
                 }
 
@@ -331,6 +381,7 @@ namespace TerrariaInGameWorldEditor.Editor
                     if (CurrentSelection?.Count > 0)
                     {
                         CopyToClipboard(CurrentSelection); // copy
+                        TerrariaInGameWorldEditor.NewText($"Copied.");
                     }
                 }
 
@@ -341,6 +392,10 @@ namespace TerrariaInGameWorldEditor.Editor
                     {
                         CurrentTool = _pasteTool;
                     }
+                    else
+                    {
+                        TerrariaInGameWorldEditor.NewText($"Nothing in clipboard.");
+                    }
                 }
 
                 // cut
@@ -350,6 +405,7 @@ namespace TerrariaInGameWorldEditor.Editor
                     {
                         CopyToClipboard(CurrentSelection);
                         Delete(CurrentSelection, true);
+                        TerrariaInGameWorldEditor.NewText($"Cut.");
                     }
                 }
 
@@ -371,6 +427,7 @@ namespace TerrariaInGameWorldEditor.Editor
                     if (CurrentSelection != null)
                     {
                         Delete(CurrentSelection, true);
+                        TerrariaInGameWorldEditor.NewText($"Deleted.");
                     }
                 }
             }
@@ -398,7 +455,7 @@ namespace TerrariaInGameWorldEditor.Editor
                     _screenPositionOffset.Y = _mouseMiddleClickedPoint.Y - Main.mouseY / Main.GameZoomTarget;
                 }
                 int mult = 1;
-                if (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift))
+                if (Keybinds.FastMoveMK.Current)
                 {
                     mult = 3;
                 }
@@ -418,6 +475,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 {
                     _screenPositionOffset.X += 10 * mult;
                 }
+                _screenPositionOffset = Vector2.Clamp(_screenPositionOffset, Vector2.Zero, new Vector2(Main.maxTilesX * 16, Main.maxTilesY * 16));
             }
         }
 
@@ -433,9 +491,9 @@ namespace TerrariaInGameWorldEditor.Editor
 
         public override void PostUpdatePlayers()
         {
-            
+
             base.PostUpdatePlayers();
-            
+
             // update tools
             Local.CurrentTool?.Update();
             if (Local.CurrentTool is SelectionTool selectionTool)
@@ -447,9 +505,13 @@ namespace TerrariaInGameWorldEditor.Editor
         private void ToggleEditor()
         {
             _mainUIState.Visible = !_mainUIState.Visible;
-            
+
             if (!_mainUIState.Visible)
             {
+                if (UseCustomScale)
+                {
+                    Main.UIScale = _actualScale;
+                }
                 CreativePowerManager.Instance.GetPower<CreativePowers.GodmodePower>().SetEnabledState(Main.LocalPlayer.whoAmI, false);
                 CurrentTool = null;
                 if (TIGWESettings.ShouldTeleportOnEditorClosed)
@@ -461,6 +523,11 @@ namespace TerrariaInGameWorldEditor.Editor
             }
             else
             {
+                if (UseCustomScale)
+                {
+                    _actualScale = Main.UIScale;
+                    Main.UIScale = Scale;
+                }
                 CreativePowerManager.Instance.GetPower<CreativePowers.GodmodePower>().SetEnabledState(Main.LocalPlayer.whoAmI, true);
                 Main.ingameOptionsWindow = false;
                 _screenPositionOffset = Main.screenPosition;
@@ -513,36 +580,67 @@ namespace TerrariaInGameWorldEditor.Editor
 
         public void Redo()
         {
-            UndoHistory.Add(new TileCollection());
+            TileCollection undo = new TileCollection();
 
             // same as undo pretty much
-            foreach (var tile in RedoHistory[RedoHistory.Count - 1])
+            foreach (var tile in _redoHistory[_redoHistory.Count - 1])
             {
-                UndoHistory[UndoHistory.Count - 1].TryAddTile(new Point16(tile.Key.X, tile.Key.Y), new TileCopy(Main.tile[tile.Key.X, tile.Key.Y]));
+                undo.TryAddTile(new Point16(tile.Key.X, tile.Key.Y), new TileCopy(Main.tile[tile.Key.X, tile.Key.Y]));
                 Main.tile[tile.Key.X, tile.Key.Y].CopyFrom(tile.Value.GetAsTile());
             }
-            RedoHistory.RemoveAt(RedoHistory.Count - 1);
+            AddToUndoHistory(undo);
+            _redoHistory.RemoveAt(_redoHistory.Count - 1);
         }
 
         public void Undo()
         {
-            RedoHistory.Add(new TileCollection());
+            TileCollection redo = new TileCollection();
 
             // go over all the tiles in the most recently added tile collection to undo
-            foreach (var tile in UndoHistory[UndoHistory.Count - 1].ToList())
+            foreach (var tile in _undoHistory[_undoHistory.Count - 1])
             {
-                // add the tile to redo
-                RedoHistory[RedoHistory.Count - 1].TryAddTile(new Point16(tile.Key.X, tile.Key.Y), new TileCopy(Main.tile[tile.Key.X, tile.Key.Y]));
-
-                // set the tile at the coordinates to the tile data we stored
+                redo.TryAddTile(new Point16(tile.Key.X, tile.Key.Y), new TileCopy(Main.tile[tile.Key.X, tile.Key.Y]));
                 Main.tile[tile.Key.X, tile.Key.Y].CopyFrom(tile.Value.GetAsTile());
             }
-            UndoHistory.RemoveAt(UndoHistory.Count - 1);
+            AddToRedoHistory(redo);
+            _undoHistory.RemoveAt(_undoHistory.Count - 1);
+        }
+
+        public void AddToRedoHistory(TileCollection redo)
+        {
+            if (TIGWESettings.HistoryLimit <= _redoHistory.Count)
+            {
+                for (int i = 0; i < _redoHistory.Count - 1; i++)
+                {
+                    _redoHistory[i] = _redoHistory[i + 1];
+                }
+                _redoHistory[_redoHistory.Count - 1] = redo;
+            }
+            else
+            {
+                _redoHistory.Add(redo);
+            }
+        }
+
+        public void AddToUndoHistory(TileCollection undo)
+        {
+            if (TIGWESettings.HistoryLimit <= _undoHistory.Count)
+            {
+                for (int i = 0; i < _undoHistory.Count - 1; i++)
+                {
+                    _undoHistory[i] = _undoHistory[i + 1];
+                }
+                _undoHistory[_undoHistory.Count - 1] = undo;
+            }
+            else
+            {
+                _undoHistory.Add(undo);
+            }
         }
 
         public void Delete(TileCollection tilesToDelete, bool save = false) // delete area
         {
-            TileCollection undoColl = new TileCollection();;
+            TileCollection undoColl = new TileCollection(); ;
 
             // go over all the tiles in the most recently added tile collection to undo
             foreach (var tile in tilesToDelete)
@@ -575,7 +673,7 @@ namespace TerrariaInGameWorldEditor.Editor
 
             if (save == true)
             {
-                UndoHistory.Add(undoColl);
+                _undoHistory.Add(undoColl);
             }
         }
     }

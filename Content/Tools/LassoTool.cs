@@ -25,7 +25,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public override void Draw(SpriteBatch spriteBatch)
         {
             // draw a line from the first to the last point if we're selecting so you can see what the selection would be like
-            if (_isSelecting)
+            if (_isSelecting && _selection.Count > 0)
             {
                 var selectionArray = _selection.ToArray();
                 Vector2 pointLast = new Vector2(selectionArray[selectionArray.Count() - 1].Key.X * 16 - Main.screenPosition.X + 8, selectionArray[selectionArray.Count() - 1].Key.Y * 16 - Main.screenPosition.Y + 8);

@@ -3,12 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
 using Terraria;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
-using TerrariaInGameWorldEditor.Editor;
 using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.DirectoryGrid;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
@@ -93,13 +91,14 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             {
                 try
                 {
-                    TagCompound tag = TagIO.FromFile(file.FullPath);
-                    EditorSystem.Local.Clipboard = tag.Get<TileCollection>("TileCollection");
+                    // read from the file
+                    using BinaryReader br = new BinaryReader(File.OpenRead(file.FullPath));
+                    EditorSystem.Local.Clipboard = TileCollection.ReadTileCollection(br);
+                    TerrariaInGameWorldEditor.NewText($"Set clipboard to \"{file.Name}\"");
                 }
                 catch (Exception ex)
                 {
-                    TerrariaInGameWorldEditor.ModLogger.Warn("Failed to load selected file.", ex);
-                    Main.NewText("Failed to load selected file.", Color.Red);
+                    TerrariaInGameWorldEditor.Warn("Failed to load selected file.", ex);
                     EditorSystem.Local.Clipboard = null;
                 }
             };

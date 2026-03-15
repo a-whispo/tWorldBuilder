@@ -1,6 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
@@ -12,11 +10,9 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
     {
         public static TIGWEUISystem Local { get; private set; } // local instance
         public bool ShouldRenderUI { get; set; } = true;
-        public float Scale = 1f;
 
         // states
         private List<TIGWEUI> _states = [];
-        private SpriteBatch _spriteBatch;
 
         public override void OnModLoad()
         {
@@ -126,29 +122,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
                     $"{TerrariaInGameWorldEditor.MODNAME}: UI",
                     delegate
                     {
-                        _spriteBatch ??= new SpriteBatch(Main.graphics.GraphicsDevice);
-
-                        // temporarily adjust to make everything act as if the UI scale is 1f
-                        int tempWidth = Main.screenWidth;
-                        int tempHeight = Main.screenHeight;
-                        float tempUIScale = Main.UIScale;
-                        Main.screenWidth = (int)(Main.screenWidth * Main.UIScale);
-                        Main.screenHeight = (int)(Main.screenHeight * Main.UIScale);
-                        Main.UIScale = Scale;
-
-                        // start a new spritebatch with SamplerState.PointClamp and no UIScaleMatrix to 1f since the normal one is kinda ugly with UI scaling
-                        _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, default, Main.UIScaleMatrix);
                         foreach (TIGWEUI state in _states)
                         {
-                            state?.Draw(_spriteBatch, Main.gameTimeCache);
+                            state?.Draw(Main.spriteBatch, Main.gameTimeCache);
                         }
-                        _spriteBatch.End();
-
-                        // restore originals
-                        Main.UIScale = tempUIScale;
-                        Main.screenWidth = tempWidth;
-                        Main.screenHeight = tempHeight;
-
                         return true;
                     },
                     InterfaceScaleType.UI)

@@ -135,7 +135,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
                 else
                 {
-                    //Main.NewText($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] Area too big to fill. Current cap is: {_tileCap}");
+                    TerrariaInGameWorldEditor.NewText($"Area too big to fill.");
                 }
             }
         }

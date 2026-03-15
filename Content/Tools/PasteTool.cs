@@ -59,6 +59,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 {
                     Rectangle bounds = GetCurrentSelectionRectangle();
                     ToolUtils.Paste(EditorSystem.Local.Clipboard, new Point(bounds.X, bounds.Y), true, TIGWESettings.ShouldUpdateDrawnTiles);
+                    TerrariaInGameWorldEditor.NewText($"Pasted.");
                 }
 
                 // rotate

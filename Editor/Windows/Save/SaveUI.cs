@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.ButtonResizable;
 using TerrariaInGameWorldEditor.UIElements.TextField;
@@ -150,14 +151,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
                 string path = $"{_selectedPath}\\{name}";
                 if (File.Exists(path))
                 {
-                    Main.NewText("A file with that name already exists.", Color.Red);
+                    TerrariaInGameWorldEditor.Warn($"Failed to save, a file with that name already exists.");
                     return;
                 }
 
-                // create tag compound of current selection
-                TagCompound tag = new TagCompound();
-                tag["TileCollection"] = EditorSystem.Local.CurrentSelection;
-                TagIO.ToFile(tag, path);
+                // write to the file
+                using BinaryWriter bw = new BinaryWriter(File.Create(path));
+                TileCollection.WriteTileCollection(bw, EditorSystem.Local.CurrentSelection);
 
                 // reset UI
                 _saveAsField.SetText("");
@@ -165,7 +165,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             }
             catch (Exception ex)
             {
-                TerrariaInGameWorldEditor.ModLogger.Warn("Failed to save current selection.", ex);
+                TerrariaInGameWorldEditor.Warn("Failed to save current selection.", ex);
             }
         }
     }

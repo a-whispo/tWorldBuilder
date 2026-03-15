@@ -4,10 +4,8 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
-using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI.Elements;
-using Terraria.Social.Base;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Content.Tools;
@@ -120,11 +118,11 @@ namespace TerrariaInGameWorldEditor.Editor
             xButton.SetVisibility(0.8f, 1f);
             xButton.Width.Set(30, 0f);
             xButton.Height.Set(30, 0f);
-            xButton.Left.Set(Width.Pixels - xButton.Width.Pixels, 0f);
+            xButton.Left.Set(GetDimensions().Width - xButton.Width.Pixels, 0f);
             xButton.Top.Set(6, 0f);
             OnRecalculate += (_, _) =>
             {
-                xButton.Left.Set(Width.Pixels - xButton.Width.Pixels, 0f);
+                xButton.Left.Set(GetDimensions().Width - xButton.Width.Pixels, 0f);
             };
             xButton.OnLeftClick += (_, _) =>
             {
@@ -224,7 +222,7 @@ namespace TerrariaInGameWorldEditor.Editor
             saveTileButton.OnLeftClick += (_, _) =>
             {
                 PaletteItem item = new PaletteItem(EditorSystem.Local.SelectedTile);
-                item.OnLeftClick += (_, _) =>   
+                item.OnLeftClick += (_, _) =>
                 {
                     EditorSystem.Local.SelectedTile = item.TileCopy;
                 };
@@ -326,7 +324,7 @@ namespace TerrariaInGameWorldEditor.Editor
             _paletteDeleteButton.OnLeftClick += (_, _) =>
             {
                 _palette.IsDeletingItems = !_palette.IsDeletingItems;
-                _paletteDeleteButton.HoverText = _palette.IsDeletingItems ? "Finish Deleting" : "Delete";                
+                _paletteDeleteButton.HoverText = _palette.IsDeletingItems ? "Finish Deleting" : "Delete";
             };
             TIGWEButton paletteClearButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/ClearButton"));
             paletteClearButton.HoverText = "Clear";
@@ -365,36 +363,38 @@ namespace TerrariaInGameWorldEditor.Editor
 
         public void PostUpdateInput()
         {
+            Point mouse = new Point((int)(Main.mouseX / Main.UIScale), (int)(Main.mouseY / Main.UIScale));
+
             // check if we're hovering the ui
-            Main.LocalPlayer.mouseInterface = !_innerBorder.GetViewCullingArea().Contains(new Point(Main.mouseX, Main.mouseY)) || _isDraggingSide || Main.LocalPlayer.mouseInterface;
+            Main.LocalPlayer.mouseInterface = !_innerBorder.GetViewCullingArea().Contains(new Point(mouse.X, mouse.Y)) || _isDraggingSide || Main.LocalPlayer.mouseInterface;
 
             // hovering sides
             var dimensions = _innerBorder.GetDimensions();
             if (!_isDraggingSide)
             {
-                _hoveringRight = Math.Abs(Main.mouseX - dimensions.X - dimensions.Width) < 5f && Main.mouseY > dimensions.Y && Main.mouseY < dimensions.Y + dimensions.Height;
-                _hoveringLeft = Math.Abs(Main.mouseX - dimensions.X) < 5f && Main.mouseY > dimensions.Y && Main.mouseY < dimensions.Y + dimensions.Height;
-                _hoveringTop = Math.Abs(Main.mouseY - dimensions.Y) < 5f && Main.mouseX > dimensions.X && Main.mouseX < dimensions.X + dimensions.Width;
-                _hoveringBottom = Math.Abs(Main.mouseY - dimensions.Y - dimensions.Height) < 5f && Main.mouseX > dimensions.X && Main.mouseX < dimensions.X + dimensions.Width;
+                _hoveringRight = Math.Abs(mouse.X - dimensions.X - dimensions.Width) < 5f && mouse.Y > dimensions.Y && mouse.Y < dimensions.Y + dimensions.Height;
+                _hoveringLeft = Math.Abs(mouse.X - dimensions.X) < 5f && mouse.Y > dimensions.Y && mouse.Y < dimensions.Y + dimensions.Height;
+                _hoveringTop = Math.Abs(mouse.Y - dimensions.Y) < 5f && mouse.X > dimensions.X && mouse.X < dimensions.X + dimensions.Width;
+                _hoveringBottom = Math.Abs(mouse.Y - dimensions.Y - dimensions.Height) < 5f && mouse.X > dimensions.X && mouse.X < dimensions.X + dimensions.Width;
             }
             if (Main.mouseLeft && Main.mouseLeftRelease && (_hoveringRight || _hoveringLeft || _hoveringTop || _hoveringBottom) || _isDraggingSide)
             {
                 _isDraggingSide = true;
                 if (_hoveringRight)
                 {
-                    RightWidth = (int)(Width.Pixels - Main.mouseX);
+                    RightWidth = (int)(GetDimensions().Width - mouse.X);
                 }
                 if (_hoveringLeft)
                 {
-                    LeftWidth = Main.mouseX;
+                    LeftWidth = mouse.X;
                 }
                 if (_hoveringTop)
                 {
-                    TopHeight = (int)(Main.mouseY - _titleBar.Height.Pixels);
+                    TopHeight = (int)(mouse.Y - _titleBar.Height.Pixels);
                 }
                 if (_hoveringBottom)
                 {
-                    BottomHeight = (int)(Height.Pixels - Main.mouseY);
+                    BottomHeight = (int)(GetDimensions().Height - mouse.Y);
                 }
             }
             if (!Main.mouseLeft)
@@ -406,9 +406,9 @@ namespace TerrariaInGameWorldEditor.Editor
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            
+
             // update undo and redo buttons to match if we can undo or redo
-            if (EditorSystem.Local.RedoHistory.Count > 0)
+            if (EditorSystem.Local.RedoCount > 0)
             {
                 _redoButton.IgnoresMouseInteraction = false;
                 _redoButton.SetVisibility(0.8f, 1f);
@@ -418,11 +418,12 @@ namespace TerrariaInGameWorldEditor.Editor
                 _redoButton.IgnoresMouseInteraction = true;
                 _redoButton.SetVisibility(0.6f, 0.6f);
             }
-            if (EditorSystem.Local.UndoHistory.Count > 0)
+            if (EditorSystem.Local.UndoCount > 0)
             {
                 _undoButton.IgnoresMouseInteraction = false;
                 _undoButton.SetVisibility(0.8f, 1f);
-            } else
+            }
+            else
             {
                 _undoButton.IgnoresMouseInteraction = true;
                 _undoButton.SetVisibility(0.6f, 0.6f);
@@ -486,8 +487,8 @@ namespace TerrariaInGameWorldEditor.Editor
 
             if (!_isDraggingSide)
             {
-                Width.Set(Main.screenWidth * Main.UIScale, 1f);
-                Height.Set(Main.screenHeight * Main.UIScale, 1f);
+                Width.Set(Main.screenWidth, 0f);
+                Height.Set(Main.screenHeight, 0f);
             }
 
             // resize sides
@@ -496,28 +497,28 @@ namespace TerrariaInGameWorldEditor.Editor
             _titleBar.Left.Set(0, 0f);
             _titleBar.Top.Set(0, 0f);
 
-            _bottom.Width.Set(- LeftWidth - RightWidth, 1f);
+            _bottom.Width.Set(0, 1f);
             _bottom.Height.Set(BottomHeight, 0f);
             _bottom.Left.Set(LeftWidth, 0f);
-            _bottom.Top.Set(Height.Pixels - _bottom.Height.Pixels, 0f);
+            _bottom.Top.Set(GetDimensions().Height - BottomHeight + 1, 0f);
 
             _left.Width.Set(LeftWidth, 0f);
             _left.Height.Set(0, 1f);
             _left.Left.Set(0, 0f);
             _left.Top.Set(_titleBar.Height.Pixels, 0f);
 
-            _right.Width.Set(RightWidth, 0f);
-            _right.Height.Set(0, 1f);
-            _right.Left.Set(Width.Pixels - _right.Width.Pixels, 0f);
-            _right.Top.Set(_titleBar.Height.Pixels, 0f);
+            _right.Width.Set(RightWidth, 1f);
+            _right.Height.Set(GetDimensions().Height - _top.Top.Pixels - _top.Height.Pixels - _bottom.Height.Pixels + 1, 0f);
+            _right.Left.Set(GetDimensions().Width - _right.Width.Pixels, 0f);
+            _right.Top.Set(_titleBar.Height.Pixels + TopHeight, 0f);
 
-            _top.Width.Set(- LeftWidth - RightWidth, 1f);
+            _top.Width.Set(0, 1f);
             _top.Height.Set(TopHeight, 0f);
             _top.Left.Set(LeftWidth, 0f);
             _top.Top.Set(_titleBar.Height.Pixels, 0f);
 
-            _innerBorder.Width.Set(Width.Pixels - _left.Width.Pixels - _right.Width.Pixels, 0f);
-            _innerBorder.Height.Set(Height.Pixels - _top.Top.Pixels - _top.Height.Pixels - _bottom.Height.Pixels, 0f);
+            _innerBorder.Width.Set(GetDimensions().Width - _left.Width.Pixels - _right.Width.Pixels, 0f);
+            _innerBorder.Height.Set(GetDimensions().Height - _top.Top.Pixels - _top.Height.Pixels - _bottom.Height.Pixels + 1, 0f);
             _innerBorder.Left.Set(_left.Width.Pixels, 0f);
             _innerBorder.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
 

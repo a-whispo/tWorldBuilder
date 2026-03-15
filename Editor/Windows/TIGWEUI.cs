@@ -116,18 +116,16 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
                 Main.LocalPlayer.mouseInterface = true;
             }
 
-            // update left and right offsets when dragging
-            if (IsDragging)
+            // update left and right offsets when dragging or ir goes out of bounds
+            if (IsDragging || (Left.Pixels >= Main.screenWidth - GetDimensions().Width / 2 || Top.Pixels >= Main.screenHeight - GetDimensions().Height / 2))
             {
-                int screenWidth = (int)(Main.screenWidth * Main.UIScale);
-                int screenHeight = (int)(Main.screenHeight * Main.UIScale);
-                Rectangle screenBounds = new Rectangle(0, 0, screenWidth, screenHeight);
-                var dimensions = GetDimensions();
+                Rectangle screenBounds = new Rectangle(0, 0, Main.screenWidth, Main.screenHeight);
+                CalculatedStyle dimensions = GetDimensions();
 
                 // check so the midpoint of the UI is within the screen bounds and clamp x and y if needed
                 if (!screenBounds.Contains((int)(Main.mouseX - _offset.Left + dimensions.Width / 2), (int)(dimensions.Y + dimensions.Height / 2)))
                 {
-                    Left.Set(Math.Clamp(Main.mouseX - _offset.Left, -dimensions.Width / 2, screenWidth - dimensions.Width / 2), 0);
+                    Left.Set(Math.Clamp(Main.mouseX - _offset.Left, -dimensions.Width / 2, Main.screenWidth - dimensions.Width / 2), 0);
                 }
                 else
                 {
@@ -135,7 +133,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
                 }
                 if (!screenBounds.Contains((int)(dimensions.X + dimensions.Width / 2), (int)(Main.mouseY - _offset.Top + dimensions.Height / 2)))
                 {
-                    Top.Set(Math.Clamp(Main.mouseY - _offset.Top, -dimensions.Height / 2, screenHeight - dimensions.Height / 2), 0);
+                    Top.Set(Math.Clamp(Main.mouseY - _offset.Top, -dimensions.Height / 2, Main.screenHeight - dimensions.Height / 2), 0);
                 }
                 else
                 {

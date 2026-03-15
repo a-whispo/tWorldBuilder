@@ -69,25 +69,6 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
-            base.DrawSelf(spriteBatch);
-            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
-        }
-
-        protected override void DrawChildren(SpriteBatch spriteBatch)
-        {
-            base.DrawChildren(spriteBatch);
-            if (ShowSearchIcon)
-            {
-                Rectangle dimensions = new Rectangle((int)GetDimensions().X + (int)Width.Pixels - 20, (int)GetDimensions().Y + 4, _searchIcon.Value.Width, _searchIcon.Value.Height);
-                spriteBatch.Draw(_searchIcon.Value, dimensions, Color.White);
-            }
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
             if (IsFocused)
             {
                 // unfocus if enter or escape is pressed
@@ -118,7 +99,7 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
                 text += "|";
             }
             _tfText.SetText(text);
-            
+
             if (IsFocused)
             {
                 if ((Main.inputText.IsKeyDown(Keys.LeftControl) || Main.inputText.IsKeyDown(Keys.RightControl)) && !(Main.inputText.IsKeyDown(Keys.LeftAlt) || Main.inputText.IsKeyDown(Keys.RightAlt)))
@@ -136,9 +117,23 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
                     }
                 }
             }
+            Recalculate();
 
             // this is kinda weird but ok
             _background.Texture = IsFocused ? _background.TextureHover : ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture");
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.DrawSelf(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
+        }
+
+        protected override void DrawChildren(SpriteBatch spriteBatch)
+        {
+            base.DrawChildren(spriteBatch);
+            if (ShowSearchIcon)
+            {
+                Rectangle dimensions = new Rectangle((int)GetDimensions().X + (int)Width.Pixels - 20, (int)GetDimensions().Y + 4, _searchIcon.Value.Width, _searchIcon.Value.Height);
+                spriteBatch.Draw(_searchIcon.Value, dimensions, Color.White);
+            }
         }
 
         public override void Recalculate()

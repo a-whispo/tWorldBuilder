@@ -1,16 +1,13 @@
 ﻿using System;
+using System.IO;
 using Terraria;
 using Terraria.GameContent.Drawing;
 using Terraria.ID;
-using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
 {
-    public class TileCopy : TagSerializable
+    public class TileCopy
     {
-        // deserializer for the tagcompound
-        public static Func<TagCompound, TileCopy> DESERIALIZER = s => DeserializeData(s);
-
         // general tile stuff
         public bool HasTile { get; set; }
         public ushort TileType { get; set; }
@@ -229,110 +226,87 @@ namespace TerrariaInGameWorldEditor.Common
             return newTile;
         }
 
-        public TagCompound SerializeData()
+        public static void WriteTileCopy(BinaryWriter bw, TileCopy tc)
         {
-            // create a tagcompound with all the fields
-            string tileTypeName = TileID.Search.GetName(TileType);
-            string wallTypeName = WallID.Search.GetName(WallType);
-            var tag = new TagCompound()
-            {
-                ["HasTile"] = HasTile,
-                ["TileTypeName"] = tileTypeName,
-                ["WallTypeName"] = wallTypeName,
-                ["LiquidType"] = LiquidType,
-                ["IsHalfBlock"] = IsHalfBlock,
-                ["TileColor"] = TileColor,
-                ["WallFrameNumber"] = WallFrameNumber,
-                ["BlueWire"] = BlueWire,
-                ["GreenWire"] = GreenWire,
-                ["RedWire"] = RedWire,
-                ["YellowWire"] = YellowWire,
-                ["IsTileInvisible"] = IsTileInvisible,
-                ["IsWallInvisible"] = IsWallInvisible,
-                ["CheckingLiquid"] = CheckingLiquid,
-                ["LiquidAmount"] = LiquidAmount,
-                ["SkipLiquid"] = SkipLiquid,
-                ["TileFrameNumber"] = TileFrameNumber,
-                ["TileFrameX"] = TileFrameX,
-                ["TileFrameY"] = TileFrameY,
-                ["WallColor"] = WallColor,
-                ["IsWallFullbright"] = IsWallFullbright,
-                ["WallFrameX"] = WallFrameX,
-                ["WallFrameY"] = WallFrameY,
-                ["IsTreeTop"] = IsTreeTop,
-                ["IsTreeBranch"] = IsTreeBranch,
-                ["IsTreeTrunk"] = IsTreeTrunk,
-                ["IsFlipped"] = IsFlipped,
-                ["TreeVariant"] = TreeVariant,
-                ["TreeFrame"] = TreeFrame,
-                ["TreeFrameWidth"] = TreeFrameWidth,
-                ["TreeFrameHeight"] = TreeFrameHeight,
-                ["TreeStyle"] = TreeStyle,
-                ["y2"] = y2,
-                ["TreeBiome"] = TreeBiome,
-                ["HasActuator"] = HasActuator,
-                ["IsActuated"] = IsActuated,
-                ["Slope"] = (int)Slope
-            };
-
-            return tag;
+            bw.Write(tc.HasTile);
+            bw.Write(tc.TileType);
+            bw.Write(tc.WallType);
+            bw.Write(tc.LiquidType);
+            bw.Write(tc.IsHalfBlock);
+            bw.Write(tc.TileColor);
+            bw.Write(tc.WallFrameNumber);
+            bw.Write(tc.BlueWire);
+            bw.Write(tc.GreenWire);
+            bw.Write(tc.RedWire);
+            bw.Write(tc.YellowWire);
+            bw.Write(tc.IsTileInvisible);
+            bw.Write(tc.IsWallInvisible);
+            bw.Write(tc.CheckingLiquid);
+            bw.Write(tc.LiquidAmount);
+            bw.Write(tc.SkipLiquid);
+            bw.Write(tc.TileFrameNumber);
+            bw.Write(tc.TileFrameX);
+            bw.Write(tc.TileFrameY);
+            bw.Write(tc.WallColor);
+            bw.Write(tc.IsWallFullbright);
+            bw.Write(tc.WallFrameX);
+            bw.Write(tc.WallFrameY);
+            bw.Write(tc.IsTreeTop);
+            bw.Write(tc.IsTreeBranch);
+            bw.Write(tc.IsTreeTrunk);
+            bw.Write(tc.IsFlipped);
+            bw.Write(tc.TreeVariant);
+            bw.Write(tc.TreeFrame);
+            bw.Write(tc.TreeFrameWidth);
+            bw.Write(tc.TreeFrameHeight);
+            bw.Write(tc.TreeStyle);
+            bw.Write(tc.y2);
+            bw.Write(tc.TreeBiome);
+            bw.Write(tc.HasActuator);
+            bw.Write(tc.IsActuated);
+            bw.Write((byte)tc.Slope);
         }
 
-        public static TileCopy DeserializeData(TagCompound tag)
+        public static TileCopy ReadTileCopy(BinaryReader br)
         {
-            // create a tilecopy with all the fields that was in the tag
             TileCopy tc = new TileCopy(new Tile());
-            tc.HasTile = tag.GetBool("HasTile");
-            try
-            {
-                tc.TileType = (ushort)TileID.Search.GetId(tag.GetString("TileTypeName"));
-            } catch (Exception ex)
-            {
-                TerrariaInGameWorldEditor.ModLogger.Warn("Failed to find TileType when deserializing TileCopy.", ex);
-                tc.TileType = 697; // unloaded tile
-            }
-            try
-            {
-                tc.WallType = (ushort)WallID.Search.GetId(tag.GetString("WallTypeName"));
-            }
-            catch (Exception ex)
-            {
-                TerrariaInGameWorldEditor.ModLogger.Warn("Failed to find WallType when deserializing TileCopy.", ex);
-                tc.WallType = 347; // unloaded wall
-            }
-            tc.LiquidType = tag.GetInt("LiquidType");
-            tc.IsHalfBlock = tag.GetBool("IsHalfBlock");
-            tc.TileColor = tag.GetByte("TileColor");
-            tc.WallFrameNumber = tag.GetInt("WallFrameNumber");
-            tc.GreenWire = tag.GetBool("GreenWire");
-            tc.RedWire = tag.GetBool("RedWire");
-            tc.YellowWire = tag.GetBool("YellowWire");
-            tc.IsTileInvisible = tag.GetBool("IsTileInvisible");
-            tc.IsWallInvisible = tag.GetBool("IsWallInvisible");
-            tc.CheckingLiquid = tag.GetBool("CheckingLiquid");
-            tc.LiquidAmount = tag.GetByte("LiquidAmount");
-            tc.SkipLiquid = tag.GetBool("SkipLiquid");
-            tc.TileFrameNumber = tag.GetInt("TileFrameNumber");
-            tc.TileFrameX = tag.GetShort("TileFrameX");
-            tc.TileFrameY = tag.GetShort("TileFrameY");
-            tc.WallColor = tag.GetByte("WallColor");
-            tc.IsWallFullbright = tag.GetBool("IsWallFullbright");
-            tc.WallFrameX = tag.GetInt("WallFrameX");
-            tc.WallFrameY = tag.GetInt("WallFrameY");
-            tc.IsTreeTop = tag.GetBool("IsTreeTop");
-            tc.IsTreeBranch = tag.GetBool("IsTreeBranch");
-            tc.IsTreeTrunk = tag.GetBool("IsTreeTrunk");
-            tc.IsFlipped = tag.GetBool("IsFlipped");
-            tc.TreeVariant = tag.GetInt("TreeVariant");
-            tc.TreeFrame = tag.GetInt("TreeFrame");
-            tc.TreeFrameWidth = tag.GetInt("TreeFrameWidth");
-            tc.TreeFrameHeight = tag.GetInt("TreeFrameHeight");
-            tc.TreeStyle = tag.GetInt("TreeStyle");
-            tc.y2 = tag.GetInt("y2");
-            tc.TreeBiome = tag.GetInt("TreeBiome");
-            tc.HasActuator = tag.GetBool("HasActuator");
-            tc.IsActuated = tag.GetBool("IsActuated");
-            tc.Slope = (SlopeType)tag.GetInt("Slope");
+            tc.HasTile = br.ReadBoolean();
+            tc.TileType = br.ReadUInt16();
+            tc.WallType = br.ReadUInt16();
+            tc.LiquidType = br.ReadInt32();
+            tc.IsHalfBlock = br.ReadBoolean();
+            tc.TileColor = br.ReadByte();
+            tc.WallFrameNumber = br.ReadInt32();
+            tc.BlueWire = br.ReadBoolean();
+            tc.GreenWire = br.ReadBoolean();
+            tc.RedWire = br.ReadBoolean();
+            tc.YellowWire = br.ReadBoolean();
+            tc.IsTileInvisible = br.ReadBoolean();
+            tc.IsWallInvisible = br.ReadBoolean();
+            tc.CheckingLiquid = br.ReadBoolean();
+            tc.LiquidAmount = br.ReadByte();
+            tc.SkipLiquid = br.ReadBoolean();
+            tc.TileFrameNumber = br.ReadInt32();
+            tc.TileFrameX = br.ReadInt16();
+            tc.TileFrameY = br.ReadInt16();
+            tc.WallColor = br.ReadByte();
+            tc.IsWallFullbright = br.ReadBoolean();
+            tc.WallFrameX = br.ReadInt32();
+            tc.WallFrameY = br.ReadInt32();
+            tc.IsTreeTop = br.ReadBoolean();
+            tc.IsTreeBranch = br.ReadBoolean();
+            tc.IsTreeTrunk = br.ReadBoolean();
+            tc.IsFlipped = br.ReadBoolean();
+            tc.TreeVariant = br.ReadInt32();
+            tc.TreeFrame = br.ReadInt32();
+            tc.TreeFrameWidth = br.ReadInt32();
+            tc.TreeFrameHeight = br.ReadInt32();
+            tc.TreeStyle = br.ReadInt32();
+            tc.y2 = br.ReadInt32();
+            tc.TreeBiome = br.ReadInt32();
+            tc.HasActuator = br.ReadBoolean();
+            tc.IsActuated = br.ReadBoolean();
+            tc.Slope = (SlopeType)br.ReadByte();
             return tc;
         }
     }

@@ -137,7 +137,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
 
             if (saveToUndo)
             {
-                EditorSystem.Local.UndoHistory.Add(undoColl);
+                EditorSystem.Local.AddToUndoHistory(undoColl);
             }
         }
 

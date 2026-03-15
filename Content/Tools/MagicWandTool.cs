@@ -134,7 +134,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 } else
                 {
                     tilesToAdd.Clear(); // just remove the tiles we wanted to add
-                    // Main.NewText($"[c/D95763:({TerrariaInGameWorldEditor.MODNAME})] Area too big to select. Current cap is: {tileCap}");
+                    TerrariaInGameWorldEditor.NewText($"Area too big to select.");
                 }
             }
 
