@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.CommandLine.Help;
 using System.IO;
 using Terraria;
 using Terraria.GameContent.Drawing;
 using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
+using Terraria.ModLoader.Default;
+using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
 {
@@ -50,44 +56,56 @@ namespace TerrariaInGameWorldEditor.Common
         public int y2 { get; set; }
         public int TreeBiome { get; set; } = 0; // mostly used for help with drawing palm trees
 
-        public TileCopy(Tile tile, int x = default, int y = default)
+        public TileCopy(Tile tile)
         {
             CopyTileData(tile);
             CopyWallData(tile);
             CopyWireData(tile);
-            if (x != default && y != default)
-            {
-                CopyTreeData(x, y);
-            }
+        }
+
+        public TileCopy(Tile tile, int x, int y)
+        {
+            CopyTileData(tile);
+            CopyWallData(tile);
+            CopyWireData(tile);
+            CopyTreeData(x, y);
+        }
+
+        public TileCopy()
+        {
+            Tile tile = new Tile();
+            CopyTileData(tile);
+            CopyWallData(tile);
+            CopyWireData(tile);
         }
 
         public void CopyTreeData(int x, int y) // copy tree data from a specific tile
         {
             // do some palm tree checks
-            if (this.TileType == 323) // check for palm trees
+            if (this.TileType == TileID.PalmTree) // check for palm trees
             {
                 int tileX = x;
                 int tileY = y;
-                while (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == 323)
+                while (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == TileID.PalmTree)
                 {
                     tileY++;
                 }
 
                 // get variant number
                 int num = -1;
-                if (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == 53)
+                if (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == TileID.Sand)
                 {
                     num = 0;
                 }
-                if (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == 234)
+                if (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == TileID.Crimsand)
                 {
                     num = 1;
                 }
-                if (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == 116)
+                if (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == TileID.Pearlsand)
                 {
                     num = 2;
                 }
-                if (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == 112)
+                if (Main.tile[tileX, tileY].HasTile && Main.tile[tileX, tileY].TileType == TileID.Ebonsand)
                 {
                     num = 3;
                 }
@@ -229,8 +247,8 @@ namespace TerrariaInGameWorldEditor.Common
         public static void WriteTileCopy(BinaryWriter bw, TileCopy tc)
         {
             bw.Write(tc.HasTile);
-            bw.Write(tc.TileType);
-            bw.Write(tc.WallType);
+            bw.Write(TileID.Search.GetName(tc.TileType));
+            bw.Write(WallID.Search.GetName(tc.WallType));
             bw.Write(tc.LiquidType);
             bw.Write(tc.IsHalfBlock);
             bw.Write(tc.TileColor);
@@ -267,12 +285,31 @@ namespace TerrariaInGameWorldEditor.Common
             bw.Write((byte)tc.Slope);
         }
 
-        public static TileCopy ReadTileCopy(BinaryReader br)
+        public static TileCopy ReadTileCopy(BinaryReader br, out HashSet<string> missingMods)
         {
-            TileCopy tc = new TileCopy(new Tile());
+            missingMods = new HashSet<string>();
+            TileCopy tc = new TileCopy();
             tc.HasTile = br.ReadBoolean();
-            tc.TileType = br.ReadUInt16();
-            tc.WallType = br.ReadUInt16();
+            string tileName = br.ReadString();
+            if (TileID.Search.TryGetId(tileName, out int tileID))
+            {
+                tc.TileType = (ushort)tileID;
+            }
+            else
+            {
+                missingMods.Add(tileName.Split('/')[0]);
+                tc.TileType = 697; // unloaded tile
+            }
+            string wallName = br.ReadString();
+            if (WallID.Search.TryGetId(wallName, out int wallID))
+            {
+                tc.WallType = (ushort)wallID;
+            }
+            else
+            {
+                missingMods.Add(wallName.Split('/')[0]);
+                tc.WallType = 347; // unloaded wall
+            }
             tc.LiquidType = br.ReadInt32();
             tc.IsHalfBlock = br.ReadBoolean();
             tc.TileColor = br.ReadByte();

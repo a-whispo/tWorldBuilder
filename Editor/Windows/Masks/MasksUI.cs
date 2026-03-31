@@ -27,16 +27,16 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteTilesOptions.Width.Set(180, 0);
             pasteTilesOptions.Height.Set(150, 0);
             Append(pasteTilesOptions);
-            UIText modifyTilesText = new UIText("Draw/paste:");
+            UIText modifyTilesText = new UIText("Draw/paste/modify:");
             modifyTilesText.Top.Set(-22, 0);
             pasteTilesOptions.Append(modifyTilesText);
 
             // paste options tiles
             TIGWECheckBox pasteTilesCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteTiles = pasteTilesCheckBox.IsChecked;
+            EditorSystem.Local.Settings.ShouldPasteTiles = pasteTilesCheckBox.IsChecked;
             pasteTilesCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWESettings.ShouldPasteTiles = isChecked;
+                EditorSystem.Local.Settings.ShouldPasteTiles = isChecked;
             };
             pasteTilesCheckBox.Left.Set(6, 0);
             pasteTilesCheckBox.Top.Set(6, 0);
@@ -48,10 +48,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
 
             // paste options walls
             TIGWECheckBox pasteWallsCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteWalls = pasteWallsCheckBox.IsChecked;
+            EditorSystem.Local.Settings.ShouldPasteWalls = pasteWallsCheckBox.IsChecked;
             pasteWallsCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWESettings.ShouldPasteWalls = isChecked;
+                EditorSystem.Local.Settings.ShouldPasteWalls = isChecked;
             };
             pasteWallsCheckBox.Left.Set(6, 0);
             pasteWallsCheckBox.Top.Set(34, 0);
@@ -63,10 +63,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
 
             // paste options liquid
             TIGWECheckBox pasteLiquidCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteLiquid = pasteLiquidCheckBox.IsChecked;
+            EditorSystem.Local.Settings.ShouldPasteLiquid = pasteLiquidCheckBox.IsChecked;
             pasteLiquidCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWESettings.ShouldPasteLiquid = isChecked;
+                EditorSystem.Local.Settings.ShouldPasteLiquid = isChecked;
             };
             pasteLiquidCheckBox.Left.Set(6, 0);
             pasteLiquidCheckBox.Top.Set(62, 0);
@@ -78,10 +78,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
 
             // paste options wire
             TIGWECheckBox pasteWireCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteWires = pasteWireCheckBox.IsChecked;
+            EditorSystem.Local.Settings.ShouldPasteWires = pasteWireCheckBox.IsChecked;
             pasteWireCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWESettings.ShouldPasteWires = isChecked;
+                EditorSystem.Local.Settings.ShouldPasteWires = isChecked;
             };
             pasteWireCheckBox.Left.Set(6, 0);
             pasteWireCheckBox.Top.Set(90, 0);
@@ -93,10 +93,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
 
             // paste empty tiles
             TIGWECheckBox pasteAirCheckBox = new TIGWECheckBox(true);
-            TIGWESettings.ShouldPasteEmpty = pasteAirCheckBox.IsChecked;
+            EditorSystem.Local.Settings.ShouldPasteEmpty = pasteAirCheckBox.IsChecked;
             pasteAirCheckBox.OnCheckedChanged += (isChecked) =>
             {
-                TIGWESettings.ShouldPasteEmpty = isChecked;
+                EditorSystem.Local.Settings.ShouldPasteEmpty = isChecked;
             };
             pasteAirCheckBox.Left.Set(6, 0);
             pasteAirCheckBox.Top.Set(118, 0);
@@ -124,10 +124,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnTilesDropDown.AddOption(Mask.Any, "Any");
             pasteOnTilesDropDown.AddOption(Mask.No, "No");
             pasteOnTilesDropDown.SetSelectedValue(Mask.Any);
-            TIGWESettings.ShouldPasteOnTiles = Mask.Any;
+            EditorSystem.Local.Settings.ShouldPasteOnTiles = Mask.Any;
             pasteOnTilesDropDown.OnOptionChanged += (option) =>
             {
-                TIGWESettings.ShouldPasteOnTiles = option.Value;
+                EditorSystem.Local.Settings.ShouldPasteOnTiles = option.Value;
             };
             pasteOnTilesDropDown.Height.Set(26, 0);
             pasteOnTilesDropDown.Width.Set(80, 0);
@@ -145,10 +145,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnWallsDropDown.AddOption(Mask.Any, "Any");
             pasteOnWallsDropDown.AddOption(Mask.No, "No");
             pasteOnWallsDropDown.SetSelectedValue(Mask.Any);
-            TIGWESettings.ShouldPasteOnWalls = Mask.Any;
+            EditorSystem.Local.Settings.ShouldPasteOnWalls = Mask.Any;
             pasteOnWallsDropDown.OnOptionChanged += (option) =>
             {
-                TIGWESettings.ShouldPasteOnWalls = option.Value;
+                EditorSystem.Local.Settings.ShouldPasteOnWalls = option.Value;
             };
             pasteOnWallsDropDown.Height.Set(26, 0);
             pasteOnWallsDropDown.Width.Set(80, 0);
@@ -166,10 +166,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnLiquidDropDown.AddOption(Mask.Any, "Any");
             pasteOnLiquidDropDown.AddOption(Mask.No, "No");
             pasteOnLiquidDropDown.SetSelectedValue(Mask.Any);
-            TIGWESettings.ShouldPasteOnLiquid = Mask.Any;
+            EditorSystem.Local.Settings.ShouldPasteOnLiquid = Mask.Any;
             pasteOnLiquidDropDown.OnOptionChanged += (option) =>
             {
-                TIGWESettings.ShouldPasteOnLiquid = option.Value;
+                EditorSystem.Local.Settings.ShouldPasteOnLiquid = option.Value;
             };
             pasteOnLiquidDropDown.Height.Set(26, 0);
             pasteOnLiquidDropDown.Width.Set(80, 0);
@@ -187,10 +187,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnWireDropDown.AddOption(Mask.Any, "Any");
             pasteOnWireDropDown.AddOption(Mask.No, "No");
             pasteOnWireDropDown.SetSelectedValue(Mask.Any);
-            TIGWESettings.ShouldPasteOnWires = Mask.Any;
+            EditorSystem.Local.Settings.ShouldPasteOnWires = Mask.Any;
             pasteOnWireDropDown.OnOptionChanged += (option) =>
             {
-                TIGWESettings.ShouldPasteOnWires = option.Value;
+                EditorSystem.Local.Settings.ShouldPasteOnWires = option.Value;
             };
             pasteOnWireDropDown.Height.Set(26, 0);
             pasteOnWireDropDown.Width.Set(80, 0);

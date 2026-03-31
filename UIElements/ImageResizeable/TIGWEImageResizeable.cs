@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using Terraria;
 using Terraria.UI;
 
 namespace TerrariaInGameWorldEditor.UIElements.ImageResizeable
@@ -20,7 +19,6 @@ namespace TerrariaInGameWorldEditor.UIElements.ImageResizeable
             TextureHover = texture;
             CornerSize = cornerSize;
             BarSize = barSize;
-            OverrideSamplerState = SamplerState.PointClamp;
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)

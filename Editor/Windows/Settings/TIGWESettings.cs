@@ -1,35 +1,71 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using TerrariaInGameWorldEditor.Common;
 
 namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
 {
-    public static class TIGWESettings
+    public class TIGWESettings
     {
         // main settings
-        public static Color ToolColor { get; set; } = Color.White;
-        public static Color MainPrimaryColor { get; set; } = new Color(43, 56, 101);
-        public static Color MainSecondaryColor { get; set; } = new Color(72, 92, 168);
-        public static Theme CurrentTheme { get; set; } = Theme.Default;
-        public static bool ShowCenterLines { get; set; } = false;
-        public static bool ShowMeasureLines { get; set; } = false;
-        public static bool ShouldUpdateDrawnTiles { get; set; } = false;
-        public static bool ShouldTeleportOnEditorClosed { get; set; } = true;
-        public static bool ForceScaleUI { get; set; } = false;
-        public static bool FullbrightEnabled { get; set; } = false;
-        public static int HistoryLimit { get; set; } = 1000;
-        public static bool ShouldShowMessages { get; set; } = false;
-        public static bool ShouldShowErrors { get; set; } = true;
-        public static bool ShouldShowFatalErrors { get; set; } = false;
+        public Color ToolColor { get; set; } = Color.White;
+        public Color PrimaryColor { get; set; }
+        public Color SecondaryColor { get; set; }
+        public Theme CurrentTheme { get; set; } = Theme.Default;
+        public bool ShowCenterLines { get; set; } = false;
+        public bool ShowMeasureLines { get; set; } = false;
+        public bool ShouldUpdateDrawnTiles { get; set; } = false;
+        public bool ShouldTeleportOnEditorClosed { get; set; } = true;
+        public bool ForceScaleUI { get; set; } = false;
+        public float UIScale { get; set; } = 1f;
+        public bool FullbrightEnabled { get; set; } = false;
+        public int HistoryLimit { get; set; } = 1000;
+        public bool ShouldShowMessages { get; set; } = false;
+        public bool ShouldShowErrors { get; set; } = true;
+        public bool ShouldShowFatalErrors { get; set; } = true;
 
         // mask settings
-        public static bool ShouldPasteTiles { get; set; }
-        public static bool ShouldPasteWalls { get; set; }
-        public static bool ShouldPasteLiquid { get; set; }
-        public static bool ShouldPasteWires { get; set; }
-        public static bool ShouldPasteEmpty { get; set; }
-        public static Mask ShouldPasteOnTiles { get; set; }
-        public static Mask ShouldPasteOnWalls { get; set; }
-        public static Mask ShouldPasteOnLiquid { get; set; }
-        public static Mask ShouldPasteOnWires { get; set; }
+        public bool ShouldPasteTiles { get; set; }
+        public bool ShouldPasteWalls { get; set; }
+        public bool ShouldPasteLiquid { get; set; }
+        public bool ShouldPasteWires { get; set; }
+        public bool ShouldPasteEmpty { get; set; }
+        public Mask ShouldPasteOnTiles { get; set; }
+        public Mask ShouldPasteOnWalls { get; set; }
+        public Mask ShouldPasteOnLiquid { get; set; }
+        public Mask ShouldPasteOnWires { get; set; }
+
+        public static TIGWESettings Load(string path)
+        {
+            try
+            {
+                string p = path.Replace(".json", "") + ".json";
+                if (File.Exists(p))
+                {
+                    return JsonSerializer.Deserialize<TIGWESettings>(File.ReadAllText(p), new JsonSerializerOptions { WriteIndented = true, Converters = { new JsonStringEnumConverter() } });
+                }
+            }
+            catch (Exception ex)
+            {
+                TerrariaInGameWorldEditor.Warn("Failed to load settings.", ex);
+            }
+            return new TIGWESettings();
+        }
+
+        public static void Save(string path, TIGWESettings settings)
+        {
+            try
+            {
+                string p = path.Replace(".json", "") + ".json";
+                Directory.CreateDirectory(Path.GetDirectoryName(p));
+                File.WriteAllText(p, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true, Converters = { new JsonStringEnumConverter() } }));
+            } 
+            catch (Exception ex)
+            {
+                TerrariaInGameWorldEditor.Warn("Failed to save settings.", ex);
+            }
+        }
     }
 }

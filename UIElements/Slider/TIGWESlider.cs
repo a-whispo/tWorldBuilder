@@ -14,31 +14,13 @@ namespace TerrariaInGameWorldEditor.UIElements.Slider
     internal class TIGWESlider : UIElement
     {
         public bool IsDragging { get; private set; } = false;
-        public bool ShouldResize
-        {
-            get => _shouldResize;
-            set
-            {
-                if (!value)
-                {
-                    RemoveChild(_body);
-                }
-                else
-                {
-                    Append(_body);
-                    RemoveChild(_point);
-                    Append(_point);
-                }
-                _shouldResize = value;
-            }
-        }
-        public Asset<Texture2D> Texture 
+        public Asset<Texture2D> Texture
         {
             get => _body.Texture;
             set => _body.Texture = value; 
         }
+        public Asset<Texture2D> SliderContent { get; set; }
 
-        private bool _shouldResize = true;
         private TIGWEImageResizeable _body;
         private UIImage _point;
         
@@ -88,27 +70,18 @@ namespace TerrariaInGameWorldEditor.UIElements.Slider
             IsDragging = true;
         }
 
-        protected override void DrawSelf(SpriteBatch spriteBatch)
-        {
-            
-            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
-            if (!ShouldResize)
-            {
-                CalculatedStyle dimensions = GetDimensions();
-                spriteBatch.Draw(Texture.Value, new Rectangle((int)dimensions.X, (int)dimensions.Y + 2, (int)dimensions.Width, (int)dimensions.Height - 4), Color.White);
-            }
-            base.DrawSelf(spriteBatch);
-            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
-        }
-
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
-        }
-
-        protected override void DrawChildren(SpriteBatch spriteBatch)
-        {
-            base.DrawChildren(spriteBatch);
+            CalculatedStyle dimensions = GetDimensions();
+            UIElementUtils.SetSpriteBatchToTheme(ref spriteBatch);
+            base.Draw(spriteBatch);
+            UIElementUtils.SetSpriteBatchToNormal(ref spriteBatch);
+            if (SliderContent != null)
+            {
+                spriteBatch.Draw(SliderContent.Value, new Rectangle((int)dimensions.X + 4, (int)dimensions.Y + 6, (int)dimensions.Width - 8, (int)dimensions.Height - 4 - 8), Color.White);
+            }
+            _point.Draw(spriteBatch);
         }
     }
 }

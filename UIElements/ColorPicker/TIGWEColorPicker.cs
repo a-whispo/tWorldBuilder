@@ -92,8 +92,7 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             _hueSlider.Width.Set(208, 0);
             _hueSlider.Top.Set(122, 0);
             _hueSlider.Left.Set(40, 0);
-            _hueSlider.Texture = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/HueSlider");
-            _hueSlider.ShouldResize = false;
+            _hueSlider.SliderContent = ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/ColorPicker/HueSliderContent");
             _colorPicker.Append(_hueSlider);
 
             // alpha slider
@@ -267,8 +266,6 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
 
         public string GetHex()
         {
-            Color color = GetColor();
-
             // converts to hex values
             string rHex = _rNumberField.GetValue().ToString("X");
             rHex = rHex.Length == 1 ? "0" + rHex : rHex;
@@ -280,7 +277,7 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             return rHex + gHex + bHex;
         }
 
-        private Color HsvToColor(double h, double s, double v)
+        private static Color HsvToColor(double h, double s, double v)
         {
             s = s / 100;
             v = v / 100;
@@ -304,7 +301,7 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             return new Color((int)Math.Round((r + m) * 255), (int)Math.Round((g + m) * 255), (int)Math.Round((b + m) * 255));
         }
 
-        private Color HexToColor(string hex)
+        private static Color HexToColor(string hex)
         {
             if (hex.Length == 6)
             {

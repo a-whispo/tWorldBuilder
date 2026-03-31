@@ -19,6 +19,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
         {
             // icon
             _icon.SetImage(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/FolderClosed"));
+            ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/FolderOpen");
             _icon.Top.Set(10, 0);
             _icon.Left.Set(10, 0);
             _icon.Width.Set(38, 0f);

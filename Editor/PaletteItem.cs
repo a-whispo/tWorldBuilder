@@ -21,13 +21,6 @@ namespace TerrariaInGameWorldEditor.Editor
             Width.Set(30, 0f);
             Height.Set(30, 0f);
             SetVisibility(0.5f, 1f);
-            OnLeftClick += (evt, listeningElement) =>
-            {
-                if (Parent.Parent.Parent is EditorPalette palette && palette.IsDeletingItems)
-                {
-                    palette.RemoveItem(this);
-                }
-            };
         }
 
         public override void Draw(SpriteBatch spriteBatch)

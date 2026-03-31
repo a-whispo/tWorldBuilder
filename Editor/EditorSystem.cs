@@ -152,17 +152,28 @@ namespace TerrariaInGameWorldEditor.Editor
         public int RedoCount => _redoHistory.Count;
         private List<TileCollection> _redoHistory = new List<TileCollection>();
 
+        // settings
+        public TIGWESettings Settings { get; private set; }
+
         public override void OnModLoad()
         {
             base.OnModLoad();
             Local = this;
             Tools = new List<Tool> { new BrushTool(), new EraseTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() };
+            Settings = TIGWESettings.Load($"{ModLoader.ModPath.Replace("\\Mods", "")}\\TIGWE\\settings");
         }
 
         public override void OnModUnload()
         {
             base.OnModUnload();
             Local = null;
+            TIGWESettings.Save($"{ModLoader.ModPath.Replace("\\Mods", "")}\\TIGWE\\settings", Settings);
+        }
+
+        public override void OnWorldUnload()
+        {
+            base.OnWorldUnload();
+            TIGWESettings.Save($"{ModLoader.ModPath.Replace("\\Mods", "")}\\TIGWE\\settings", Settings);
         }
 
         public override void PostSetupContent()
@@ -286,8 +297,8 @@ namespace TerrariaInGameWorldEditor.Editor
             // draw tools before the main ui
             if (Local.CurrentSelection?.Count > 0)
             {
-                DrawUtils.DrawTileCollectionOutline(Local.CurrentSelection, new Point(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY()), TIGWESettings.ToolColor);
-                DrawUtils.DrawMiscOptions(new Rectangle(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY(), Local.CurrentSelection.GetWidth(), Local.CurrentSelection.GetHeight()), TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
+                DrawUtils.DrawTileCollectionOutline(Local.CurrentSelection, new Point(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY()), EditorSystem.Local.Settings.ToolColor);
+                DrawUtils.DrawMiscOptions(new Rectangle(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY(), Local.CurrentSelection.GetWidth(), Local.CurrentSelection.GetHeight()), EditorSystem.Local.Settings.ShowCenterLines, EditorSystem.Local.Settings.ShowMeasureLines);
             }
             Local.CurrentTool?.Draw(Main.spriteBatch);
 
@@ -304,6 +315,12 @@ namespace TerrariaInGameWorldEditor.Editor
                 {
                     if (_mainUserInterface.CurrentState != null)
                     {
+                        // weird case when ui scale is a multiple of 25 that pointclamp causes artifacts with 9 splicing, so just avoid those cases
+                        // a ui scale of 1 is fine tho
+                        if (Main.UIScale % 0.25 == 0 && Main.UIScale != 1f)
+                        {
+                            Main.UIScale += 0.01f;
+                        }
                         _mainUserInterface.Draw(Main.spriteBatch, Main.gameTimeCache);
                     }
                     return true;
@@ -316,12 +333,10 @@ namespace TerrariaInGameWorldEditor.Editor
         {
             base.PostUpdateInput();
 
-            // open
-            if (Keybinds.OpenEditorMK.JustPressed)
+            if (Keybinds.OpenEditorMK.JustPressed && !Main.mapFullscreen)
             {
                 ToggleEditor();
             }
-
             if (!_mainUIState?.Visible ?? true)
             {
                 return;
@@ -338,7 +353,7 @@ namespace TerrariaInGameWorldEditor.Editor
             if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape))
             {
                 CurrentSelection?.Clear();
-                if (CurrentTool is SelectionTool selectionTool)
+                if (CurrentTool is ISelectionTool selectionTool)
                 {
                     selectionTool.ResetSelection();
                 }
@@ -404,7 +419,7 @@ namespace TerrariaInGameWorldEditor.Editor
                     if (CurrentSelection != null)
                     {
                         CopyToClipboard(CurrentSelection);
-                        Delete(CurrentSelection, true);
+                        ToolUtils.Delete(CurrentSelection);
                         TerrariaInGameWorldEditor.NewText($"Cut.");
                     }
                 }
@@ -426,7 +441,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 {
                     if (CurrentSelection != null)
                     {
-                        Delete(CurrentSelection, true);
+                        ToolUtils.Delete(CurrentSelection);
                         TerrariaInGameWorldEditor.NewText($"Deleted.");
                     }
                 }
@@ -496,7 +511,7 @@ namespace TerrariaInGameWorldEditor.Editor
 
             // update tools
             Local.CurrentTool?.Update();
-            if (Local.CurrentTool is SelectionTool selectionTool)
+            if (Local.CurrentTool is ISelectionTool selectionTool)
             {
                 Local.CurrentSelection = selectionTool.GetSelection();
             }
@@ -514,7 +529,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 }
                 CreativePowerManager.Instance.GetPower<CreativePowers.GodmodePower>().SetEnabledState(Main.LocalPlayer.whoAmI, false);
                 CurrentTool = null;
-                if (TIGWESettings.ShouldTeleportOnEditorClosed)
+                if (EditorSystem.Local.Settings.ShouldTeleportOnEditorClosed)
                 {
                     Vector2 screenPos = new Vector2(Main.screenPosition.X + Main.screenWidth / 2f - Main.LocalPlayer.width / 2f, Main.screenPosition.Y + Main.screenHeight / 2f - Main.LocalPlayer.height / 2f);
                     Main.LocalPlayer.Teleport(screenPos);
@@ -608,7 +623,7 @@ namespace TerrariaInGameWorldEditor.Editor
 
         public void AddToRedoHistory(TileCollection redo)
         {
-            if (TIGWESettings.HistoryLimit <= _redoHistory.Count)
+            if (EditorSystem.Local.Settings.HistoryLimit <= _redoHistory.Count)
             {
                 for (int i = 0; i < _redoHistory.Count - 1; i++)
                 {
@@ -624,7 +639,7 @@ namespace TerrariaInGameWorldEditor.Editor
 
         public void AddToUndoHistory(TileCollection undo)
         {
-            if (TIGWESettings.HistoryLimit <= _undoHistory.Count)
+            if (EditorSystem.Local.Settings.HistoryLimit <= _undoHistory.Count)
             {
                 for (int i = 0; i < _undoHistory.Count - 1; i++)
                 {
@@ -635,45 +650,6 @@ namespace TerrariaInGameWorldEditor.Editor
             else
             {
                 _undoHistory.Add(undo);
-            }
-        }
-
-        public void Delete(TileCollection tilesToDelete, bool save = false) // delete area
-        {
-            TileCollection undoColl = new TileCollection(); ;
-
-            // go over all the tiles in the most recently added tile collection to undo
-            foreach (var tile in tilesToDelete)
-            {
-                int x = tile.Key.X;
-                int y = tile.Key.Y;
-
-                // add tile to history
-                undoColl.TryAddTile(new Point16(x, y), new TileCopy(Main.tile[x, y]));
-
-                // will only delete walls
-                if (TIGWESettings.ShouldPasteWalls)
-                {
-                    Main.tile[x, y].WallType = WallID.None;
-                }
-
-                // will only delete tiles
-                if (TIGWESettings.ShouldPasteTiles)
-                {
-                    ((Tile)Main.tile[x, y]).HasTile = false;
-                    Main.tile[x, y].TileType = TileID.Dirt;
-                }
-
-                // deletes liquid
-                if (TIGWESettings.ShouldPasteLiquid)
-                {
-                    Main.tile[x, y].LiquidAmount = 0;
-                }
-            }
-
-            if (save == true)
-            {
-                _undoHistory.Add(undoColl);
             }
         }
     }

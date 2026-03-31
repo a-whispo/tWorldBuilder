@@ -72,6 +72,8 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
 
             // main body
             Body = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/TIGWEUIBody"), 42, 2);
+            Body.Width.Set(0, 1);
+            Body.Height.Set(0, 1);
             Append(Body);
 
             // title text
@@ -82,12 +84,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
 
             // x button
             _xButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/XButton"));
-            _xButton.SetVisibility(0.8f, 1f);
+            _xButton.SetVisibility(0.8f, 1);
             _xButton.HoverText = "Close";
-            _xButton.Width.Set(26, 0f);
-            _xButton.Height.Set(26, 0f);
-            _xButton.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);
-            _xButton.Top.Set(6, 0f);
+            _xButton.Width.Set(26, 0);
+            _xButton.Height.Set(26, 0);
+            _xButton.Left.Set(-_xButton.Width.Pixels - 6, 1);
+            _xButton.Top.Set(6, 0);
             _xButton.OnLeftClick += (_, _) =>
             {
                 Visible = false;
@@ -142,21 +144,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
             }
         }
 
-        public override void Recalculate()
-        {
-            base.Recalculate();
-
-            // update title bar and body sizes and location to match resizes
-            Body?.Top.Set(0, 0);
-            Body?.Left.Set(0, 0);
-            Body?.Height.Set(Height.Pixels, 0);
-            Body?.Width.Set(Width.Pixels, 0);
-            _xButton?.Height.Set(26, 0f);
-            _xButton?.Width.Set(26, 0f);
-            _xButton?.Left.Set(Width.Pixels - _xButton.Width.Pixels - 6, 0f);
-            _xButton?.Top.Set(6, 0f);
-        }
-
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             _UI.Draw(spriteBatch, gameTime);
@@ -164,7 +151,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
 
         public void UpdateUI(GameTime gametime)
         {
-            // update the UI
             if (Visible)
             {
                 _UI.Update(gametime);

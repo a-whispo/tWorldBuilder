@@ -7,19 +7,21 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.Editor;
 using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
-    internal class LassoTool : SelectionTool
+    internal class LassoTool : Tool, ISelectionTool
     {
         private bool _isSelecting = false;
+        private TileCollection _selection;
 
         public LassoTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/LassoTool"));
             ToggleToolButton.HoverText = "Lasso";
+            _selection = new TileCollection();
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -30,8 +32,18 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 var selectionArray = _selection.ToArray();
                 Vector2 pointLast = new Vector2(selectionArray[selectionArray.Count() - 1].Key.X * 16 - Main.screenPosition.X + 8, selectionArray[selectionArray.Count() - 1].Key.Y * 16 - Main.screenPosition.Y + 8);
                 Vector2 pointFirst = new Vector2(selectionArray[0].Key.X * 16 - Main.screenPosition.X + 8, selectionArray[0].Key.Y * 16 - Main.screenPosition.Y + 8);
-                DrawUtils.DrawLine(pointLast, pointFirst, color: TIGWESettings.ToolColor);
+                DrawUtils.DrawLine(pointLast, pointFirst, color: EditorSystem.Local.Settings.ToolColor);
             }
+        }
+
+        public TileCollection GetSelection()
+        {
+            return _selection;
+        }
+
+        public void ResetSelection()
+        {
+            _selection.Clear();
         }
 
         public override string GetInfoText()

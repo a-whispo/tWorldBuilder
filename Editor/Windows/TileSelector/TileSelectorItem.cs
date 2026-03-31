@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
@@ -14,21 +16,21 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
     {
         public string Name { get; set; }
         public int ItemId { get; set; }
+        public string HoverText { get; set; }
 
         private int _createTile;
         private int _createWall;
         private int _placeStyle;
-        private Item _item;
 
         public TileSelectorItem(int itemId)
         {
             // load item
-            _item = new Item(itemId);
-            Name = _item.Name;
+            Item item = ContentSamples.ItemsByType[itemId];
+            Name = item.Name;
             ItemId = itemId;
-            _createTile = _item.createTile;
-            _createWall = _item.createWall;
-            _placeStyle = _item.placeStyle;
+            _createTile = item.createTile;
+            _createWall = item.createWall;
+            _placeStyle = item.placeStyle;
 
             // ui and events
             TIGWEImageResizeable body = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
@@ -43,11 +45,18 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
-            Main.inventoryScale = 1f;
-            ItemSlot.Draw(spriteBatch, ref _item, 21, new Vector2(GetDimensions().X - 4, GetDimensions().Y - 4));
+            Main.instance.LoadItem(ItemId);
+            Texture2D tex = TextureAssets.Item[ItemId].Value;
+            CalculatedStyle dimensions = GetDimensions();
+            float scale = 1;
+            if (tex.Width > (Width.Pixels - 12) || tex.Height > (Width.Pixels - 12))
+            {
+                scale = Math.Min((Width.Pixels - 12) / tex.Width, (Width.Pixels - 12) / tex.Height); // get the smallest scale
+            }
+            spriteBatch.Draw(tex, new Rectangle((int)(dimensions.X + dimensions.Width / 2 - tex.Width * scale / 2), (int)(dimensions.Y + dimensions.Height / 2 - tex.Height * scale / 2), (int)(tex.Width * scale), (int)(tex.Height * scale)), Color.White);
             if (IsMouseHovering)
             {
-                Main.instance.MouseText($"{Name}");
+                Main.instance.MouseText(HoverText);
             }
         }
 
@@ -56,10 +65,17 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             Tile tile = new Tile();
             if (_createTile != -1)
             {
-                // important
                 tile.TileType = (ushort)_createTile;
                 tile.HasTile = true;
                 tile.WallType = WallID.None;
+                tile.Slope = 0;
+                tile.IsHalfBlock = false;
+                tile.TileColor = PaintID.None;
+                tile.IsActuated = false;
+                tile.RedWire = false;
+                tile.BlueWire = false;
+                tile.YellowWire = false;
+                tile.GreenWire = false;
 
                 var tileObjectData = (TileObjectData.GetTileData(_createTile, _placeStyle, 0) ?? TileObjectData.GetTileData(_createTile, 0, 0)) ?? null;
                 if (tileObjectData != null)

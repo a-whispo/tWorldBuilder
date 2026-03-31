@@ -5,7 +5,6 @@ using System.Reflection;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaInGameWorldEditor.UIElements;
 
 namespace TerrariaInGameWorldEditor.UIElements.Scrollbar
 {

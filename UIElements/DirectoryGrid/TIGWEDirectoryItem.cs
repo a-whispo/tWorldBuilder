@@ -68,6 +68,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
 
             // delete
             _deleteButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/Delete"));
+            ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/DeleteConfirm");
             _deleteButton.SetVisibility(0.8f, 1f);
             _deleteButton.HoverText = "Delete";
             _deleteButton.Width.Set(26, 0f);
@@ -87,7 +88,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
             _renameTextField = new TIGWETextField("", 100);
             _renameTextField.Height.Set(26, 0f);
             _renameTextField.Width.Set(150, 0f);
-            _confirmRenameButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/RenameConfirm"));
+            _confirmRenameButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/Confirm"));
             _confirmRenameButton.SetVisibility(0.8f, 1f);
             _confirmRenameButton.HoverText = "Confirm rename";
             _confirmRenameButton.Height.Set(26, 0f);
@@ -95,7 +96,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
             _confirmRenameButton.OnLeftClick += (_, _) => ConfirmRename();
 
             // select
-            _selectButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/Load"));
+            _selectButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/Confirm"));
             _selectButton.SetVisibility(0.8f, 1f);
             _selectButton.Width.Set(26, 0);
             _selectButton.Height.Set(26, 0);

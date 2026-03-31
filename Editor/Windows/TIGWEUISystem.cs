@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -124,6 +126,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
                     {
                         foreach (TIGWEUI state in _states)
                         {
+                            if (Main.UIScale % 0.25 == 0 && Main.UIScale != 1f)
+                            {
+                                Main.UIScale += 0.01f;
+                            }
                             state?.Draw(Main.spriteBatch, Main.gameTimeCache);
                         }
                         return true;

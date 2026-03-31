@@ -1,6 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Win32.SafeHandles;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.ModLoader;
@@ -61,10 +63,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             refresh.Left.Set(createFolder.Left.Pixels + createFolder.Width.Pixels + 2, 0);
             refresh.SetVisibility(0.7f, 1);
             refresh.HoverText = "Refresh";
-            refresh.OnLeftClick += (evt, listeningElement) =>
-            {
-                _grid.RefreshContent();
-            };
             Append(refresh);
 
             // search bar
@@ -75,6 +73,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             searchBar.Top.Set(42, 0);
             searchBar.Left.Set(refresh.Left.Pixels + refresh.Width.Pixels + 2, 0);
             Append(searchBar);
+
+            refresh.OnLeftClick += (evt, listeningElement) =>
+            {
+                _grid.RefreshContent();
+                searchBar.PlaceholderText = $"Search for files... [c/60ABE7:({_grid.FileCount})]";
+            };
 
             // grid
             _grid = new TIGWEDirectoryGrid();
@@ -91,9 +95,17 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             {
                 try
                 {
-                    // read from the file
                     using BinaryReader br = new BinaryReader(File.OpenRead(file.FullPath));
-                    EditorSystem.Local.Clipboard = TileCollection.ReadTileCollection(br);
+                    EditorSystem.Local.Clipboard = TileCollection.ReadTileCollection(br, out HashSet<string> missingMods);
+                    if (missingMods.Count > 0)
+                    {
+                        string msg = "Missing mods used in file:";
+                        foreach (string mod in missingMods)
+                        {
+                            msg += $"\n{mod}";
+                        }
+                        TerrariaInGameWorldEditor.Warn(msg);
+                    }
                     TerrariaInGameWorldEditor.NewText($"Set clipboard to \"{file.Name}\"");
                 }
                 catch (Exception ex)

@@ -3,7 +3,6 @@
     public enum Theme
     {
         Default,
-        TexturePack,
         Custom
     }
 }

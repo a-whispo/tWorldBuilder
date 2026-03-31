@@ -2,11 +2,11 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Editor;
-using TerrariaInGameWorldEditor.Editor.Windows.Settings;
 using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
@@ -34,10 +34,10 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             {
                 // paste preview
                 Rectangle selection = GetCurrentSelectionRectangle();
-                Color color = TIGWESettings.ToolColor;
-                DrawUtils.DrawTileCollection(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), TIGWESettings.ShouldPasteTiles, TIGWESettings.ShouldPasteWalls, TIGWESettings.ShouldPasteLiquid, TIGWESettings.ShouldPasteWires);
+                Color color = EditorSystem.Local.Settings.ToolColor;
+                DrawUtils.DrawTileCollection(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), EditorSystem.Local.Settings.ShouldPasteTiles, EditorSystem.Local.Settings.ShouldPasteWalls, EditorSystem.Local.Settings.ShouldPasteLiquid, EditorSystem.Local.Settings.ShouldPasteWires);
                 DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), color);
-                DrawUtils.DrawMiscOptions(selection, TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
+                DrawUtils.DrawMiscOptions(selection, EditorSystem.Local.Settings.ShowCenterLines, EditorSystem.Local.Settings.ShowMeasureLines);
             }  
         }
 
@@ -58,7 +58,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 if (Keybinds.PasteMK.JustPressed && EditorSystem.Local.Clipboard != null)
                 {
                     Rectangle bounds = GetCurrentSelectionRectangle();
-                    ToolUtils.Paste(EditorSystem.Local.Clipboard, new Point(bounds.X, bounds.Y), true, TIGWESettings.ShouldUpdateDrawnTiles);
+                    ToolUtils.Paste(EditorSystem.Local.Clipboard, new Point16(bounds.X, bounds.Y), true, EditorSystem.Local.Settings.ShouldUpdateDrawnTiles);
                     TerrariaInGameWorldEditor.NewText($"Pasted.");
                 }
 

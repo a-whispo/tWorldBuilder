@@ -2,9 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using Terraria;
 using Terraria.DataStructures;
-using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
 {
@@ -129,6 +127,23 @@ namespace TerrariaInGameWorldEditor.Common
                 return true;
             }
             return false;
+        }
+
+        public bool TryAddTile(Point16 coord, Func<TileCopy> func)
+        {
+            if (_tiles.ContainsKey(coord))
+            {
+                return false;
+            }
+
+            _tiles.Add(coord, func());
+            if (!_boundsDirty)
+            {
+                UpdateBounds(coord);
+            }
+            InvalidateCaches();
+            OnChanged?.Invoke(this, EventArgs.Empty);
+            return true;
         }
 
         public bool TryGetTile(Point16 coord, out TileCopy tile)
@@ -273,15 +288,20 @@ namespace TerrariaInGameWorldEditor.Common
             }
         }
 
-        public static TileCollection ReadTileCollection(BinaryReader br)
+        public static TileCollection ReadTileCollection(BinaryReader br, out HashSet<string> missingMods)
         {
+            missingMods = new HashSet<string>();
             TileCollection tc = new TileCollection();
             int count = br.ReadInt32();
             for (int i = 0; i < count; i++)
             {
                 int x = br.ReadInt16();
                 int y = br.ReadInt16();
-                tc.TryAddTile(new Point16(x, y), TileCopy.ReadTileCopy(br));
+                tc.TryAddTile(new Point16(x, y), TileCopy.ReadTileCopy(br, out HashSet<string> tcMissingMods));
+                foreach (string mod in tcMissingMods)
+                {
+                    missingMods.Add(mod);
+                }
             }
             return tc;
         }

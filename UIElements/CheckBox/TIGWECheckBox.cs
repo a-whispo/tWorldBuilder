@@ -17,8 +17,12 @@ namespace TerrariaInGameWorldEditor.UIElements.CheckBox
             get => _isChecked;
             set
             {
-                _isChecked = value;
-                SetImage(IsChecked ? _textureChecked : _textureUnchecked);
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    SetImage(IsChecked ? _textureChecked : _textureUnchecked);
+                    OnCheckedChanged?.Invoke(_isChecked);
+                }
             }
         }
 

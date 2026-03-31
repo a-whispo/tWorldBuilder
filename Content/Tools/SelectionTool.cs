@@ -2,18 +2,10 @@
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
-    internal abstract class SelectionTool : Tool
+    internal interface ISelectionTool
     {
-        protected TileCollection _selection = new TileCollection();
+        public TileCollection GetSelection();
 
-        public virtual TileCollection GetSelection()
-        {
-            return _selection;
-        }
-
-        public virtual void ResetSelection()
-        {
-            _selection.Clear();
-        }
+        public void ResetSelection();
     }
 }

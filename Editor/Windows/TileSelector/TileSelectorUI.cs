@@ -2,16 +2,19 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.ButtonResizable;
+using TerrariaInGameWorldEditor.UIElements.CheckBox;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 using TerrariaInGameWorldEditor.UIElements.Scrollbar;
 using TerrariaInGameWorldEditor.UIElements.SearchGrid;
@@ -25,6 +28,8 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
 
         private TileCopy _currentTileCopy;
         private List<TileSelectorProperty> _properties;
+
+        private TIGWESearchGrid propertiesGrid;
 
         public override void OnInitialize()
         {
@@ -79,10 +84,26 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             propertiesGridBorder.Height.Set(300, 0);
             propertiesGridBorder.Width.Set(248, 0);
             border.Append(propertiesGridBorder);
-            TIGWESearchGrid propertiesGrid = new TIGWESearchGrid((item, searchTerm) =>
+            propertiesGrid = new TIGWESearchGrid((item, searchTerm) =>
             {
                 return ((TileSelectorProperty)item).Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
             });
+            propertiesGrid.ManualSortMethod = (elements) =>
+            {
+                // sorting by the element type make it easier to find what you want in the grid
+                // most of the bool properties (checkboxes) are not that important tho so just put those last
+                elements.Sort((item1, item2) =>
+                {
+                    UIElement item1Element = ((TileSelectorProperty)item1).PropertyUIElement;
+                    UIElement item2Element = ((TileSelectorProperty)item2).PropertyUIElement;
+                    int checkBoxComparison = (item1Element is TIGWECheckBox).CompareTo(item2Element is TIGWECheckBox);
+                    if (checkBoxComparison != 0)
+                    {
+                        return checkBoxComparison;
+                    }
+                    return string.Compare(((TileSelectorProperty)item1).PropertyUIElement.GetType().Name, ((TileSelectorProperty)item2).PropertyUIElement.GetType().Name);
+                });
+            };
             propertiesGrid.ListPadding = 2;
             propertiesGrid.MarginLeft = 2;
             propertiesGrid.Left.Set(propertiesGridBorder.Left.Pixels + 6, 0);
@@ -169,48 +190,49 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             tileGrid.SetScrollbar(tileScrollbar);
             tileGrid.SetSearchBar(tileSearchBar);
 
-            Task task = new Task(() =>
+            // get all tiles from mods
+            List<TileSelectorItem> items = new List<TileSelectorItem>();
+            for (int i = 0; i < ItemLoader.ItemCount; i++)
             {
-                // get all tiles from mods
-                for (int i = 0; i < ItemLoader.ItemCount; i++)
+                Item item = ContentSamples.ItemsByType[i];
+                if (item.createTile != -1 || item.createWall != -1)
                 {
-                    Item item = null;
-                    try
+                    TileSelectorItem tileItem = new TileSelectorItem(i);
+                    items.Add(tileItem);
+                    tileItem.OnLeftClick += (_, _) =>
                     {
-                        item = new Item(i);
-                        if (item.createTile != -1 || item.createWall != -1)
-                        {
-                            // add to the grid and add an event
-                            TileSelectorItem tileItem = new TileSelectorItem(i);
-                            tileGrid.Add(tileItem);
-                            tileItem.OnLeftClick += (_, _) =>
-                            {
-                                SetCurrentTileCopy(tileItem.GetAsTileCopy());
-                            };
-                        }
-                    }
-                    catch (Exception ex)
+                        SetCurrentTileCopy(tileItem.GetAsTileCopy());
+                    };
+                    tileItem.OnRightClick += (_, _) =>
                     {
-                        TerrariaInGameWorldEditor.Warn($"Failed to load item {(item != null ? $"\"{item.Name}\"" : "(item was null)")}, with ID {i}.", ex);
-                    }
+                        TileCopy tc = tileItem.GetAsTileCopy();
+                        _currentTileCopy.TileType = tc.TileType;
+                        _currentTileCopy.WallType = tc.WallType;
+                        _currentTileCopy.HasTile = tc.HasTile;
+                        _currentTileCopy.TileFrameX = tc.TileFrameX;
+                        _currentTileCopy.TileFrameY = tc.TileFrameY;
+                        _currentTileCopy.WallFrameX = tc.WallFrameX;
+                        _currentTileCopy.WallFrameY = tc.WallFrameY;
+                        SetCurrentTileCopy(_currentTileCopy);
+                    };
+                    tileItem.HoverText = $"{tileItem.Name}\n[c/EAD87A:Left click] to update and reset properties.\n[c/EAD87A:Right click] to only update tile/wall type.";
                 }
-                tileGrid.UpdateOrder();
-                tileSearchBar.PlaceholderText = $"Search for tiles... [c/60ABE7:({tileGrid.AllItems.Count})]";
+            }
+            tileGrid.AddRange(items);
+            tileSearchBar.PlaceholderText = $"Search for tiles... [c/60ABE7:({tileGrid.AllItems.Count})]";
 
-                // add tile properties
-                _properties = new List<TileSelectorProperty>();
-                foreach (PropertyInfo property in typeof(TileCopy).GetProperties())
+            // add tile properties
+            _properties = new List<TileSelectorProperty>();
+            foreach (PropertyInfo property in typeof(TileCopy).GetProperties())
+            {
+                // exclude things that are not in the actual tile class
+                if (property.Name.Equals("HasWire") || property.Name.Equals("IsTreeTop") || property.Name.Equals("IsTreeBranch") || property.Name.Equals("IsTreeTrunk") || property.Name.Equals("IsFlipped") || property.Name.Equals("TreeVariant") || property.Name.Equals("TreeFrame") || property.Name.Equals("TreeFrameWidth") || property.Name.Equals("TreeFrameHeight") || property.Name.Equals("TreeStyle") || property.Name.Equals("y2") || property.Name.Equals("TreeBiome"))
                 {
-                    // exclude things that are not in the actual tile class
-                    if (property.Name.Equals("HasWire") || property.Name.Equals("IsTreeTop") || property.Name.Equals("IsTreeBranch") || property.Name.Equals("IsTreeTrunk") || property.Name.Equals("IsFlipped") || property.Name.Equals("TreeVariant") || property.Name.Equals("TreeFrame") || property.Name.Equals("TreeFrameWidth") || property.Name.Equals("TreeFrameHeight") || property.Name.Equals("TreeStyle") || property.Name.Equals("y2") || property.Name.Equals("TreeBiome"))
-                    {
-                        continue;
-                    }
-                    _properties.Add(new TileSelectorProperty(property, _currentTileCopy));
+                    continue;
                 }
-                propertiesGrid.AddRange(_properties);
-            });
-            task.Start();
+                _properties.Add(new TileSelectorProperty(property, _currentTileCopy));
+            }
+            propertiesGrid.AddRange(_properties);
         }
 
         public void SetCurrentTileCopy(TileCopy tileCopy)

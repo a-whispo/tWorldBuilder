@@ -118,7 +118,7 @@ namespace TerrariaInGameWorldEditor.Editor
             xButton.SetVisibility(0.8f, 1f);
             xButton.Width.Set(30, 0f);
             xButton.Height.Set(30, 0f);
-            xButton.Left.Set(GetDimensions().Width - xButton.Width.Pixels, 0f);
+            xButton.Left.Set(-xButton.Width.Pixels - 2, 1f);
             xButton.Top.Set(6, 0f);
             OnRecalculate += (_, _) =>
             {
@@ -129,7 +129,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 EditorSystem.Local.ToggleWindow(EditorWindow.Main);
             };
             xButton.HoverText = "Close";
-            Append(xButton);
+            _titleBar.Append(xButton);
 
             // settings button
             TIGWEButton settingsButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/SettingsButton"));
@@ -143,7 +143,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 EditorSystem.Local.ToggleWindow(EditorWindow.Settings);
             };
             settingsButton.HoverText = "Settings";
-            Append(settingsButton);
+            _titleBar.Append(settingsButton);
 
             // blueprints button
             TIGWEButton blueprintsButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/BlueprintsButton"));
@@ -157,7 +157,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 EditorSystem.Local.ToggleWindow(EditorWindow.Blueprints);
             };
             blueprintsButton.HoverText = "Blueprints";
-            Append(blueprintsButton);
+            _titleBar.Append(blueprintsButton);
 
             // save button
             TIGWEButton saveButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/SaveButton"));
@@ -171,7 +171,78 @@ namespace TerrariaInGameWorldEditor.Editor
                 EditorSystem.Local.ToggleWindow(EditorWindow.Save);
             };
             saveButton.HoverText = "Save";
-            Append(saveButton);
+            _titleBar.Append(saveButton);
+
+            // mask button
+            TIGWEButton maskButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/MaskButton"));
+            maskButton.SetVisibility(0.8f, 1f);
+            maskButton.Width.Set(30, 0f);
+            maskButton.Height.Set(30, 0f);
+            maskButton.Left.Set(saveButton.Left.Pixels + saveButton.Width.Pixels + 2, 0f);
+            maskButton.Top.Set(4, 0f);
+            maskButton.OnLeftClick += (_, _) =>
+            {
+                EditorSystem.Local.ToggleWindow(EditorWindow.Masks);
+            };
+            maskButton.HoverText = "Masks";
+            _titleBar.Append(maskButton);
+
+            // save tile to palette button
+            TIGWEButton saveTileButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/AddButton"));
+            saveTileButton.SetVisibility(0.8f, 1f);
+            saveTileButton.Width.Set(30, 0f);
+            saveTileButton.Height.Set(30, 0f);
+            saveTileButton.Left.Set(0, 0f);
+            saveTileButton.Top.Set(2, 0f);
+            saveTileButton.HoverText = "Add to current palette";
+            saveTileButton.OnLeftClick += (_, _) =>
+            {
+                PaletteItem item = new PaletteItem(EditorSystem.Local.SelectedTile);
+                item.OnLeftClick += (_, _) =>
+                {
+                    EditorSystem.Local.SelectedTile = item.TileCopy;
+                };
+                _palette.AddItem(item);
+                Recalculate();
+                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
+            };
+            _top.Append(saveTileButton);
+
+            // undo button
+            _undoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/UndoButton"));
+            _undoButton.SetVisibility(0.8f, 1f);
+            _undoButton.Width.Set(30, 0f);
+            _undoButton.Height.Set(30, 0f);
+            _undoButton.Left.Set(saveTileButton.Left.Pixels + saveTileButton.Width.Pixels + 2, 0f);
+            _undoButton.Top.Set(2, 0f);
+            _undoButton.HoverText = "Undo (Ctrl + Z)";
+            _undoButton.OnLeftClick += (_, _) =>
+            {
+                EditorSystem.Local.Undo();
+            };
+            _top.Append(_undoButton);
+
+            // redo button
+            _redoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/RedoButton"));
+            _redoButton.SetVisibility(0.8f, 1f);
+            _redoButton.Width.Set(30, 0f);
+            _redoButton.Height.Set(30, 0f);
+            _redoButton.Left.Set(_undoButton.Left.Pixels + _undoButton.Width.Pixels + 2, 0f);
+            _redoButton.Top.Set(2, 0f);
+            _redoButton.HoverText = "Redo (Ctrl + Y)";
+            _redoButton.OnLeftClick += (_, _) =>
+            {
+                EditorSystem.Local.Redo();
+            };
+            _top.Append(_redoButton);
+
+            // tool settings
+            _toolSettings = new UIElement();
+            _toolSettings.Top.Set(2, 0f);
+            _toolSettings.Left.Set(_redoButton.Left.Pixels + _redoButton.Width.Pixels + 30, 0f);
+            _toolSettings.Width.Set(0, 1f);
+            _toolSettings.Height.Set(0, 1f);
+            _top.Append(_toolSettings);
 
             // current selected tile (opens tile browser on click)
             TIGWEButton tileButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/TileButton"));
@@ -179,7 +250,7 @@ namespace TerrariaInGameWorldEditor.Editor
             tileButton.Width.Set(30, 0f);
             tileButton.Height.Set(30, 0f);
             tileButton.Left.Set(2, 0f);
-            tileButton.Top.Set(42, 0f);
+            tileButton.Top.Set(2, 0f);
             tileButton.HoverText = "Tile Browser";
             tileButton.OnLeftClick += (_, _) =>
             {
@@ -195,78 +266,7 @@ namespace TerrariaInGameWorldEditor.Editor
                     DrawUtils.DrawTileCopyInUI(EditorSystem.Local.SelectedTile, dimensions, tileButton.IsMouseHovering ? 0.8f : 1f);
                 }
             };
-            Append(tileButton);
-
-            // mask button
-            TIGWEButton maskButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/MaskButton"));
-            maskButton.SetVisibility(0.8f, 1f);
-            maskButton.Width.Set(30, 0f);
-            maskButton.Height.Set(30, 0f);
-            maskButton.Left.Set(saveButton.Left.Pixels + saveButton.Width.Pixels + 2, 0f);
-            maskButton.Top.Set(4, 0f);
-            maskButton.OnLeftClick += (_, _) =>
-            {
-                EditorSystem.Local.ToggleWindow(EditorWindow.Masks);
-            };
-            maskButton.HoverText = "Masks";
-            Append(maskButton);
-
-            // save tile to palette button
-            TIGWEButton saveTileButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/AddButton"));
-            saveTileButton.SetVisibility(0.8f, 1f);
-            saveTileButton.Width.Set(30, 0f);
-            saveTileButton.Height.Set(30, 0f);
-            saveTileButton.Left.Set(tileButton.Left.Pixels + tileButton.Width.Pixels + 2, 0f);
-            saveTileButton.Top.Set(42, 0f);
-            saveTileButton.HoverText = "Add to current palette";
-            saveTileButton.OnLeftClick += (_, _) =>
-            {
-                PaletteItem item = new PaletteItem(EditorSystem.Local.SelectedTile);
-                item.OnLeftClick += (_, _) =>
-                {
-                    EditorSystem.Local.SelectedTile = item.TileCopy;
-                };
-                _palette.AddItem(item);
-                Recalculate();
-                SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
-            };
-            Append(saveTileButton);
-
-            // undo button
-            _undoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/UndoButton"));
-            _undoButton.SetVisibility(0.8f, 1f);
-            _undoButton.Width.Set(30, 0f);
-            _undoButton.Height.Set(30, 0f);
-            _undoButton.Left.Set(saveTileButton.Left.Pixels + saveTileButton.Width.Pixels + 2, 0f);
-            _undoButton.Top.Set(42, 0f);
-            _undoButton.HoverText = "Undo (Ctrl + Z)";
-            _undoButton.OnLeftClick += (_, _) =>
-            {
-                EditorSystem.Local.Undo();
-            };
-            Append(_undoButton);
-
-            // redo button
-            _redoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/RedoButton"));
-            _redoButton.SetVisibility(0.8f, 1f);
-            _redoButton.Width.Set(30, 0f);
-            _redoButton.Height.Set(30, 0f);
-            _redoButton.Left.Set(_undoButton.Left.Pixels + _undoButton.Width.Pixels + 2, 0f);
-            _redoButton.Top.Set(42, 0f);
-            _redoButton.HoverText = "Redo (Ctrl + Y)";
-            _redoButton.OnLeftClick += (_, _) =>
-            {
-                EditorSystem.Local.Redo();
-            };
-            Append(_redoButton);
-
-            // tool settings
-            _toolSettings = new UIElement();
-            _toolSettings.Top.Set(42, 0f);
-            _toolSettings.Left.Set(_redoButton.Left.Pixels + _redoButton.Width.Pixels + 30, 0f);
-            _toolSettings.Width.Set(0, 1f);
-            _toolSettings.Height.Set(0, 1f);
-            Append(_toolSettings);
+            _left.Append(tileButton);
 
             UIGrid toolGrid = new UIGrid();
             // loop through all the tools and add everything
@@ -278,7 +278,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 tool.ToggleToolButton.OnLeftClick += (_, _) =>
                 {
                     // reset selection if we clicked another selection tool
-                    if (tool is SelectionTool selectionTool && selectionTool != EditorSystem.Local.CurrentTool)
+                    if (tool is ISelectionTool selectionTool && selectionTool != EditorSystem.Local.CurrentTool)
                     {
                         selectionTool.ResetSelection();
                     }
@@ -293,7 +293,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 toolGrid.Add(tool.ToggleToolButton);
             }
             toolGrid.ListPadding = 2f;
-            toolGrid.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
+            toolGrid.Top.Set(tileButton.Top.Pixels + tileButton.Height.Pixels + 2, 0f);
             toolGrid.Left.Set(2, 0f);
             toolGrid.Width.Set(LeftWidth - 4, 0f);
             toolGrid.Height.Set(0, 0.5f);
@@ -301,20 +301,18 @@ namespace TerrariaInGameWorldEditor.Editor
             {
                 toolGrid.Width.Set(LeftWidth - 4, 0f);
             };
-            Append(toolGrid);
+            _left.Append(toolGrid);
 
             // palette (wow this sucks)
             _palette = new EditorPalette();
-            _palette.Top.Set(_top.Top.Pixels + _top.Height.Pixels, 0f);
-            _palette.Left.Set(_right.Left.Pixels + 2, 0f);
+            _palette.Left.Set(2, 0f);
             _palette.Width.Set(RightWidth - 4, 0f);
-            _palette.AutoResizeHeight = true;
             OnRecalculate += (_, _) =>
             {
                 _palette.Width.Set(RightWidth - 4, 0f);
-                _palette.Left.Set(_right.Left.Pixels + 2, 0f);
+                _palette.Left.Set(2, 0f); ;
             };
-            Append(_palette);
+            _right.Append(_palette);
             // buttons for palette
             _paletteDeleteButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/DeleteButton"));
             _paletteDeleteButton.HoverText = "Delete";

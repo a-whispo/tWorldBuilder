@@ -17,8 +17,8 @@ namespace TerrariaInGameWorldEditor.UIElements
                 if (_themeEffect == null && Path != null)
                 {
                     _themeEffect ??= ModContent.Request<Effect>($"{Path}/UIElements/Theme", AssetRequestMode.ImmediateLoad).Value;
-                    _themeEffect.Parameters["OriginalPrimary"].SetValue(new Color(43, 56, 101).ToVector4());
-                    _themeEffect.Parameters["OriginalSecondary"].SetValue(new Color(72, 92, 168).ToVector4());
+                    _themeEffect.Parameters["OriginalPrimaryColor"].SetValue(new Color(43, 56, 101).ToVector4());
+                    _themeEffect.Parameters["OriginalSecondaryColor"].SetValue(new Color(72, 92, 168).ToVector4());
                 }
                 return _themeEffect;
             }
@@ -26,13 +26,13 @@ namespace TerrariaInGameWorldEditor.UIElements
         private static Effect _themeEffect;
         public static Color PrimaryColor
         {
-            get => new Color(ThemeEffect.Parameters["NewPrimary"].GetValueVector4());
-            set => ThemeEffect.Parameters["NewPrimary"].SetValue(value.ToVector4());
+            get => new Color(ThemeEffect.Parameters["NewPrimaryColor"].GetValueVector4());
+            set => ThemeEffect.Parameters["NewPrimaryColor"].SetValue(value.ToVector4());
         }
         public static Color SecondaryColor
         {
-            get => new Color(ThemeEffect.Parameters["NewSecondary"].GetValueVector4());
-            set => ThemeEffect.Parameters["NewSecondary"].SetValue(value.ToVector4());
+            get => new Color(ThemeEffect.Parameters["NewSecondaryColor"].GetValueVector4());
+            set => ThemeEffect.Parameters["NewSecondaryColor"].SetValue(value.ToVector4());
         }
 
         public static void SetSpriteBatchToTheme(ref SpriteBatch spriteBatch)
@@ -40,8 +40,9 @@ namespace TerrariaInGameWorldEditor.UIElements
             try
             {
                 spriteBatch.End();
-                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, default, new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true }, ThemeEffect, Main.UIScaleMatrix);
-            } 
+                ThemeEffect.Parameters["ApplyLinear"].SetValue(Main.UIScale != 1f);
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true }, ThemeEffect, Main.UIScaleMatrix);
+            }
             catch (Exception ex)
             {
                 TerrariaInGameWorldEditor.Error("Failed to set spritebatch to theme.", ex);
@@ -53,7 +54,7 @@ namespace TerrariaInGameWorldEditor.UIElements
             try
             {
                 spriteBatch.End();
-                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true }, default, Main.UIScaleMatrix);
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, new RasterizerState { CullMode = CullMode.None, ScissorTestEnable = true }, default, Main.UIScaleMatrix);
             }
             catch (Exception ex)
             {
@@ -73,7 +74,7 @@ namespace TerrariaInGameWorldEditor.UIElements
             Point bottomRight = new Point(topLeft.X + dimensions.Width - cornerSize, topLeft.Y + dimensions.Height - cornerSize);
 
             // middle part
-            spriteBatch.Draw(texture, new Rectangle(topLeft.X + cornerSize, topLeft.Y + cornerSize, dimensions.Width - cornerSize * 2, dimensions.Height - cornerSize * 2), new Rectangle(cornerSize + 1, cornerSize + 1, Math.Max(barSize - 2, 0), Math.Max(barSize - 2, 0)), color); // middle part
+            spriteBatch.Draw(texture, new Rectangle(topLeft.X + cornerSize, topLeft.Y + cornerSize, dimensions.Width - cornerSize * 2, dimensions.Height - cornerSize * 2), new Rectangle(cornerSize + 1, cornerSize + 1, Math.Max(barSize - 1, 0), Math.Max(barSize - 1, 0)), color); // middle part
 
             // corners
             spriteBatch.Draw(texture, new Rectangle(topLeft.X, topLeft.Y, cornerSize, cornerSize), new Rectangle(0, 0, cornerSize, cornerSize), color); // top left

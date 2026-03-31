@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
@@ -10,7 +9,6 @@ namespace TerrariaInGameWorldEditor.Editor
     internal class EditorPalette : UIElement
     {
         public bool IsDeletingItems { get; set; } = false;
-        public bool AutoResizeHeight { get; set; } = false;
 
         private TIGWEImageResizeable _border;
         private UIGrid _paletteGrid;
@@ -19,10 +17,14 @@ namespace TerrariaInGameWorldEditor.Editor
         {
             // a border and the grid to hold the items
             _border = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Border"), 6, 4);
+            _border.Width.Set(0, 1f);
+            _border.Height.Set(0, 1f);
             Append(_border);
             _paletteGrid = new UIGrid();
             _paletteGrid.Left.Set(8, 0f);
             _paletteGrid.Top.Set(8, 0f);
+            _paletteGrid.Width.Set(-16, 1f);
+            _paletteGrid.Height.Set(-16, 1f);
             _paletteGrid.ListPadding = 2f;
             _paletteGrid.OverflowHidden = false;
             _paletteGrid.ManualSortMethod = (list) => {
@@ -46,15 +48,7 @@ namespace TerrariaInGameWorldEditor.Editor
 
         public override void Recalculate()
         {
-            // update sizes
-            _border.Width.Set(Width.Pixels, 0f);
-            _border.Height.Set(Height.Pixels, 0f);
-            _paletteGrid.Width.Set(_border.Width.Pixels - 16, 0f);
-            _paletteGrid.Height.Set(_border.Height.Pixels - 16, 0f);
-            if (AutoResizeHeight)
-            {
-                Height.Set(_paletteGrid.Count > 0 ? _paletteGrid._items[^1].Top.Pixels + _paletteGrid._items[^1].Height.Pixels + _paletteGrid.Top.Pixels + 8 : 12, 0f);
-            }
+            Height.Set(_paletteGrid.Count > 0 ? _paletteGrid._items[^1].Top.Pixels + _paletteGrid._items[^1].Height.Pixels + 16 : 12, 0f);
             base.Recalculate();
         }
 
@@ -67,6 +61,13 @@ namespace TerrariaInGameWorldEditor.Editor
         public void AddItem(PaletteItem item)
         {
             _paletteGrid.Add(item);
+            item.OnLeftClick += (_, _) =>
+            {
+                if (IsDeletingItems)
+                {
+                    RemoveItem(item);
+                }
+            };
             Recalculate();
         }
 

@@ -1,13 +1,9 @@
-﻿using Microsoft.CodeAnalysis.Options;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
-using Terraria.GameContent.UI.States;
-using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI.Elements;
-using Terraria.UI;
 using TerrariaInGameWorldEditor.UIElements;
 using TerrariaInGameWorldEditor.UIElements.CheckBox;
 using TerrariaInGameWorldEditor.UIElements.ColorPicker;
@@ -15,7 +11,6 @@ using TerrariaInGameWorldEditor.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 using TerrariaInGameWorldEditor.UIElements.NumberField;
 using TerrariaInGameWorldEditor.UIElements.Scrollbar;
-using TerrariaInGameWorldEditor.UIElements.TextField;
 
 namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
 {
@@ -31,8 +26,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             Width.Set(700, 0);
             Height.Set(368, 0);
             _defaultTitle = "Settings";
-
-            // ui stuff
             
             // categories
             TIGWEImageResizeable categoriesBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Border"), 6, 4);
@@ -91,66 +84,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             Append(optionsScrollBar);
             optionsGrid.SetScrollbar(optionsScrollBar);
 
-            // general
-            SettingsCategory general = new SettingsCategory("General");
-            general.SetOptionsGrid(optionsGrid);
-            SettingsOption<TIGWECheckBox> updateDraw = new SettingsOption<TIGWECheckBox>("Update drawn/pasted tiles:", new TIGWECheckBox(TIGWESettings.ShouldUpdateDrawnTiles));
-            general.AddOption(updateDraw);
-            updateDraw.OptionElement.OnCheckedChanged += (check) =>
-            {
-                TIGWESettings.ShouldUpdateDrawnTiles = check;
-            };
-            SettingsOption<TIGWECheckBox> teleport = new SettingsOption<TIGWECheckBox>("Teleport to editor location when closing editor:", new TIGWECheckBox(TIGWESettings.ShouldTeleportOnEditorClosed));
-            general.AddOption(teleport);
-            teleport.OptionElement.OnCheckedChanged += (check) =>
-            {
-                TIGWESettings.ShouldTeleportOnEditorClosed = check;
-            };
-            SettingsOption<TIGWENumberField> historyLimit = new SettingsOption<TIGWENumberField>("Max undo/redo actions to keep in memory:", new TIGWENumberField(TIGWESettings.HistoryLimit, ushort.MaxValue, 0));
-            general.AddOption(historyLimit);
-            historyLimit.OptionElement.OnValueChanged += (newValue) =>
-            {
-                TIGWESettings.HistoryLimit = newValue;
-            };
-            historyLimit.OptionElement.Width.Set(100, 0);
-            historyLimit.OptionElement.Height.Set(26, 0);
-            SettingsOption<TIGWECheckBox> showMessages = new SettingsOption<TIGWECheckBox>("Should write messages in chat.", new TIGWECheckBox(TIGWESettings.ShouldShowMessages));
-            general.AddOption(showMessages);
-            showMessages.OptionElement.OnCheckedChanged += (check) =>
-            {
-                TIGWESettings.ShouldShowMessages = check;
-            };
-            SettingsOption<TIGWECheckBox> showErrorMessages = new SettingsOption<TIGWECheckBox>("Should write error messages in chat.", new TIGWECheckBox(TIGWESettings.ShouldShowErrors));
-            general.AddOption(showErrorMessages);
-            showErrorMessages.OptionElement.OnCheckedChanged += (check) =>
-            {
-                TIGWESettings.ShouldShowErrors = check;
-            };
-            SettingsOption<TIGWECheckBox> showFatalErrorMessages = new SettingsOption<TIGWECheckBox>("Should write fatal error messages in chat.", new TIGWECheckBox(TIGWESettings.ShouldShowFatalErrors));
-            general.AddOption(showFatalErrorMessages);
-            showFatalErrorMessages.OptionElement.OnCheckedChanged += (check) =>
-            {
-                TIGWESettings.ShouldShowFatalErrors = check;
-            };
-            settingCategories.Add(general);
+            // this way of doing things is kind of awful
 
-            // visual
-            SettingsCategory visual = new SettingsCategory("Visual");
-            visual.SetOptionsGrid(optionsGrid);
-            SettingsOption<TIGWECheckBox> centerLines = new SettingsOption<TIGWECheckBox>("Add center lines to selection:", new TIGWECheckBox(TIGWESettings.ShowCenterLines));
-            visual.AddOption(centerLines);
-            centerLines.OptionElement.OnCheckedChanged += (check) =>
-            {
-                TIGWESettings.ShowCenterLines = check;
-            };
-            SettingsOption<TIGWECheckBox> measuringLines = new SettingsOption<TIGWECheckBox>("Show measuring lines:", new TIGWECheckBox(TIGWESettings.ShowMeasureLines));
-            visual.AddOption(measuringLines);
-            measuringLines.OptionElement.OnCheckedChanged += (check) =>
-            {
-                TIGWESettings.ShowMeasureLines = check;
-            };
+            // editor settings
+            SettingsCategory editorSettings = new SettingsCategory("Editor settings");
+            editorSettings.SetOptionsGrid(optionsGrid);
             SettingsGroup uiScaleOptions = new SettingsGroup();
-            SettingsOption<TIGWECheckBox> shouldForceScale = new SettingsOption<TIGWECheckBox>("Force editor UI scale:", new TIGWECheckBox(TIGWESettings.ForceScaleUI));
+            SettingsOption<TIGWECheckBox> shouldForceScale = new SettingsOption<TIGWECheckBox>("Force editor UI scale:", new TIGWECheckBox());
             SettingsOption<TIGWEDropDown<float>> forceScale = new SettingsOption<TIGWEDropDown<float>>("Scale:", new TIGWEDropDown<float>());
             uiScaleOptions.AddNode(shouldForceScale);
             uiScaleOptions.AddNode(forceScale);
@@ -158,33 +98,21 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             {
                 forceScale.Enabled = check;
                 EditorSystem.Local.UseCustomScale = check;
+                EditorSystem.Local.Settings.ForceScaleUI = check;
             };
             forceScale.OptionElement.OnOptionChanged += (option) =>
             {
                 EditorSystem.Local.Scale = option.Value;
+                EditorSystem.Local.Settings.UIScale = option.Value;
             };
             forceScale.Enabled = false;
             forceScale.OptionElement.AddOption(0.5f, "50%");
             forceScale.OptionElement.AddOption(1f, "100%");
             forceScale.OptionElement.AddOption(1.5f, "150%");
             forceScale.OptionElement.AddOption(2f, "200%");
-            forceScale.OptionElement.SetSelectedValue(1f);
             forceScale.OptionElement.Height.Set(26, 0);
             forceScale.OptionElement.Width.Set(150, 0);
-            visual.AddOption(uiScaleOptions);
-            SettingsOption<TIGWECheckBox> fullbright = new SettingsOption<TIGWECheckBox>("Fullbright enabled:", new TIGWECheckBox(TIGWESettings.FullbrightEnabled));
-            visual.AddOption(fullbright);
-            fullbright.OptionElement.OnCheckedChanged += (check) =>
-            {
-                TIGWESettings.FullbrightEnabled = check;
-            };
-            SettingsOption<TIGWEColorPicker> toolColorPrimary = new SettingsOption<TIGWEColorPicker>("Tool color:", new TIGWEColorPicker());
-            visual.AddOption(toolColorPrimary);
-            toolColorPrimary.OptionElement.OnColorChanged += (color) =>
-            {
-                TIGWESettings.ToolColor = color;
-            };
-            toolColorPrimary.OptionElement.SetColor(TIGWESettings.ToolColor);
+            editorSettings.AddOption(uiScaleOptions);
             SettingsGroup themeOptions = new SettingsGroup();
             SettingsOption<TIGWEDropDown<Theme>> theme = new SettingsOption<TIGWEDropDown<Theme>>("Theme:", new TIGWEDropDown<Theme>());
             SettingsOption<TIGWEColorPicker> primaryColor = new SettingsOption<TIGWEColorPicker>("Primary color:", new TIGWEColorPicker());
@@ -196,44 +124,122 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             {
                 primaryColor.Enabled = option.Value == Theme.Custom;
                 secondaryColor.Enabled = option.Value == Theme.Custom;
-                switch (option.Value)
+                if (option.Value == Theme.Default)
                 {
-                    case Theme.Default:
-                        primaryColor.OptionElement.SetColor(new Color(43, 56, 101));
-                        secondaryColor.OptionElement.SetColor(new Color(72, 92, 168));
-                        break;
-                    case Theme.TexturePack:
-                        // fix logic
-                        break;
+                    primaryColor.OptionElement.SetColor(new Color(11, 19, 66, 160));
+                    secondaryColor.OptionElement.SetColor(new Color(62, 70, 113, 160));
                 }
-                TIGWESettings.CurrentTheme = option.Value;
+                EditorSystem.Local.Settings.CurrentTheme = option.Value;
             };
             primaryColor.OptionElement.OnColorChanged += (color) =>
             {
                 UIElementUtils.PrimaryColor = color;
-                TIGWESettings.MainPrimaryColor = color;
+                EditorSystem.Local.Settings.PrimaryColor = color;
             };
             secondaryColor.OptionElement.OnColorChanged += (color) =>
             {
                 UIElementUtils.SecondaryColor = color;
-                TIGWESettings.MainSecondaryColor = color;
+                EditorSystem.Local.Settings.SecondaryColor = color;
             };
             theme.OptionElement.AddOption(Theme.Default, "Default");
-            theme.OptionElement.AddOption(Theme.TexturePack, "Texture pack");
             theme.OptionElement.AddOption(Theme.Custom, "Custom");
-            theme.OptionElement.SetSelectedValue(TIGWESettings.CurrentTheme);
             theme.OptionElement.Height.Set(26, 0);
             theme.OptionElement.Width.Set(150, 0);
-            primaryColor.Enabled = false;
-            primaryColor.OptionElement.SetColor(TIGWESettings.MainPrimaryColor);
-            secondaryColor.Enabled = false;
-            secondaryColor.OptionElement.SetColor(TIGWESettings.MainSecondaryColor);
-            visual.AddOption(themeOptions);
-            settingCategories.Add(visual);
+            editorSettings.AddOption(themeOptions);
+            settingCategories.Add(editorSettings);  
+            SettingsOption<TIGWECheckBox> teleport = new SettingsOption<TIGWECheckBox>("Teleport to editor location when closing editor:", new TIGWECheckBox());
+            editorSettings.AddOption(teleport);
+            teleport.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.ShouldTeleportOnEditorClosed = check;
+            };
+            SettingsOption<TIGWECheckBox> fullbright = new SettingsOption<TIGWECheckBox>("Fullbright enabled:", new TIGWECheckBox());
+            editorSettings.AddOption(fullbright);
+            fullbright.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.FullbrightEnabled = check;
+            };
+            SettingsOption<TIGWENumberField> historyLimit = new SettingsOption<TIGWENumberField>("Max undo/redo actions to keep in memory:", new TIGWENumberField(1000, ushort.MaxValue, 0));
+            editorSettings.AddOption(historyLimit);
+            historyLimit.OptionElement.OnValueChanged += (newValue) =>
+            {
+                EditorSystem.Local.Settings.HistoryLimit = newValue;
+            };
+            historyLimit.OptionElement.Width.Set(100, 0);
+            historyLimit.OptionElement.Height.Set(26, 0);
+
+            // tool settings
+            SettingsCategory toolSettings = new SettingsCategory("Tool settings");
+            toolSettings.SetOptionsGrid(optionsGrid);
+            SettingsOption<TIGWECheckBox> updateDraw = new SettingsOption<TIGWECheckBox>("Update drawn/pasted tiles:", new TIGWECheckBox());
+            toolSettings.AddOption(updateDraw);
+            updateDraw.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.ShouldUpdateDrawnTiles = check;
+            };
+            SettingsOption<TIGWEColorPicker> toolColor = new SettingsOption<TIGWEColorPicker>("Tool color:", new TIGWEColorPicker());
+            toolSettings.AddOption(toolColor);
+            toolColor.OptionElement.OnColorChanged += (color) =>
+            {
+                EditorSystem.Local.Settings.ToolColor = color;
+            };
+            SettingsOption<TIGWECheckBox> centerLines = new SettingsOption<TIGWECheckBox>("Add center lines to selection:", new TIGWECheckBox());
+            toolSettings.AddOption(centerLines);
+            centerLines.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.ShowCenterLines = check;
+            };
+            SettingsOption<TIGWECheckBox> measuringLines = new SettingsOption<TIGWECheckBox>("Show measuring lines:", new TIGWECheckBox());
+            toolSettings.AddOption(measuringLines);
+            measuringLines.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.ShowMeasureLines = check;
+            };
+            settingCategories.Add(toolSettings);
+
+            // messages
+            SettingsCategory messages = new SettingsCategory("Messages");
+            messages.SetOptionsGrid(optionsGrid);
+            SettingsOption<TIGWECheckBox> showMessages = new SettingsOption<TIGWECheckBox>("Should write editor messages in chat.", new TIGWECheckBox());
+            messages.AddOption(showMessages);
+            showMessages.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.ShouldShowMessages = check;
+            };
+            SettingsOption<TIGWECheckBox> showErrorMessages = new SettingsOption<TIGWECheckBox>("Should write warn messages in chat.", new TIGWECheckBox());
+            messages.AddOption(showErrorMessages);
+            showErrorMessages.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.ShouldShowErrors = check;
+            };
+            SettingsOption<TIGWECheckBox> showFatalErrorMessages = new SettingsOption<TIGWECheckBox>("Should write error messages in chat.", new TIGWECheckBox());
+            messages.AddOption(showFatalErrorMessages);
+            showFatalErrorMessages.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.ShouldShowFatalErrors = check;
+            };
+            settingCategories.Add(messages);
 
             // default to general
-            general.SetSelected();
-            _selectedCategory = general;
+            editorSettings.SetSelected();
+            _selectedCategory = editorSettings;
+
+            // set everything to current settings
+            updateDraw.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldUpdateDrawnTiles;
+            teleport.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldTeleportOnEditorClosed;
+            historyLimit.OptionElement.SetValue(EditorSystem.Local.Settings.HistoryLimit);
+            showMessages.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldShowMessages;
+            showErrorMessages.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldShowErrors;
+            showFatalErrorMessages.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldShowFatalErrors;
+            centerLines.OptionElement.IsChecked = EditorSystem.Local.Settings.ShowCenterLines;
+            measuringLines.OptionElement.IsChecked = EditorSystem.Local.Settings.ShowMeasureLines;
+            shouldForceScale.OptionElement.IsChecked = EditorSystem.Local.Settings.ForceScaleUI;
+            forceScale.OptionElement.SetSelectedValue(EditorSystem.Local.Settings.UIScale);
+            fullbright.OptionElement.IsChecked = EditorSystem.Local.Settings.FullbrightEnabled;
+            toolColor.OptionElement.SetColor(EditorSystem.Local.Settings.ToolColor);
+            theme.OptionElement.SetSelectedValue(EditorSystem.Local.Settings.CurrentTheme);
+            primaryColor.OptionElement.SetColor(EditorSystem.Local.Settings.PrimaryColor);
+            secondaryColor.OptionElement.SetColor(EditorSystem.Local.Settings.SecondaryColor);
         }
     }
 }

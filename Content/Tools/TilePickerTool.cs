@@ -7,7 +7,6 @@ using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.Editor;
-using TerrariaInGameWorldEditor.Editor.Windows.Settings;
 using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
@@ -22,7 +21,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         public override string GetInfoText()
         {
-            return $"[c/EAD87A:Target Tile Type:] {(Main.tile[Player.tileTargetX, Player.tileTargetY].HasTile ? TileID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].TileType) : "Air")} ([c/EAD87A:ID:] {Main.tile[Player.tileTargetX, Player.tileTargetY].TileType}), [c/EAD87A:Target Wall Type:] {(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType != 0 ? WallID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType) : "None")} ([c/EAD87A:ID:] {Main.tile[Player.tileTargetX, Player.tileTargetY].WallType})";
+            return $"[c/EAD87A:Target Tile Type:] {(Main.tile[Player.tileTargetX, Player.tileTargetY].HasTile ? TileID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].TileType) : "Air")} ([c/EAD87A:ID:] {Main.tile[Player.tileTargetX, Player.tileTargetY].TileType}), [c/EAD87A:Target Wall Type:] {(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType != WallID.None ? WallID.Search.GetName(Main.tile[Player.tileTargetX, Player.tileTargetY].WallType) : "None")} ([c/EAD87A:ID:] {Main.tile[Player.tileTargetX, Player.tileTargetY].WallType})";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -30,7 +29,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             Point16 point = new Point16(Player.tileTargetX, Player.tileTargetY);
             TileCollection tc = new TileCollection();
             tc.TryAddTile(point, new TileCopy(Main.tile[point.X, point.Y]));
-            DrawUtils.DrawTileCollectionOutline(tc, point.ToPoint(), TIGWESettings.ToolColor);
+            DrawUtils.DrawTileCollectionOutline(tc, point.ToPoint(), EditorSystem.Local.Settings.ToolColor);
         }
 
         public override void PostUpdateInput()

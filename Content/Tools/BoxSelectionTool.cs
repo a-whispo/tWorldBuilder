@@ -6,12 +6,12 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
-using TerrariaInGameWorldEditor.Editor.Windows.Settings;
+using TerrariaInGameWorldEditor.Editor;
 using TerrariaInGameWorldEditor.UIElements.Button;
 
 namespace TerrariaInGameWorldEditor.Content.Tools
 {
-    internal class BoxSelectionTool : SelectionTool
+    internal class BoxSelectionTool : Tool, ISelectionTool
     {
         // hovering
         public bool HoveringAny => _hoveringLeft || _hoveringRight || _hoveringTop || _hoveringBottom;
@@ -30,10 +30,13 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         private int _oldWidth = 0;
         private int _oldHeight = 0;
 
+        private TileCollection _selection;
+
         public BoxSelectionTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/SelectTool"));
             ToggleToolButton.HoverText = "Box Selection";
+            _selection = new TileCollection();
         }
 
         public override string GetInfoText()
@@ -53,7 +56,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             return $"[c/EAD87A:Width:] {selection.Width}, [c/EAD87A:Height:] {selection.Height}";
         }
 
-        public override void ResetSelection()
+        public void ResetSelection()
         {
             // unplace both points if you right click, results in selection going away
             _point1placed = false;
@@ -67,7 +70,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             _selection.Clear();
         }
 
-        public override TileCollection GetSelection()
+        public TileCollection GetSelection()
         {
             // no selection
             if (!_point1placed || !_point2placed)
@@ -88,7 +91,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             // draw a rectangle outline while we dont have anything actually selected
             if (_point1placed && !_point2placed)
             {
-                DrawUtils.DrawRectangleOutline(selection, TIGWESettings.ToolColor);
+                DrawUtils.DrawRectangleOutline(selection, EditorSystem.Local.Settings.ToolColor);
             }
 
             // draw hovering side highlight

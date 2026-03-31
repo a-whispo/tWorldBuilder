@@ -236,6 +236,7 @@ namespace TerrariaInGameWorldEditor.UIElements.NumberField
                 }
             }
             _numText.SetText(text);
+            Recalculate();
 
             // this is kinda weird but ok
             _background.Texture = IsFocused ? _background.TextureHover : ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture");

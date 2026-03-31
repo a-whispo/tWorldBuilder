@@ -87,7 +87,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
                 selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
                 selection = new Rectangle(selection.X, selection.Y, selection.Width, selection.Height);
-                Color color = TIGWESettings.ToolColor;
+                Color color = EditorSystem.Local.Settings.ToolColor;
 
                 TileCollection tiles;
                 switch (_mode)
@@ -110,10 +110,10 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
                 DrawUtils.DrawTileCollection(tiles, new Point(selection.X, selection.Y));
                 DrawUtils.DrawTileCollectionOutline(tiles, new Point(selection.X, selection.Y), color);
-                DrawUtils.DrawMiscOptions(selection, TIGWESettings.ShowCenterLines, TIGWESettings.ShowMeasureLines);
+                DrawUtils.DrawMiscOptions(selection, EditorSystem.Local.Settings.ShowCenterLines, EditorSystem.Local.Settings.ShowMeasureLines);
                 if (_point2placed)
                 {
-                    ToolUtils.Paste(tiles, new Point(selection.X, selection.Y), true, TIGWESettings.ShouldUpdateDrawnTiles);
+                    ToolUtils.Paste(tiles, new Point16(selection.X, selection.Y), true, EditorSystem.Local.Settings.ShouldUpdateDrawnTiles);
                     _point1placed = false;
                     _point2placed = false;
                 }
@@ -167,7 +167,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
                 if (PlayerInput.ScrollWheelDelta != 0)
                 {
-                    _d = Math.Max(_d, 1);
+                    _d = Math.Clamp(_d, 1, 200);
                     _sizeField.SetValue(_d);
                 }
             }
