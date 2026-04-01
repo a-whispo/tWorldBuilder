@@ -1,1 +1,3 @@
-This description will show up on the steam page, check out https://steamcommunity.com/comment/Guide/formattinghelp.
+A mod for helping with in-game building at a larger scale with the ability to save/load builds, modify tiles and more. Should somewhat work for multiplayer.
+
+Github: https://github.com/a-whispo/TerrariaInGameWorldEditor

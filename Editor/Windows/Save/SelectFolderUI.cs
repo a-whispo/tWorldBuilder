@@ -38,7 +38,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             openFolder.HoverText = "Open save folder";
             openFolder.OnLeftClick += (evt, listeningElement) =>
             {
-                Utils.OpenFolder(ModLoader.ModPath.Replace("\\Mods", "") + "\\TIGWE\\saves\\");
+                Utils.OpenFolder(ModLoader.ModPath.Replace("\\Mods", "") + $"\\{TerrariaInGameWorldEditor.MODNAME}\\saves\\");
             };
             Append(openFolder);
 
@@ -84,7 +84,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             _grid.Top.Set(74, 0);
             _grid.ListPadding = 2;
             _grid.PaddingTop = 2;
-            _grid.SetDirectory(ModLoader.ModPath.Replace("\\Mods", "") + "\\TIGWE\\saves\\");
+            _grid.SetDirectory(ModLoader.ModPath.Replace("\\Mods", "") + $"\\{TerrariaInGameWorldEditor.MODNAME}\\saves\\");
             _grid.SetSearchBar(searchBar);
             searchBar.PlaceholderText = $"Search for folders... [c/60ABE7:({_grid.FolderCount})]";
             _grid.CanSelectFiles = false;
@@ -125,12 +125,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
 
             // make sure we dont try to create a file with the same name as another one
             int num = 1;
-            while (Directory.Exists($"{ModLoader.ModPath.Replace("\\Mods", "")}\\TIGWE\\saves\\New Folder ({num})"))
+            while (Directory.Exists($"{ModLoader.ModPath.Replace("\\Mods", "")}\\{TerrariaInGameWorldEditor.MODNAME}\\saves\\New Folder ({num})"))
             {
                 num++;
             }
 
-            string fullPath = $"{ModLoader.ModPath.Replace("\\Mods", "")}\\TIGWE\\saves\\New Folder ({num})";
+            string fullPath = $"{ModLoader.ModPath.Replace("\\Mods", "")}\\{TerrariaInGameWorldEditor.MODNAME}\\saves\\New Folder ({num})";
             // create the directory and UIBlueprintItem
             Directory.CreateDirectory(fullPath);
             TIGWEDirectoryFolder folder = new TIGWEDirectoryFolder(fullPath);

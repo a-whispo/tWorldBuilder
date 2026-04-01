@@ -24,11 +24,10 @@ namespace TerrariaInGameWorldEditor.UIElements.Button
             set => _btnText.PaddingTop = value;
         }
 
-        private UIText _btnText;
+        private UIText _btnText = new UIText("");
 
         public TIGWEButton(Asset<Texture2D> texture) : base(texture)
         {
-            _btnText = new UIText("");
             _btnText.IgnoresMouseInteraction = true;
             Append(_btnText);
             TextOffsetLeft = 10;

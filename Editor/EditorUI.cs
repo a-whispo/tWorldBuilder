@@ -322,7 +322,7 @@ namespace TerrariaInGameWorldEditor.Editor
             _paletteDeleteButton.OnLeftClick += (_, _) =>
             {
                 _palette.IsDeletingItems = !_palette.IsDeletingItems;
-                _paletteDeleteButton.HoverText = _palette.IsDeletingItems ? "Finish Deleting" : "Delete";
+                _paletteDeleteButton.HoverText = _palette.IsDeletingItems ? "Finish deleting" : "Delete";
             };
             TIGWEButton paletteClearButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/ClearButton"));
             paletteClearButton.HoverText = "Clear";

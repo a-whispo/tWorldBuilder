@@ -127,9 +127,26 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 }
             }
 
+            
+            if (Main.netMode == NetmodeID.MultiplayerClient)
+            {
+                SendTileCollectionUpdates(point, tilesToPaste);
+            }
             if (saveToUndo)
             {
                 EditorSystem.Local.AddToUndoHistory(undoColl);
+            }
+        }
+
+        public static void SendTileCollectionUpdates(Point16 point, TileCollection tiles)
+        {
+            // send tile info in chunks so theres not too much info at once
+            for (int xc = 0; xc < tiles.GetWidth() + 60; xc += 60)
+            {
+                for (int yc = 0; yc < tiles.GetHeight() + 60; yc += 60)
+                {
+                    NetMessage.SendTileSquare(-1, point.X + xc, point.Y + yc, 60);
+                }
             }
         }
 
@@ -247,6 +264,10 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 }
             }
 
+            if (Main.netMode == NetmodeID.MultiplayerClient)
+            {
+                SendTileCollectionUpdates(new Point16(tilesToDelete.GetMinX(), tilesToDelete.GetMinY()), tilesToDelete);
+            }
             if (saveToUndo)
             {
                 EditorSystem.Local.AddToUndoHistory(undoColl);

@@ -87,7 +87,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
                 selection = ToolUtils.GetRectangleFromPoints(_point1, _point2);
                 selection = new Rectangle(selection.X, selection.Y, selection.Width, selection.Height);
-                Color color = EditorSystem.Local.Settings.ToolColor;
 
                 TileCollection tiles;
                 switch (_mode)
@@ -109,7 +108,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         break;
                 }
                 DrawUtils.DrawTileCollection(tiles, new Point(selection.X, selection.Y));
-                DrawUtils.DrawTileCollectionOutline(tiles, new Point(selection.X, selection.Y), color);
+                DrawUtils.DrawTileCollectionOutline(tiles, new Point(selection.X, selection.Y), EditorSystem.Local.Settings.ToolColor);
                 DrawUtils.DrawMiscOptions(selection, EditorSystem.Local.Settings.ShowCenterLines, EditorSystem.Local.Settings.ShowMeasureLines);
                 if (_point2placed)
                 {

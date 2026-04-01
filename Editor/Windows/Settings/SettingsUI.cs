@@ -236,10 +236,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             shouldForceScale.OptionElement.IsChecked = EditorSystem.Local.Settings.ForceScaleUI;
             forceScale.OptionElement.SetSelectedValue(EditorSystem.Local.Settings.UIScale);
             fullbright.OptionElement.IsChecked = EditorSystem.Local.Settings.FullbrightEnabled;
-            toolColor.OptionElement.SetColor(EditorSystem.Local.Settings.ToolColor);
+            toolColor.OptionElement.SetColorPremultipled(EditorSystem.Local.Settings.ToolColor);
             theme.OptionElement.SetSelectedValue(EditorSystem.Local.Settings.CurrentTheme);
-            primaryColor.OptionElement.SetColor(EditorSystem.Local.Settings.PrimaryColor);
-            secondaryColor.OptionElement.SetColor(EditorSystem.Local.Settings.SecondaryColor);
+            primaryColor.OptionElement.SetColorPremultipled(EditorSystem.Local.Settings.PrimaryColor);
+            secondaryColor.OptionElement.SetColorPremultipled(EditorSystem.Local.Settings.SecondaryColor);
         }
     }
 }

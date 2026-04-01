@@ -21,12 +21,12 @@ namespace TerrariaInGameWorldEditor.Content
         public override void Load()
         {
             base.Load();
-            OpenEditorMK = KeybindLoader.RegisterKeybind(Mod, "Open Editor", Keys.P);
+            OpenEditorMK = KeybindLoader.RegisterKeybind(Mod, "Open Editor", Keys.O);
             DeleteMK = KeybindLoader.RegisterKeybind(Mod, "Delete (Ctrl + Key)", Keys.Delete);
             CopyMK = KeybindLoader.RegisterKeybind(Mod, "Copy (Ctrl + Key)", Keys.C);
             PasteMK = KeybindLoader.RegisterKeybind(Mod, "Paste (Ctrl + Key)", Keys.V);
-            ChangeCornerOnPasteMK = KeybindLoader.RegisterKeybind(Mod, "Change Paste Corner (Ctrl + Key)", Keys.R);
-            RotateMK = KeybindLoader.RegisterKeybind(Mod, "Rotate selection (Ctrl + Key)", Keys.T);
+            ChangeCornerOnPasteMK = KeybindLoader.RegisterKeybind(Mod, "Change Paste Corner (Ctrl + Key)", Keys.T);
+            RotateMK = KeybindLoader.RegisterKeybind(Mod, "Rotate selection (Ctrl + Key)", Keys.R);
             MirrorMK = KeybindLoader.RegisterKeybind(Mod, "Mirror selection (Ctrl + Key)", Keys.M);
             CutMK = KeybindLoader.RegisterKeybind(Mod, "Cut (Ctrl + Key)", Keys.X);
             UndoMK = KeybindLoader.RegisterKeybind(Mod, "Undo (Ctrl + Key)", Keys.Z);

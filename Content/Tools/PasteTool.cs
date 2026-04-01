@@ -34,9 +34,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             {
                 // paste preview
                 Rectangle selection = GetCurrentSelectionRectangle();
-                Color color = EditorSystem.Local.Settings.ToolColor;
                 DrawUtils.DrawTileCollection(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), EditorSystem.Local.Settings.ShouldPasteTiles, EditorSystem.Local.Settings.ShouldPasteWalls, EditorSystem.Local.Settings.ShouldPasteLiquid, EditorSystem.Local.Settings.ShouldPasteWires);
-                DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), color);
+                DrawUtils.DrawTileCollectionOutline(EditorSystem.Local.Clipboard, new Point(selection.X, selection.Y), EditorSystem.Local.Settings.ToolColor);
                 DrawUtils.DrawMiscOptions(selection, EditorSystem.Local.Settings.ShowCenterLines, EditorSystem.Local.Settings.ShowMeasureLines);
             }  
         }

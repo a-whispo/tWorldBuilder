@@ -9,7 +9,7 @@ namespace TerrariaInGameWorldEditor
 {
     public class TerrariaInGameWorldEditor : Mod
 	{
-        public const string MODNAME = "TIGWE";
+        public const string MODNAME = "tWB";
         public const string ASSET_PATH = $"TerrariaInGameWorldEditor";
         private static ILog _modLogger;
 

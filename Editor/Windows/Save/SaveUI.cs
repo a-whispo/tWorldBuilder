@@ -136,7 +136,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
 
         private void ResetPath()
         {
-            _selectedPath = $"{ModLoader.ModPath.Replace("\\Mods", "")}\\TIGWE\\saves";
+            _selectedPath = $"{ModLoader.ModPath.Replace("\\Mods", "")}\\{TerrariaInGameWorldEditor.MODNAME}\\saves";
             _pathField?.SetText($"...\\saves [c/60ABE7:(default)]");
         }
 
@@ -147,7 +147,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
                 // get path where we should save to and create the saves directory if it doesnt exist
                 string name = _saveAsField.GetText();
                 string modsPath = ModLoader.ModPath.Replace("\\Mods", "");
-                Directory.CreateDirectory($"{modsPath}\\TIGWE\\saves");
+                Directory.CreateDirectory($"{modsPath}\\{TerrariaInGameWorldEditor.MODNAME}\\saves");
                 string path = $"{_selectedPath}\\{name}";
                 if (File.Exists(path))
                 {

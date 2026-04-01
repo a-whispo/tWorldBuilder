@@ -313,11 +313,19 @@ namespace TerrariaInGameWorldEditor.UIElements.ColorPicker
             return new Color(255, 255, 255);
         }
 
+        public void SetColorPremultipled(Color color)
+        {
+            color.R = (byte)(color.R / (color.A / 255f));
+            color.G = (byte)(color.G / (color.A / 255f));
+            color.B = (byte)(color.B / (color.A / 255f));
+            SetColor(color);
+        }
+
         public void SetColor(Color color)
         {
-            float R = (float)color.R / 255;
-            float G = (float)color.G / 255;
-            float B = (float)color.B / 255;
+            float R = (color.R / 255f);
+            float G = (color.G / 255f);
+            float B = (color.B / 255f);
 
             float cMax = Math.Max(R, Math.Max(G, B));
             float cMin = Math.Min(R, Math.Min(G, B));

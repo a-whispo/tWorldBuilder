@@ -683,101 +683,85 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 bounds.Width = bounds.Width / 16;
                 bounds.Height = bounds.Height / 16;
 
-                // left line
-                int distance1 = 101;
-                for (int y = 0; y < bounds.Height; y++)
+                int distanceLeft = GetDistanceHorizontal(bounds, 0, -1, 0, 1);
+                int distanceRight = GetDistanceHorizontal(bounds, bounds.Width - 1, 1, 0, 1);
+                int distanceTop = GetDistanceVertical(bounds, 0, 1, 0, -1);
+                int distanceBottom = GetDistanceVertical(bounds, 0, 1, bounds.Height - 1, 1);
+                if (distanceLeft != -1)
                 {
-                    for (int x = 0; x <= 101; x++)
-                    {
-                        if (Main.tile[bounds.X - x, bounds.Y + y].HasTile)
-                        {
-                            if ((x - 1) < distance1)
-                            {
-                                distance1 = x - 1;
-                            }
-                        }
-                    }
+                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16 - distanceLeft * 16) - (int)Main.screenPosition.X, (bounds.Y * 16) - (int)Main.screenPosition.Y, 2, bounds.Height * 16), color); // vertical line
+                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16 - distanceLeft * 16) - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y - 1, distanceLeft * 16 - 2, 2), color); // horizontal line
                 }
-                if (distance1 != -1)
+                if (distanceRight != -1)
                 {
-                    Terraria.Utils.DrawBorderStringFourWay(SpriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance1 > 100 ? ">100" : distance1), bounds.X * 16 - 6 * 16 - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
-                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16 - distance1 * 16) - (int)Main.screenPosition.X, (bounds.Y * 16) - (int)Main.screenPosition.Y, 2, bounds.Height * 16), color); // vertical line
-                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16 - distance1 * 16) - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y - 1, distance1 * 16 - 2, 2), color); // horizontal line
+                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16 + bounds.Width * 16 + distanceRight * 16) - (int)Main.screenPosition.X - 2, (bounds.Y * 16) - (int)Main.screenPosition.Y, 2, bounds.Height * 16), color); // vertical line
+                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16 + bounds.Width * 16) - (int)Main.screenPosition.X + 2, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y - 1, distanceRight * 16 - 2, 2), color); // horizontal line
                 }
-
-                // right line
-                int distance2 = 101;
-                for (int y = 0; y < bounds.Height; y++)
+                if (distanceTop != -1)
                 {
-                    for (int x = 0; x <= 101; x++)
-                    {
-                        if (Main.tile[bounds.X + bounds.Width + x - 1, bounds.Y + y].HasTile)
-                        {
-                            if ((x - 1) < distance2)
-                            {
-                                distance2 = x - 1;
-                            }
-                        }
-                    }
+                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X - 1, (bounds.Y * 16 - distanceTop * 16) - (int)Main.screenPosition.Y, 2, distanceTop * 16 - 2), color); // vertical line
+                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16) - (int)Main.screenPosition.X, (bounds.Y * 16 - distanceTop * 16) - (int)Main.screenPosition.Y, bounds.Width * 16, 2), color); // horizontal line
                 }
-                if (distance2 != -1)
+                if (distanceBottom != -1)
                 {
-                    Terraria.Utils.DrawBorderStringFourWay(SpriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance2 > 100 ? ">100" : distance2), (bounds.X * 16 + bounds.Width * 16) + 16 - (int)Main.screenPosition.X, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
-                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16 + bounds.Width * 16 + distance2 * 16) - (int)Main.screenPosition.X - 2, (bounds.Y * 16) - (int)Main.screenPosition.Y, 2, bounds.Height * 16), color); // vertical line
-                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16 + bounds.Width * 16) - (int)Main.screenPosition.X + 2, (bounds.Y * 16) + ((bounds.Height * 16) / 2) - (int)Main.screenPosition.Y - 1, distance2 * 16 - 2, 2), color); // horizontal line
+                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X - 1, (bounds.Y * 16 + bounds.Height * 16) - (int)Main.screenPosition.Y + 2, 2, distanceBottom * 16 - 2), color); // vertical line
+                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16) - (int)Main.screenPosition.X, (bounds.Y * 16 + distanceBottom * 16 + bounds.Height * 16) - (int)Main.screenPosition.Y - 2, bounds.Width * 16, 2), color); // horizontal line
                 }
-
-                // top line
-                int distance3 = 101;
-                for (int x = 0; x < bounds.Width; x++)
-                {
-                    for (int y = 0; y <= 101; y++)
-                    {
-                        int tx = bounds.X + x;
-                        int ty = bounds.Y - y;
-                        if (tx > Main.maxTilesY || tx < 0 || ty > Main.maxTilesY || ty < 0)
-                        {
-                            break;
-                        }
-                        if (Main.tile[bounds.X + x, bounds.Y - y].HasTile)
-                        {
-                            if ((y - 1) < distance3)
-                            {
-                                distance3 = y - 1;
-                            }
-                        }
-                    }
-                }
-                if (distance3 != -1)
-                {
-                    Terraria.Utils.DrawBorderStringFourWay(SpriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance3 > 100 ? ">100" : distance3), (bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X, (bounds.Y * 16) - 24 - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
-                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X - 1, (bounds.Y * 16 - distance3 * 16) - (int)Main.screenPosition.Y, 2, distance3 * 16 - 2), color); // vertical line
-                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16) - (int)Main.screenPosition.X, (bounds.Y * 16 - distance3 * 16) - (int)Main.screenPosition.Y, bounds.Width * 16, 2), color); // horizontal line
-                }
-
-                // bottom line
-                int distance4 = 101;
-                for (int x = 0; x < bounds.Width; x++)
-                {
-                    for (int y = 0; y <= 101; y++)
-                    {
-                        if (Main.tile[bounds.X + x, bounds.Y + bounds.Height + y - 1].HasTile)
-                        {
-                            if ((y - 1) < distance4)
-                            {
-                                distance4 = y - 1;
-                            }
-                        }
-                    }
-                }
-                if (distance4 != -1)
-                {
-                    Terraria.Utils.DrawBorderStringFourWay(SpriteBatch, FontAssets.MouseText.Value, "Tiles: " + (distance4 > 100 ? ">100" : distance4), (bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X, (bounds.Y * 16 + bounds.Height * 16) + 8 - (int)Main.screenPosition.Y, new Color(215, 215, 215), Color.Black, Vector2.Zero, 1f);
-                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16) + (bounds.Width * 16) / 2 - (int)Main.screenPosition.X - 1, (bounds.Y * 16 + bounds.Height * 16) - (int)Main.screenPosition.Y + 2, 2, distance4 * 16 - 2), color); // vertical line
-                    SpriteBatch.Draw(BlankTexture2D.Value, new Rectangle((bounds.X * 16) - (int)Main.screenPosition.X, (bounds.Y * 16 + distance4 * 16 + bounds.Height * 16) - (int)Main.screenPosition.Y - 2, bounds.Width * 16, 2), color); // horizontal line
-                }
+                Main.instance.MouseText($"Top distance: {(distanceTop > 100 ? ">100" : Math.Max(0, distanceTop))} \nRight distance: {(distanceRight > 100 ? ">100" : Math.Max(0, distanceRight))} \nBottom distance: {(distanceBottom > 100 ? ">100" : Math.Max(0, distanceBottom))} \nLeft distance: {(distanceLeft > 100 ? ">100" : Math.Max(0, distanceLeft))}\n");
             }
             SpriteBatch.End();
+        }
+
+        public static int GetDistanceHorizontal(Rectangle bounds, int xOffset, int xMult, int yOffset, int yMult)
+        {
+            int distance = 101;
+            for (int x = 0; x < 101; x++)
+            {
+                for (int y = 0; y < bounds.Height; y++)
+                {
+                    int tx = bounds.X - x;
+                    int ty = bounds.Y + y;
+                    if (tx > Main.maxTilesX || tx < 0 || ty > Main.maxTilesY || ty < 0)
+                    {
+                        continue;
+                    }
+                    if (Main.tile[bounds.X + xOffset + x * xMult, bounds.Y + yOffset + y * yMult].HasTile)
+                    {
+                        if ((x - 1) < distance)
+                        {
+                            distance = x - 1;
+                        }
+                        return distance;
+                    }
+                }
+            }
+            return distance;
+        }
+
+        public static int GetDistanceVertical(Rectangle bounds, int xOffset, int xMult, int yOffset, int yMult)
+        {
+            int distance = 101;
+            for (int y = 0; y < 101; y++)
+            {
+                for (int x = 0; x < bounds.Width; x++)
+                {
+                    int tx = bounds.X + x;
+                    int ty = bounds.Y - y;
+                    if (tx > Main.maxTilesX || tx < 0 || ty > Main.maxTilesY || ty < 0)
+                    {
+                        continue;
+                    }
+                    if (Main.tile[bounds.X + xOffset + x * xMult, bounds.Y + yOffset + y * yMult].HasTile)
+                    {
+                        if ((y - 1) < distance)
+                        {
+                            distance = y - 1;
+                        }
+                        return distance;
+                    }
+                }
+            }
+            return distance;
         }
     }
 }
