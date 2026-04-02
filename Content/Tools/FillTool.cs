@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using TerrariaInGameWorldEditor.Common;
+using TerrariaInGameWorldEditor.Editor;
 using TerrariaInGameWorldEditor.UIElements.CheckBox;
 using TerrariaInGameWorldEditor.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UIElements.NumberField;
@@ -73,8 +74,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
                 bool IsMatch(Point16 coords)
                 {
-                    Tile tile = Main.tile[coords.X, coords.Y];
+                    if (!(((EditorSystem.Local.CurrentSelection?.ContainsCoord(coords)) ?? false) || EditorSystem.Local.CurrentSelection?.Count == 0))
+                    {
+                        return false;
+                    }
 
+                    Tile tile = Main.tile[coords.X, coords.Y];
                     switch (_mode)
                     {
                         case Target.Auto:
