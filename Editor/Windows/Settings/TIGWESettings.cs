@@ -16,13 +16,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         public Theme CurrentTheme { get; set; } = Theme.Default;
         public bool ShowCenterLines { get; set; } = false;
         public bool ShowMeasureLines { get; set; } = false;
-        public bool ShouldUpdateDrawnTiles { get; set; } = false;
+        public bool ShouldUpdateDrawnTiles { get; set; } = true;
         public bool ShouldTeleportOnEditorClosed { get; set; } = true;
         public bool ForceScaleUI { get; set; } = false;
         public float UIScale { get; set; } = 1f;
         public bool FullbrightEnabled { get; set; } = false;
         public int HistoryLimit { get; set; } = 1000;
-        public bool ShouldShowMessages { get; set; } = false;
+        public bool ShouldShowMessages { get; set; } = true;
         public bool ShouldShowErrors { get; set; } = true;
         public bool ShouldShowFatalErrors { get; set; } = true;
 

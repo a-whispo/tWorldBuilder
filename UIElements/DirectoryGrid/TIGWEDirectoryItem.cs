@@ -52,7 +52,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
         public TIGWEDirectoryItem(string fullPath)
         {
             FullPath = fullPath;
-            Name = Path.GetFileName(@FullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            Name = Path.GetFileNameWithoutExtension(@FullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 
             // texture
             _texture = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/Assets/Texture"));

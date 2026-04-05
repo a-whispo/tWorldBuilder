@@ -44,7 +44,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         {
             Main.blockMouse = true;
 
-            // left click
             if (Main.mouseRight && Main.mouseRightRelease && !Main.LocalPlayer.mouseInterface)
             {
                 EditorSystem.Local.CurrentTool = null;

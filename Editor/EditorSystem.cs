@@ -418,7 +418,11 @@ namespace TerrariaInGameWorldEditor.Editor
                 {
                     if (Clipboard?.Count > 0) // if we have something in our clipboard
                     {
-                        CurrentTool = _pasteTool;
+                        if (CurrentTool != _pasteTool)
+                        {
+                            CurrentTool = _pasteTool;
+                            TerrariaInGameWorldEditor.NewText($"Paste tool opened. Press Ctrl + {Keybinds.PasteMK.GetAssignedKeys()[0]} again to paste.");
+                        }
                     }
                     else
                     {
