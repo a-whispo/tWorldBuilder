@@ -22,6 +22,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         public float UIScale { get; set; } = 1f;
         public bool FullbrightEnabled { get; set; } = false;
         public int HistoryLimit { get; set; } = 1000;
+        public bool ShouldShowActiveSelectionText { get; set; } = true;
         public bool ShouldShowMessages { get; set; } = true;
         public bool ShouldShowErrors { get; set; } = true;
         public bool ShouldShowFatalErrors { get; set; } = true;

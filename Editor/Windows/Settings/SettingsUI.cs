@@ -159,6 +159,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             {
                 EditorSystem.Local.Settings.FullbrightEnabled = check;
             };
+            SettingsOption<TIGWECheckBox> selectionActiveText = new SettingsOption<TIGWECheckBox>("Show text for when a selection area is active:", new TIGWECheckBox());
+            editorSettings.AddOption(selectionActiveText);
+            selectionActiveText.OptionElement.OnCheckedChanged += (check) =>
+            {
+                EditorSystem.Local.Settings.ShouldShowActiveSelectionText = check;
+            };
             SettingsOption<TIGWENumberField> historyLimit = new SettingsOption<TIGWENumberField>("Max undo/redo actions to keep in memory:", new TIGWENumberField(1000, ushort.MaxValue, 0));
             editorSettings.AddOption(historyLimit);
             historyLimit.OptionElement.OnValueChanged += (newValue) =>
@@ -220,13 +226,14 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             };
             settingCategories.Add(messages);
 
-            // default to general
+            // default to editor settings
             editorSettings.SetSelected();
             _selectedCategory = editorSettings;
 
             // set everything to current settings
             updateDraw.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldUpdateDrawnTiles;
             teleport.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldTeleportOnEditorClosed;
+            selectionActiveText.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldShowActiveSelectionText;
             historyLimit.OptionElement.SetValue(EditorSystem.Local.Settings.HistoryLimit);
             showMessages.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldShowMessages;
             showErrorMessages.OptionElement.IsChecked = EditorSystem.Local.Settings.ShouldShowErrors;

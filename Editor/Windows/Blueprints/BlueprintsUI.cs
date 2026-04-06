@@ -97,7 +97,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
                 {
                     using BinaryReader br = new BinaryReader(File.OpenRead(file.FullPath));
                     EditorSystem.Local.Clipboard = TileCollection.ReadTileCollection(br, out HashSet<string> missingMods);
-                    if (missingMods.Count > 0)
+                    if (missingMods?.Count > 0)
                     {
                         string msg = "Missing mods used in file:";
                         foreach (string mod in missingMods)
@@ -106,7 +106,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
                         }
                         TerrariaInGameWorldEditor.Warn(msg);
                     }
+                    br.Close();
                     TerrariaInGameWorldEditor.NewText($"Set clipboard to \"{file.Name}\"");
+                    if (!Path.HasExtension(file.FullPath) && !File.Exists($"{file.FullPath}.twb"))
+                    {
+                        File.Move(file.FullPath, $"{file.FullPath}.twb");
+                    }
                 }
                 catch (Exception ex)
                 {

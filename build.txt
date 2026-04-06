@@ -1,4 +1,4 @@
 displayName = tWorldBuilder
 internalName = tWorldBuilder
 author = whispo
-version = 1.0.2
+version = 1.0.3

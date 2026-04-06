@@ -244,6 +244,26 @@ namespace TerrariaInGameWorldEditor.Editor
             _toolSettings.Height.Set(0, 1f);
             _top.Append(_toolSettings);
 
+            // selection notifier
+            UIText selectionActiveText = new UIText("");
+            selectionActiveText.Top.Set(TopHeight + 20, 0);
+            selectionActiveText.Left.Set(20, 0);
+            selectionActiveText.IgnoresMouseInteraction = true;
+            OnRecalculate += (_, _) =>
+            {
+                selectionActiveText.Top.Set(TopHeight + 20, 0);
+                if (EditorSystem.Local.CurrentSelection?.Count > 0 && EditorSystem.Local.Settings.ShouldShowActiveSelectionText)
+                {
+                    selectionActiveText.SetText("A selection is active. \nDrawing/Pasting/Modifying tiles is limited to the selection area.");
+                }
+                else
+                {
+                    selectionActiveText.SetText("");
+                }
+                selectionActiveText.Recalculate();
+            };
+            _top.Append(selectionActiveText);
+
             // current selected tile (opens tile browser on click)
             TIGWEButton tileButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/TileButton"));
             tileButton.SetVisibility(0.8f, 1f);
