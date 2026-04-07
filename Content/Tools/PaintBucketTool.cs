@@ -36,5 +36,14 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             }
             ToolUtils.Paste(toPaste, new Point16(toPaste.GetMinX(), toPaste.GetMinY()), true, EditorSystem.Local.Settings.ShouldUpdateDrawnTiles);
         }
+
+        protected override bool IsMatch(Point16 coords, TileCopy clickedTile)
+        {
+            if (!(((EditorSystem.Local.CurrentSelection?.ContainsCoord(coords)) ?? false) || EditorSystem.Local.CurrentSelection?.Count == 0))
+            {
+                return false;
+            }
+            return base.IsMatch(coords, clickedTile);
+        }
     }
 }

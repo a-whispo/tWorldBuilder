@@ -111,6 +111,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
                     if (!Path.HasExtension(file.FullPath) && !File.Exists($"{file.FullPath}.twb"))
                     {
                         File.Move(file.FullPath, $"{file.FullPath}.twb");
+                        file.FullPath = file.FullPath + ".twb";
                     }
                 }
                 catch (Exception ex)

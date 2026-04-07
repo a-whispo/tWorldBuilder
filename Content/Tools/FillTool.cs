@@ -56,6 +56,46 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         }
 
+        protected virtual bool IsMatch(Point16 coords, TileCopy clickedTile)
+        {
+            Tile tile = Main.tile[coords.X, coords.Y];
+            switch (_mode)
+            {
+                case Target.Auto:
+                    if (tile.HasTile || clickedTile.HasTile)
+                    {
+                        return tile.TileType == clickedTile.TileType && tile.HasTile == clickedTile.HasTile;
+                    }
+                    if (tile.WallType != WallID.None || clickedTile.WallType != WallID.None)
+                    {
+                        return tile.WallType != WallID.None && tile.WallType == clickedTile.WallType;
+                    }
+                    if (tile.LiquidAmount != 0 || clickedTile.LiquidAmount != 0)
+                    {
+                        return tile.LiquidAmount != 0 && tile.LiquidType == clickedTile.LiquidType;
+                    }
+                    return tile.TileType == clickedTile.TileType;
+
+                case Target.Tiles:
+                    return tile.TileType == clickedTile.TileType && tile.HasTile == clickedTile.HasTile;
+
+                case Target.Walls:
+                    if (tile.WallType != WallID.None || clickedTile.WallType != WallID.None)
+                    {
+                        return tile.WallType != WallID.None && tile.WallType == clickedTile.WallType;
+                    }
+                    return false;
+
+                case Target.Liquid:
+                    if (tile.LiquidAmount != 0 || clickedTile.LiquidAmount != 0)
+                    {
+                        return tile.LiquidAmount != 0 && tile.LiquidType == clickedTile.LiquidType;
+                    }
+                    return false;
+            }
+            return false;
+        }
+
         public override void PostUpdateInput()
         {
             Main.blockMouse = true;
@@ -72,57 +112,12 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 Queue<Point16> queue = new Queue<Point16>();
                 queue.Enqueue(new Point16(point.X, point.Y));
 
-                bool IsMatch(Point16 coords)
-                {
-                    if (!(((EditorSystem.Local.CurrentSelection?.ContainsCoord(coords)) ?? false) || EditorSystem.Local.CurrentSelection?.Count == 0))
-                    {
-                        return false;
-                    }
-
-                    Tile tile = Main.tile[coords.X, coords.Y];
-                    switch (_mode)
-                    {
-                        case Target.Auto:
-                            if (tile.HasTile || clickedTile.HasTile)
-                            {
-                                return tile.TileType == clickedTile.TileType && tile.HasTile == clickedTile.HasTile;
-                            }
-                            if (tile.WallType != WallID.None || clickedTile.WallType != WallID.None)
-                            {
-                                return tile.WallType != WallID.None && tile.WallType == clickedTile.WallType;
-                            }
-                            if (tile.LiquidAmount != 0 || clickedTile.LiquidAmount != 0)
-                            {
-                                return tile.LiquidAmount != 0 && tile.LiquidType == clickedTile.LiquidType;
-                            }
-                            return tile.TileType == clickedTile.TileType;
-
-                        case Target.Tiles:
-                            return tile.TileType == clickedTile.TileType && tile.HasTile == clickedTile.HasTile;
-
-                        case Target.Walls:
-                            if (tile.WallType != WallID.None || clickedTile.WallType != WallID.None)
-                            {
-                                return tile.WallType != WallID.None && tile.WallType == clickedTile.WallType;
-                            }
-                            return false;
-
-                        case Target.Liquid:
-                            if (tile.LiquidAmount != 0 || clickedTile.LiquidAmount != 0)
-                            {
-                                return tile.LiquidAmount != 0 && tile.LiquidType == clickedTile.LiquidType;
-                            }
-                            return false;
-                    }
-                    return false;
-                }
-
                 // go until we hit the tilecap or cant find any more tiles that we think match
                 while (queue.Count > 0 && count <= _tileCap)
                 {
                     Point16 coords = queue.Dequeue();
 
-                    if (IsMatch(coords))
+                    if (IsMatch(coords, clickedTile))
                     {
                         // if we dont already have it added, add it
                         if (tilesToAdd.TryAddTile(coords, new TileCopy(Main.tile[coords.X, coords.Y])))
