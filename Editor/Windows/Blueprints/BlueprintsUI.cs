@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.IO.Pipes;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -95,8 +97,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             {
                 try
                 {
-                    using BinaryReader br = new BinaryReader(File.OpenRead(file.FullPath));
-                    EditorSystem.Local.Clipboard = TileCollection.ReadTileCollection(br, out HashSet<string> missingMods);
+                    EditorSystem.Local.Clipboard = ReadTwbFile(file.FullPath, out HashSet<string> missingMods);
                     if (missingMods?.Count > 0)
                     {
                         string msg = "Missing mods used in file:";
@@ -106,12 +107,11 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
                         }
                         TerrariaInGameWorldEditor.Warn(msg);
                     }
-                    br.Close();
                     TerrariaInGameWorldEditor.NewText($"Set clipboard to \"{file.Name}\"");
                     if (!Path.HasExtension(file.FullPath) && !File.Exists($"{file.FullPath}.twb"))
                     {
                         File.Move(file.FullPath, $"{file.FullPath}.twb");
-                        file.FullPath = file.FullPath + ".twb";
+                        file.FullPath += ".twb";
                     }
                 }
                 catch (Exception ex)
@@ -136,6 +136,45 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             border.Width.Set(_grid.Width.Pixels + 16, 0);
             border.Height.Set(_grid.Height.Pixels + 10, 0);
             Append(border);
+        }
+
+        private static TileCollection ReadTwbFile(string path, out HashSet<string> missingMods)
+        {
+            missingMods = new HashSet<string>();
+            Stream fileStream = File.OpenRead(path);
+            Stream dataStream;
+            byte version = 0;
+
+            // read header
+            using (BinaryReader headerReader = new BinaryReader(fileStream, System.Text.Encoding.UTF8, true))
+            {
+                if (headerReader.ReadString().Equals("twb"))
+                {
+                    version = headerReader.ReadByte();
+                    dataStream = new BufferedStream(new DeflateStream(fileStream, CompressionMode.Decompress), 10000);
+                }
+                else
+                {
+                    fileStream.Position = 0;
+                    dataStream = fileStream;
+                }
+            }
+
+            // read the right version
+            using (BinaryReader collectionReader = new BinaryReader(dataStream, System.Text.Encoding.UTF8, false))
+            {
+                switch (version)
+                {
+                    case 0:
+                        return TileCollection.ReadV0TileCollection(collectionReader, out missingMods);
+
+                    case 1:
+                        return TileCollection.ReadV1TileCollection(collectionReader, out missingMods);
+
+                    default:
+                        throw new Exception($"Unknown twb file verson: {version}.");
+                }
+            }
         }
 
         private void CreateDirectory(UIMouseEvent evt, UIElement listeningElement)

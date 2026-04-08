@@ -4,7 +4,9 @@ using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.Enums;
 using Terraria.GameContent;
+using Terraria.GameContent.Drawing;
 using Terraria.ModLoader;
 
 namespace TerrariaInGameWorldEditor.Common.Utils

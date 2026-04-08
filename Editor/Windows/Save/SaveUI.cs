@@ -1,9 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using TerrariaInGameWorldEditor.Common;
@@ -154,10 +157,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
                     TerrariaInGameWorldEditor.Warn($"Failed to save, a file with that name already exists.");
                     return;
                 }
-
-                // write to the file
-                using BinaryWriter bw = new BinaryWriter(File.Create(path));
-                TileCollection.WriteTileCollection(bw, EditorSystem.Local.CurrentSelection);
+                WriteTwbFile(path, EditorSystem.Local.CurrentSelection);
 
                 // reset UI
                 _saveAsField.SetText("");
@@ -166,6 +166,29 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             catch (Exception ex)
             {
                 TerrariaInGameWorldEditor.Warn("Failed to save current selection.", ex);
+            }
+        }
+
+        public static void WriteTwbFile(string path, TileCollection tc)
+        {
+            if (File.Exists(path))
+            {
+                return;
+            }
+            byte version = 1;
+            Stream fileStream = File.Create(path);
+
+            // write header
+            using (BinaryWriter headerWriter = new BinaryWriter(fileStream, System.Text.Encoding.UTF8, true))
+            {
+                headerWriter.Write("twb");
+                headerWriter.Write(version);
+            }
+
+            // write data
+            using (BinaryWriter collectionWriter = new BinaryWriter(new BufferedStream(new DeflateStream(fileStream, CompressionLevel.Optimal), 10000)))
+            {
+                TileCollection.WriteTileCollection(collectionWriter, tc);
             }
         }
     }

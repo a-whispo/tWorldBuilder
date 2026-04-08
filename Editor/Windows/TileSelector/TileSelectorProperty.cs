@@ -40,12 +40,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             {
                 // special cases
                 case "LiquidType":
-                    PropertyUIElement = new TIGWEDropDown<int>();
-                    for (int i = 0; i < LiquidID.Search.Count; i++)
+                    PropertyUIElement = new TIGWEDropDown<Byte>();
+                    for (Byte i = 0; i < LiquidID.Search.Count; i++)
                     {
                         if (LiquidID.Search.TryGetName(i, out string name))
                         {
-                            ((TIGWEDropDown<int>)PropertyUIElement).AddOption(i, $"[c/60ABE7:({i})] " + name);
+                            ((TIGWEDropDown<Byte>)PropertyUIElement).AddOption(i, $"[c/60ABE7:({i})] " + name);
                         }
                     }
                     break;

@@ -2,7 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using Terraria.DataStructures;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace TerrariaInGameWorldEditor.Common
 {
@@ -277,8 +281,19 @@ namespace TerrariaInGameWorldEditor.Common
             return _maxY - _minY;
         }
 
+        public IEnumerator<KeyValuePair<Point16, TileCopy>> GetEnumerator()
+        {
+            return _tiles.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _tiles.GetEnumerator();
+        }
+
         public static void WriteTileCollection(BinaryWriter bw, TileCollection tc)
         {
+            // write tiles
             bw.Write(tc.Count);
             foreach (var item in tc)
             {
@@ -288,32 +303,36 @@ namespace TerrariaInGameWorldEditor.Common
             }
         }
 
-        public static TileCollection ReadTileCollection(BinaryReader br, out HashSet<string> missingMods)
+        public static TileCollection ReadV1TileCollection(BinaryReader br, out HashSet<string> missingMods)
         {
             missingMods = new HashSet<string>();
             TileCollection tc = new TileCollection();
+
+            // read tiles
             int count = br.ReadInt32();
             for (int i = 0; i < count; i++)
             {
-                int x = br.ReadInt16();
-                int y = br.ReadInt16();
-                tc.TryAddTile(new Point16(x, y), TileCopy.ReadTileCopy(br, out HashSet<string> tcMissingMods));
-                foreach (string mod in tcMissingMods)
-                {
-                    missingMods.Add(mod);
-                }
+                short x = br.ReadInt16();
+                short y = br.ReadInt16();
+                tc.TryAddTile(new Point16(x, y), TileCopy.ReadV1TileCopy(br, ref missingMods));
             }
             return tc;
         }
 
-        public IEnumerator<KeyValuePair<Point16, TileCopy>> GetEnumerator()
+        public static TileCollection ReadV0TileCollection(BinaryReader br, out HashSet<string> missingMods)
         {
-            return _tiles.GetEnumerator();
-        }
+            missingMods = new HashSet<string>();
+            TileCollection tc = new TileCollection();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _tiles.GetEnumerator();
+            // read tiles
+            int count = br.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                short x = br.ReadInt16();
+                short y = br.ReadInt16();
+                tc.TryAddTile(new Point16(x, y), TileCopy.ReadV0TileCopy(br, ref missingMods));
+            }
+            return tc;
         }
     }
 }
