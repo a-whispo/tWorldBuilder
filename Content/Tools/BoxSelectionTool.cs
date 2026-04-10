@@ -196,7 +196,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                                 {
                                     int newX = x + selection.X;
                                     int newY = y + selection.Y;
-                                    _selection.TryAddTile(new Point16(newX, newY), new TileCopy(Main.tile[newX, newY], newX, newY));
+                                    _selection.TryAddTile(new Point16(newX, newY), new TileCopy(newX, newY));
                                 }
                             }
                         }

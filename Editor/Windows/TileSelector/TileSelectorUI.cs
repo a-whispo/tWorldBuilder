@@ -224,7 +224,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             foreach (PropertyInfo property in typeof(TileCopy).GetProperties())
             {
                 // exclude things that are not in the actual tile class
-                if (property.Name.Equals("HasWire") || property.Name.Equals("IsTreeTop") || property.Name.Equals("IsTreeBranch") || property.Name.Equals("IsTreeTrunk") || property.Name.Equals("IsFlipped") || property.Name.Equals("TreeVariant") || property.Name.Equals("TreeFrame") || property.Name.Equals("TreeFrameWidth") || property.Name.Equals("TreeFrameHeight") || property.Name.Equals("TreeStyle") || property.Name.Equals("y2") || property.Name.Equals("TreeBiome"))
+                if (property.Name.Equals("Container") || property.Name.Equals("Entity") || property.Name.Equals("HasWire") || property.Name.Equals("IsTreeTop") || property.Name.Equals("IsTreeBranch") || property.Name.Equals("IsTreeTrunk") || property.Name.Equals("IsFlipped") || property.Name.Equals("TreeVariant") || property.Name.Equals("TreeFrame") || property.Name.Equals("TreeFrameWidth") || property.Name.Equals("TreeFrameHeight") || property.Name.Equals("TreeStyle") || property.Name.Equals("y2") || property.Name.Equals("TreeBiome"))
                 {
                     continue;
                 }

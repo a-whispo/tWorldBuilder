@@ -68,7 +68,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             int err = (dx > dy ? dx : -dy) / 2, e2;
             for (; ; )
             {
-                tc.TryAddTile(new Point16(x0, y0), new TileCopy(Main.tile[x0, y0]));
+                tc.TryAddTile(new Point16(x0, y0), new TileCopy(x0, y0));
                 if (x0 == x1 && y0 == y1) break;
                 e2 = err;
                 if (e2 > -dx) { err -= dy; x0 += sx; }
@@ -117,7 +117,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         }
                         if (inside)
                         {
-                            _selection.TryAddTile(testPoint, new TileCopy(Main.tile[testPoint.X, testPoint.Y]));
+                            _selection.TryAddTile(testPoint, new TileCopy(testPoint.X, testPoint.Y));
                         }
                     }
                 }
@@ -132,7 +132,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                 }
 
                 // add tile to selection and drag a line between it and the last point to make sure we have a complete outline
-                if (_selection.TryAddTile(new Point16(Player.tileTargetX, Player.tileTargetY), new TileCopy(Main.tile[Player.tileTargetX, Player.tileTargetY])))
+                if (_selection.TryAddTile(new Point16(Player.tileTargetX, Player.tileTargetY), new TileCopy(Player.tileTargetX, Player.tileTargetY)))
                 {
                     if (_selection.Count >= 2)
                     {

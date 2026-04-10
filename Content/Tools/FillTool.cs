@@ -104,7 +104,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             if (Main.mouseLeft && Main.mouseLeftRelease && !Main.LocalPlayer.mouseInterface)
             {
                 Point16 point = new Point16(Player.tileTargetX, Player.tileTargetY);
-                TileCopy clickedTile = new TileCopy(Main.tile[point.X, point.Y]);
+                TileCopy clickedTile = new TileCopy(point.X, point.Y);
 
                 int count = 0;
                 TileCollection tilesToAdd = new TileCollection();
@@ -120,7 +120,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     if (IsMatch(coords, clickedTile))
                     {
                         // if we dont already have it added, add it
-                        if (tilesToAdd.TryAddTile(coords, new TileCopy(Main.tile[coords.X, coords.Y])))
+                        if (tilesToAdd.TryAddTile(coords, new TileCopy(coords.X, coords.Y)))
                         {
                             count++;
                         }

@@ -30,11 +30,11 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                     {
                         continue;
                     }
-                    undoColl.TryAddTile(new Point16(x, y), () => new TileCopy(Main.tile[x, y]));
-                    undoColl.TryAddTile(new Point16(x + 1, y), () => new TileCopy(Main.tile[x + 1, y]));
-                    undoColl.TryAddTile(new Point16(x - 1, y), () => new TileCopy(Main.tile[x - 1, y]));
-                    undoColl.TryAddTile(new Point16(x, y + 1), () => new TileCopy(Main.tile[x, y + 1]));
-                    undoColl.TryAddTile(new Point16(x, y - 1), () => new TileCopy(Main.tile[x, y - 1]));
+                    undoColl.TryAddTile(new Point16(x, y), () => new TileCopy(x, y));
+                    undoColl.TryAddTile(new Point16(x + 1, y), () => new TileCopy(x + 1, y));
+                    undoColl.TryAddTile(new Point16(x - 1, y), () => new TileCopy(x - 1, y));
+                    undoColl.TryAddTile(new Point16(x, y + 1), () => new TileCopy(x, y + 1));
+                    undoColl.TryAddTile(new Point16(x, y - 1), () => new TileCopy(x, y - 1));
                 }
             }
 
@@ -55,7 +55,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                 // if we dont want the pasted tiles to update just add to history as we paste the tiles
                 if (!placeTileWithTileFraming && saveToUndo)
                 {
-                    undoColl.TryAddTile(new Point16(x, y), () => new TileCopy(Main.tile[x, y]));
+                    undoColl.TryAddTile(new Point16(x, y), () => new TileCopy(x, y));
                 }
 
                 if (CompareTileToDrawOnMask(Main.tile[x, y]))
@@ -90,6 +90,8 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                         Main.tile[x, y].CopyTileData(tile);
                         ((Tile)(Main.tile[x, y])).LiquidType = liquidType;
                         Main.tile[x, y].LiquidAmount = liquidAmount;
+                        tile.Entity?.Place(x, y);
+                        tile.Container?.Place(x, y);
                     }
 
                     // paste wire stuff
@@ -237,7 +239,7 @@ namespace TerrariaInGameWorldEditor.Common.Utils
             {
                 int x = tile.Key.X;
                 int y = tile.Key.Y;
-                undoColl.TryAddTile(new Point16(x, y), () => new TileCopy(Main.tile[x, y]));
+                undoColl.TryAddTile(new Point16(x, y), () => new TileCopy(x, y));
 
                 if (CompareTileToDrawOnMask(Main.tile[x, y]))
                 {

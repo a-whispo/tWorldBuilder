@@ -161,14 +161,14 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                         }
 
                         _tilesToPaste.TryAddTile(new Point16(x, y), tile.Value);
-                        _brushStroke.TryAddTile(new Point16(x, y), () => new TileCopy(Main.tile[x, y]));
+                        _brushStroke.TryAddTile(new Point16(x, y), () => new TileCopy(x, y));
                         if (EditorSystem.Local.Settings.ShouldUpdateDrawnTiles)
                         {
                             // we also need to add the tiles around it since those also get affected if we have update tiles on
-                            _brushStroke.TryAddTile(new Point16(x + 1, y), () => new TileCopy(Main.tile[x + 1, y]));
-                            _brushStroke.TryAddTile(new Point16(x - 1, y), () => new TileCopy(Main.tile[x - 1, y]));
-                            _brushStroke.TryAddTile(new Point16(x, y + 1), () => new TileCopy(Main.tile[x, y + 1]));
-                            _brushStroke.TryAddTile(new Point16(x, y - 1), () => new TileCopy(Main.tile[x, y - 1]));
+                            _brushStroke.TryAddTile(new Point16(x + 1, y), () => new TileCopy(x + 1, y));
+                            _brushStroke.TryAddTile(new Point16(x - 1, y), () => new TileCopy(x - 1, y));
+                            _brushStroke.TryAddTile(new Point16(x, y + 1), () => new TileCopy(x, y + 1));
+                            _brushStroke.TryAddTile(new Point16(x, y - 1), () => new TileCopy(x, y - 1));
                         }
                     }
                 }

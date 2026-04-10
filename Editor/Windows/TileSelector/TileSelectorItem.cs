@@ -128,14 +128,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
                 else
                 {
                     // place temp tile
-                    int tempX = Main.maxTilesX - 10;
-                    int tempY = Main.maxTilesY - 10;
+                    int tempX = 10;
+                    int tempY = 10;
                     WorldGen.PlaceTile(tempX, tempY, _createTile, true, false, -1, _placeStyle);
 
                     // get TileFrameY and TileFrameX
-                    TileCopy tc = new TileCopy(Main.tile[tempX, tempY]);
-                    tile.TileFrameX = tc.TileFrameX;
-                    tile.TileFrameY = tc.TileFrameY;
+                    tile.TileFrameX = Main.tile[tempX, tempY].TileFrameX;
+                    tile.TileFrameY = Main.tile[tempX, tempY].TileFrameY;
 
                     // remove tile
                     WorldGen.KillTile(tempX, tempY, false, false, true);

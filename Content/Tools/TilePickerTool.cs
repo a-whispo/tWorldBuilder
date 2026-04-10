@@ -28,7 +28,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         {
             Point16 point = new Point16(Player.tileTargetX, Player.tileTargetY);
             TileCollection tc = new TileCollection();
-            tc.TryAddTile(point, new TileCopy(Main.tile[point.X, point.Y]));
+            tc.TryAddTile(point, new TileCopy(point.X, point.Y));
             DrawUtils.DrawTileCollectionOutline(tc, point.ToPoint(), EditorSystem.Local.Settings.ToolColor);
         }
 
@@ -40,7 +40,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             if (Main.mouseLeft && Main.mouseLeftRelease && !Main.LocalPlayer.mouseInterface)
             {
                 Point point = new Point(Player.tileTargetX, Player.tileTargetY);
-                EditorSystem.Local.SelectedTile = new TileCopy(Main.tile[point.X, point.Y]);
+                EditorSystem.Local.SelectedTile = new TileCopy(point.X, point.Y);
             }
         }
     }

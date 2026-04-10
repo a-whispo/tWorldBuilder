@@ -100,14 +100,18 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
                     EditorSystem.Local.Clipboard = ReadTwbFile(file.FullPath, out HashSet<string> missingMods);
                     if (missingMods?.Count > 0)
                     {
-                        string msg = "Missing mods used in file:";
+                        EditorSystem.Local.Clipboard = null;
+                        string msg = "Missing mods needed to load file:";
                         foreach (string mod in missingMods)
                         {
                             msg += $"\n{mod}";
                         }
                         TerrariaInGameWorldEditor.Warn(msg);
                     }
-                    TerrariaInGameWorldEditor.NewText($"Set clipboard to \"{file.Name}\"");
+                    else
+                    {
+                        TerrariaInGameWorldEditor.NewText($"Set clipboard to \"{file.Name}\"");
+                    }
                     if (!Path.HasExtension(file.FullPath) && !File.Exists($"{file.FullPath}.twb"))
                     {
                         File.Move(file.FullPath, $"{file.FullPath}.twb");
@@ -170,6 +174,9 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
 
                     case 1:
                         return TileCollection.ReadV1TileCollection(collectionReader, out missingMods);
+
+                    case 2:
+                        return TileCollection.ReadV2TileCollection(collectionReader, out missingMods);
 
                     default:
                         throw new Exception($"Unknown twb file verson: {version}.");

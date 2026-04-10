@@ -617,7 +617,7 @@ namespace TerrariaInGameWorldEditor.Editor
             // same as undo pretty much
             foreach (var tile in redo)
             {
-                undo.TryAddTile(new Point16(tile.Key.X, tile.Key.Y), new TileCopy(Main.tile[tile.Key.X, tile.Key.Y]));
+                undo.TryAddTile(new Point16(tile.Key.X, tile.Key.Y), new TileCopy(tile.Key.X, tile.Key.Y));
                 Main.tile[tile.Key.X, tile.Key.Y].CopyFrom(tile.Value.GetAsTile());
             }
             if (Main.netMode == NetmodeID.MultiplayerClient)
@@ -636,7 +636,7 @@ namespace TerrariaInGameWorldEditor.Editor
             // go over all the tiles in the most recently added tile collection to undo
             foreach (var tile in undo)
             {
-                redo.TryAddTile(new Point16(tile.Key.X, tile.Key.Y), new TileCopy(Main.tile[tile.Key.X, tile.Key.Y]));
+                redo.TryAddTile(new Point16(tile.Key.X, tile.Key.Y), new TileCopy(tile.Key.X, tile.Key.Y));
                 Main.tile[tile.Key.X, tile.Key.Y].CopyFrom(tile.Value.GetAsTile());
             }
             if (Main.netMode == NetmodeID.MultiplayerClient)

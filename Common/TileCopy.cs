@@ -9,6 +9,9 @@ namespace TerrariaInGameWorldEditor.Common
 {
     public class TileCopy
     {
+        public TileEntityData Entity { get; set; }
+        public ChestData Container { get; set; }
+
         // general tile stuff
         public bool HasTile { get; set; }
         public ushort TileType { get; set; }
@@ -58,12 +61,15 @@ namespace TerrariaInGameWorldEditor.Common
             CopyWireData(tile);
         }
 
-        public TileCopy(Tile tile, int x, int y)
+        public TileCopy(int x, int y)
         {
+            Tile tile = Main.tile[x, y];
             CopyTileData(tile);
             CopyWallData(tile);
             CopyWireData(tile);
             CopyTreeData(x, y);
+            Entity = TileEntityData.CopyTileEntityData(x, y);
+            Container = ChestData.CopyChestData(x, y);
         }
 
         public TileCopy()
@@ -228,12 +234,12 @@ namespace TerrariaInGameWorldEditor.Common
             return newTile;
         }
 
-        private static ushort TryReadTileType(BinaryReader br, ref HashSet<string> missingMods)
+        private static ushort TryReadTileType(BinaryReader br, HashSet<string> missingMods)
         {
             string tileName = br.ReadString();
-            if (TileID.Search.TryGetId(tileName, out int tileID))
+            if (TileID.Search.TryGetId(tileName, out int id))
             {
-                return (ushort)tileID;
+                return (ushort)id;
             }
             else
             {
@@ -242,12 +248,12 @@ namespace TerrariaInGameWorldEditor.Common
             }
         }
 
-        private static ushort TryReadWallType(BinaryReader br, ref HashSet<string> missingMods)
+        private static ushort TryReadWallType(BinaryReader br, HashSet<string> missingMods)
         {
             string wallName = br.ReadString();
-            if (WallID.Search.TryGetId(wallName, out int wallID))
+            if (WallID.Search.TryGetId(wallName, out int id))
             {
-                return (ushort)wallID;
+                return (ushort)id;
             }
             else
             {
@@ -293,14 +299,24 @@ namespace TerrariaInGameWorldEditor.Common
             bw.Write(tc.HasActuator);
             bw.Write(tc.IsActuated);
             bw.Write((byte)tc.Slope);
+            ChestData.Write(bw, tc.Container);
+            TileEntityData.Write(bw, tc.Entity);
         }
 
-        public static TileCopy ReadV1TileCopy(BinaryReader br, ref HashSet<string> missingMods)
+        public static TileCopy ReadV2TileCopy(BinaryReader br, HashSet<string> missingMods)
+        {
+            TileCopy tc = ReadV1TileCopy(br, missingMods);
+            tc.Container = ChestData.Read(br, missingMods);
+            tc.Entity = TileEntityData.Read(br, missingMods);
+            return tc;
+        }
+
+        public static TileCopy ReadV1TileCopy(BinaryReader br, HashSet<string> missingMods)
         {
             TileCopy tc = new TileCopy();
             tc.HasTile = br.ReadBoolean();
-            tc.TileType = TryReadTileType(br, ref missingMods);
-            tc.WallType = TryReadWallType(br, ref missingMods);
+            tc.TileType = TryReadTileType(br, missingMods);
+            tc.WallType = TryReadWallType(br, missingMods);
             tc.LiquidType = br.ReadByte();
             tc.IsHalfBlock = br.ReadBoolean();
             tc.TileColor = br.ReadByte();
@@ -336,12 +352,12 @@ namespace TerrariaInGameWorldEditor.Common
             return tc;
         }
 
-        public static TileCopy ReadV0TileCopy(BinaryReader br, ref HashSet<string> missingMods)
+        public static TileCopy ReadV0TileCopy(BinaryReader br, HashSet<string> missingMods)
         {
             TileCopy tc = new TileCopy();
             tc.HasTile = br.ReadBoolean();
-            tc.TileType = TryReadTileType(br, ref missingMods);
-            tc.WallType = TryReadWallType(br, ref missingMods);
+            tc.TileType = TryReadTileType(br, missingMods);
+            tc.WallType = TryReadWallType(br, missingMods);
             tc.LiquidType = (Byte)br.ReadInt32();
             tc.IsHalfBlock = br.ReadBoolean();
             tc.TileColor = br.ReadByte();

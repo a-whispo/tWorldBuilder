@@ -303,6 +303,22 @@ namespace TerrariaInGameWorldEditor.Common
             }
         }
 
+        public static TileCollection ReadV2TileCollection(BinaryReader br, out HashSet<string> missingMods)
+        {
+            missingMods = new HashSet<string>();
+            TileCollection tc = new TileCollection();
+
+            // read tiles
+            int count = br.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                short x = br.ReadInt16();
+                short y = br.ReadInt16();
+                tc.TryAddTile(new Point16(x, y), TileCopy.ReadV2TileCopy(br, missingMods));
+            }
+            return tc;
+        }
+
         public static TileCollection ReadV1TileCollection(BinaryReader br, out HashSet<string> missingMods)
         {
             missingMods = new HashSet<string>();
@@ -314,7 +330,7 @@ namespace TerrariaInGameWorldEditor.Common
             {
                 short x = br.ReadInt16();
                 short y = br.ReadInt16();
-                tc.TryAddTile(new Point16(x, y), TileCopy.ReadV1TileCopy(br, ref missingMods));
+                tc.TryAddTile(new Point16(x, y), TileCopy.ReadV1TileCopy(br, missingMods));
             }
             return tc;
         }
@@ -330,7 +346,7 @@ namespace TerrariaInGameWorldEditor.Common
             {
                 short x = br.ReadInt16();
                 short y = br.ReadInt16();
-                tc.TryAddTile(new Point16(x, y), TileCopy.ReadV0TileCopy(br, ref missingMods));
+                tc.TryAddTile(new Point16(x, y), TileCopy.ReadV0TileCopy(br, missingMods));
             }
             return tc;
         }
