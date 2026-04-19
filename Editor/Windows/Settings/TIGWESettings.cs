@@ -45,12 +45,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
                 string p = path.Replace(".json", "") + ".json";
                 if (File.Exists(p))
                 {
-                    return JsonSerializer.Deserialize<TIGWESettings>(File.ReadAllText(p), new JsonSerializerOptions { WriteIndented = true, Converters = { new JsonStringEnumConverter() } });
+                    TIGWESettings settings = JsonSerializer.Deserialize<TIGWESettings>(File.ReadAllText(p), new JsonSerializerOptions { WriteIndented = true, Converters = { new JsonStringEnumConverter() } });
+                    return settings;
                 }
             }
             catch (Exception ex)
             {
-                TerrariaInGameWorldEditor.Warn("Failed to load settings.", ex);
+                TerrariaInGameWorldEditor.Warn("Failed to load settings, using default settings instead.", ex);
             }
             return new TIGWESettings();
         }

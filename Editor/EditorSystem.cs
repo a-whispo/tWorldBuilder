@@ -78,7 +78,7 @@ namespace TerrariaInGameWorldEditor.Editor
         private PasteTool _pasteTool;
         private Tool _currentTool;
         public Tool CurrentTool
-        { // current selected tool
+        { 
             get => _currentTool;
             set
             {
@@ -163,6 +163,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 Local = this;
                 _pasteTool = new PasteTool();
                 Tools = new List<Tool> { new BrushTool(), new EraseTool(), new LineTool(), new ShapesTool(), new PaintBucketTool(), new TilePickerTool(), new BoxSelectionTool(), new MagicWandTool(), new LassoTool() };
+                Settings = new TIGWESettings(); // just some default settings to use so settings arent null during load
                 Settings = TIGWESettings.Load($"{ModLoader.ModPath.Replace("\\Mods", "")}\\{TerrariaInGameWorldEditor.MODNAME}\\settings");
             }
         }
@@ -285,11 +286,10 @@ namespace TerrariaInGameWorldEditor.Editor
             // update UI
             if (_mainUIState.Visible)
             {
-                if (_mainUserInterface.CurrentState == null)
+                if (_mainUserInterface.CurrentState != _mainUIState || !TIGWEUISystem.Local.ShouldRenderUI)
                 {
                     _mainUserInterface.SetState(_mainUIState);
                     TIGWEUISystem.Local.ShouldRenderUI = true;
-                    return;
                 }
                 _mainUserInterface.Update(gameTime);
             }
@@ -310,7 +310,7 @@ namespace TerrariaInGameWorldEditor.Editor
             // draw tools before the main ui
             if (Local.CurrentSelection?.Count > 0)
             {
-                DrawUtils.DrawTileCollectionOutline(Local.CurrentSelection, new Point(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY()), EditorSystem.Local.Settings.ToolColor);
+                DrawUtils.DrawTileCollectionOutline(Local.CurrentSelection, new Point(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY()), Local.Settings.ToolColor);
                 DrawUtils.DrawMiscOptions(new Rectangle(Local.CurrentSelection.GetMinX(), Local.CurrentSelection.GetMinY(), Local.CurrentSelection.GetWidth(), Local.CurrentSelection.GetHeight()), EditorSystem.Local.Settings.ShowCenterLines, EditorSystem.Local.Settings.ShowMeasureLines);
             }
             Local.CurrentTool?.Draw(Main.spriteBatch);
@@ -376,7 +376,7 @@ namespace TerrariaInGameWorldEditor.Editor
             if (PlayerInput.GetPressedKeys().Contains(Keys.LeftControl))
             {
                 // undo
-                if (Keybinds.UndoMK.JustPressed)
+                if (Keybinds.UndoMK.JustPressed && !(Main.mouseLeft && CurrentTool != null))
                 {
                     if (_undoHistory.Count > 0)
                     {
