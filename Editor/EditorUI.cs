@@ -254,7 +254,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 selectionActiveText.Top.Set(TopHeight + 20, 0);
                 if (EditorSystem.Local.CurrentSelection?.Count > 0 && EditorSystem.Local.Settings.ShouldShowActiveSelectionText)
                 {
-                    selectionActiveText.SetText("A selection is active. \nDrawing/Pasting/Modifying tiles is limited to the selection area.");
+                    selectionActiveText.SetText("[c/EAD87A:Note:] A selection is active. \nDrawing/Pasting/Modifying tiles is limited to the selection area.");
                 }
                 else
                 {
@@ -298,8 +298,9 @@ namespace TerrariaInGameWorldEditor.Editor
                 tool.ToggleToolButton.OnLeftClick += (_, _) =>
                 {
                     // reset selection if we clicked another selection tool
-                    if (tool is ISelectionTool selectionTool && selectionTool != EditorSystem.Local.CurrentTool)
+                    if (tool is ISelectionTool selectionTool && selectionTool != EditorSystem.Local.CurrentTool && EditorSystem.Local.LastSelectionTool != selectionTool)
                     {
+                        EditorSystem.Local.LastSelectionTool = selectionTool;
                         selectionTool.ResetSelection();
                     }
 

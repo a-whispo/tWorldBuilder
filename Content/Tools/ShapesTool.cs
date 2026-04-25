@@ -40,7 +40,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public ShapesTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/ShapesTool"));
-            ToggleToolButton.HoverText = "Shapes";
+            ToggleToolButton.HoverText = "Shapes \n[c/EAD87A:Ctrl + Scroll:] Change size by 1 \n[c/EAD87A:Ctrl + Shift + Scroll:] Change size by 10";
 
             // settings
             // mode

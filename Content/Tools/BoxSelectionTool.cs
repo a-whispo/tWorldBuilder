@@ -35,7 +35,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public BoxSelectionTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/SelectTool"));
-            ToggleToolButton.HoverText = "Box Selection";
+            ToggleToolButton.HoverText = "Box Selection \n[c/EAD87A:Right Mouse:] Remove selection \n[c/EAD87A:Left Mouse:] New selection";
             _selection = new TileCollection();
         }
 

@@ -108,7 +108,6 @@ namespace TerrariaInGameWorldEditor.Common
                         UpdateBounds(tile.Key);
                     }
                     changed = true;
-
                 }
             }
             if (changed)
@@ -155,7 +154,7 @@ namespace TerrariaInGameWorldEditor.Common
             return _tiles.TryGetValue(coord, out tile);
         }
 
-        public bool RemoveTile(Point16 coord)
+        public bool TryRemoveTile(Point16 coord)
         {
             if (_tiles.Remove(coord))
             {
@@ -169,6 +168,30 @@ namespace TerrariaInGameWorldEditor.Common
                 return true;
             }
             return false;
+        }
+
+        public void TryRemoveTiles(IEnumerable<KeyValuePair<Point16, TileCopy>> tiles)
+        {
+            bool changed = false;
+            Point16 coord;
+            foreach (var tile in tiles)
+            {
+                coord = tile.Key;
+                if (_tiles.Remove(coord))
+                {
+                    // if the tile we removed was on the bounds we need to recalculate them
+                    if (!_boundsDirty && (coord.X == _minX || coord.X == _maxX || coord.Y == _minY || coord.Y == _maxY))
+                    {
+                        _boundsDirty = true;
+                    }
+                    changed = true;
+                }
+            }
+            if (changed)
+            {
+                InvalidateCaches();
+                OnChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public void Clear()

@@ -26,7 +26,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
 
         private TileCollection _brush = new TileCollection();
         private TileCollection _cachedTilesInLine = new TileCollection();
-        private Point16 _lastMouseLocation = new Point16();
         private TileCollection _tilesToDraw = new TileCollection();
         private int _d = 4;
         private int _yDiff = 0;
@@ -43,7 +42,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public LineTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/LineTool"));
-            ToggleToolButton.HoverText = "Line";
+            ToggleToolButton.HoverText = "Line \n[c/EAD87A:Ctrl + Scroll:] Change size by 1 \n[c/EAD87A:Ctrl + Shift + Scroll:] Change size by 10";
 
             // settings
             // mode
@@ -123,43 +122,40 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public override void Draw(SpriteBatch spriteBatch)
         {
             // update line
-            Point16 curentMouseLocation = new Point16(Player.tileTargetX, Player.tileTargetY);
-            if (_lastMouseLocation != curentMouseLocation || !_point1placed)
+            List<Point16> pointsToDrawAt = ToolUtils.CalculatePointsInLine(_point1, _point2);
+            _yDiff = _point2.Y - _point1.Y;
+            _xDiff = _point2.X - _point1.X;
+            _tilesToDraw.Clear();
+            int radius = (int)Math.Floor(_brush.GetWidth() / 2f);
+            int spacing = (int)Math.Max(1, _brush.GetWidth() * 0.1); // dont bother putting the brush at every point when it gets bigger
+            int count = 0;
+            foreach (Point16 point in pointsToDrawAt)
             {
-                List<Point16> pointsToDrawAt = ToolUtils.CalculatePointsInLine(_point1, _point2);
-                _yDiff = _point2.Y - _point1.Y;
-                _xDiff = _point2.X - _point1.X;
-                _tilesToDraw.Clear();
-                int radius = (int)Math.Floor(_brush.GetWidth() / 2f);
-                int spacing = (int)Math.Max(1, _brush.GetWidth() * 0.1); // dont bother putting the brush at every point when it gets bigger
-                int count = 0;
-                foreach (Point16 point in pointsToDrawAt)
+                count++;
+                if (count != spacing && (point != _point1 && point != _point2))
                 {
-                    count++;
-                    if (count != spacing && (point != _point1 && point != _point2))
-                    {
-                        continue;
-                    }
-                    count = 0;
-                    if (point.X < (Main.screenPosition.X / 16) - radius || point.X > (Main.screenPosition.X / 16 + radius + Main.screenWidth / 16))
-                    {
-                        continue;
-                    }
-                    if (point.Y < (Main.screenPosition.Y / 16) - radius || point.Y > (Main.screenPosition.Y / 16 + radius + Main.screenHeight / 16))
-                    {
-                        continue;
-                    }
+                    continue;
+                }
+                count = 0;
+                if (point.X < (Main.screenPosition.X / 16) - radius || point.X > (Main.screenPosition.X / 16 + radius + Main.screenWidth / 16))
+                {
+                    continue;
+                }
+                if (point.Y < (Main.screenPosition.Y / 16) - radius || point.Y > (Main.screenPosition.Y / 16 + radius + Main.screenHeight / 16))
+                {
+                    continue;
+                }
 
-                    // go over all the tiles and set coordinates
-                    foreach (var tile in _brush.ToNormalized())
-                    {
-                        int x = tile.Key.X + point.X - radius;
-                        int y = tile.Key.Y + point.Y - radius;
-                        _tilesToDraw.TryAddTile(new Point16(x, y), tile.Value);
-                    }
+                // go over all the tiles and set coordinates
+                foreach (var tile in _brush.ToNormalized())
+                {
+                    int x = tile.Key.X + point.X - radius;
+                    int y = tile.Key.Y + point.Y - radius;
+                    _tilesToDraw.TryAddTile(new Point16(x, y), tile.Value);
                 }
             }
-            _lastMouseLocation = curentMouseLocation;
+
+            // draw
             Point coord = new Point(_tilesToDraw.GetMinX(), _tilesToDraw.GetMinY());
             DrawUtils.DrawTileCollection(_tilesToDraw, coord);
             DrawUtils.DrawTileCollectionOutline(_tilesToDraw, coord, EditorSystem.Local.Settings.ToolColor);

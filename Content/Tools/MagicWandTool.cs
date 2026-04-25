@@ -15,7 +15,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public MagicWandTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/MagicWandTool"));
-            ToggleToolButton.HoverText = "Magic Wand";
+            ToggleToolButton.HoverText = "Magic Wand \n[c/EAD87A:Right Mouse:] Remove selection \n[c/EAD87A:Left Mouse:] New selection \n[c/EAD87A:Ctrl + Left Mouse:] Add to selection \n[c/EAD87A:Shift + Left Mouse:] Remove from selection";
             _selection = new TileCollection();
         }
 
@@ -37,7 +37,14 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         protected override void OnFill(TileCollection tiles)
         {
             base.OnFill(tiles);
-            _selection.TryAddTiles(tiles);
+            if (PlayerInput.GetPressedKeys().Contains(Keys.LeftShift) && _selection.Count > 0)
+            {
+                _selection.TryRemoveTiles(tiles);
+            }
+            else
+            {
+                _selection.TryAddTiles(tiles);
+            }
         }
 
         public override void PostUpdateInput()
@@ -47,8 +54,8 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             // left click
             if (Main.mouseLeft && Main.mouseLeftRelease && !Main.LocalPlayer.mouseInterface)
             {
-                // if ctrl is pressed down, keep adding tiles to our selection
-                if (!PlayerInput.GetPressedKeys().Contains(Keys.LeftControl))
+                // if ctrl is pressed down, keep adding tiles to our selection, if shift is pressed down remove tile from our selection
+                if (!PlayerInput.GetPressedKeys().Contains(Keys.LeftControl) && !PlayerInput.GetPressedKeys().Contains(Keys.LeftShift))
                 {
                     _selection.Clear();
                 }
@@ -59,7 +66,6 @@ namespace TerrariaInGameWorldEditor.Content.Tools
             // right click
             if (Main.mouseRight && Main.mouseRightRelease && !Main.LocalPlayer.mouseInterface)
             {
-                // undo selection
                 _selection.Clear();
             }
         }

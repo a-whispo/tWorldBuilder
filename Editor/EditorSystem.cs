@@ -86,6 +86,7 @@ namespace TerrariaInGameWorldEditor.Editor
                 _mainUIState.RecalculateToolSettings();
             }
         }
+        public ISelectionTool LastSelectionTool { get; set; }
 
         // editing
         public TileCollection Clipboard // current clipboard
