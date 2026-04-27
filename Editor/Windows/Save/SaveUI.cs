@@ -152,6 +152,11 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
                 string modsPath = ModLoader.ModPath.Replace("\\Mods", "");
                 Directory.CreateDirectory($"{modsPath}\\{TerrariaInGameWorldEditor.MODNAME}\\saves");
                 string path = $"{_selectedPath}\\{name}.twb";
+                if (!Path.Exists(_selectedPath))
+                {
+                    TerrariaInGameWorldEditor.Warn($"The folder you're trying to save to doesn't exist anymore, maybe you renamed or deleted it?");
+                    return;
+                }
                 if (File.Exists(path))
                 {
                     TerrariaInGameWorldEditor.Warn($"Failed to save, a file with that name already exists.");
