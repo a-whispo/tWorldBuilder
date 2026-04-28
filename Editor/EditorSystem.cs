@@ -316,11 +316,15 @@ namespace TerrariaInGameWorldEditor.Editor
             }
             Local.CurrentTool?.Draw(Main.spriteBatch);
 
-            // removes all layers except the ones we want
-            layers.RemoveAll(layer =>
+            // make sure we dont draw any other layers
+            for (int i = 0; i < layers.Count; i++)
             {
-                return !(layer.Name.Equals("Vanilla: Player Chat") || layer.Name.Equals("Vanilla: Cursor") || layer.Name.Equals($"{TerrariaInGameWorldEditor.MODNAME}: UI") || layer.Name.Equals("Vanilla: Interface Logic 4") || layer.Name.Equals("Vanilla: Tile Grid Option"));
-            });
+                GameInterfaceLayer layer = layers[i];
+                if (!(layer.Name.Equals("Vanilla: Player Chat") || layer.Name.Equals("Vanilla: Cursor") || layer.Name.Equals($"{TerrariaInGameWorldEditor.MODNAME}: UI") || layer.Name.Equals("Vanilla: Interface Logic 4") || layer.Name.Equals("Vanilla: Tile Grid Option")))
+                {
+                    layers[i] = new LegacyGameInterfaceLayer(layer.Name, delegate { return true; }, layer.ScaleType);
+                }
+            }
 
             // insert our layer before the cursor layer but after the tile grid option layer so the tile grid isnt drawn over our UI
             layers.Insert(layers.FindIndex(0, layers.Count, layer => layer.Name.Equals("Vanilla: Tile Grid Option")) + 1, new LegacyGameInterfaceLayer(
