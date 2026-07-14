@@ -28,7 +28,7 @@ namespace TerrariaInGameWorldEditor.UIElements.DirectoryGrid
 
             // create folder
             _createSubFolderButton = new TIGWEButton(ModContent.Request<Texture2D>($"{UIElementUtils.Path}/UIElements/DirectoryGrid/CreateFolder", AssetRequestMode.ImmediateLoad));
-            _createSubFolderButton.HoverText = LocalizationUtils.GetTextValue("UIElements.DirectoryFolder.HoverText");
+            _createSubFolderButton.HoverText = LocalizationUtils.GetText("UIElements.DirectoryFolder.HoverText");
             _createSubFolderButton.OnLeftClick += (_, _) => CreateSubFolder();
             Append(_createSubFolderButton);
         }

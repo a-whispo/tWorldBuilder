@@ -87,7 +87,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             // this way of doing things is kind of awful
 
             // editor settings
-            SettingsCategory editorSettings = new SettingsCategory(LocalizationUtils.GetTextValue("Windows.Settings.Categories.EditorSettings"));
+            SettingsCategory editorSettings = new SettingsCategory(LocalizationUtils.GetText("Windows.Settings.Categories.EditorSettings"));
             editorSettings.SetOptionsGrid(optionsGrid);
             SettingsGroup uiScaleOptions = new SettingsGroup();
             SettingsOption<TIGWECheckBox> shouldForceScale = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.ForceScale"), new TIGWECheckBox());
@@ -189,7 +189,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             settingCategories.Add(editorSettings);
 
             // tool settings
-            SettingsCategory toolSettings = new SettingsCategory(LocalizationUtils.GetTextValue("Windows.Settings.Categories.ToolSettings"));
+            SettingsCategory toolSettings = new SettingsCategory(LocalizationUtils.GetText("Windows.Settings.Categories.ToolSettings"));
             toolSettings.SetOptionsGrid(optionsGrid);
             SettingsOption<TIGWECheckBox> updateDraw = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.UpdateTiles"), new TIGWECheckBox());
             toolSettings.AddOption(updateDraw);
@@ -228,7 +228,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             settingCategories.Add(toolSettings);
 
             // messages
-            SettingsCategory messages = new SettingsCategory(LocalizationUtils.GetTextValue("Windows.Settings.Categories.Messages"));
+            SettingsCategory messages = new SettingsCategory(LocalizationUtils.GetText("Windows.Settings.Categories.Messages"));
             messages.SetOptionsGrid(optionsGrid);
             SettingsOption<TIGWECheckBox> showMessages = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.EditorMessages"), new TIGWECheckBox());
             messages.AddOption(showMessages);

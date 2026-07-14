@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
@@ -14,10 +15,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         private TIGWEImageButtonResizeable _body;
         private bool _isSelected = false;
 
-        public SettingsCategory(string category)
+        public SettingsCategory(LocalizedText category)
         {
             _body = new TIGWEImageButtonResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
-            _body.Text = category;
+            _body.SetLocalizedText(category);
             _body.TextOffsetTop = 10;
             _body.IgnoresMouseInteraction = true;
             _body.Width.Set(0, 1);

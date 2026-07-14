@@ -15,7 +15,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public PaintBucketTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/PaintBucketTool", AssetRequestMode.ImmediateLoad));
-            ToggleToolButton.HoverText = LocalizationUtils.GetTextValue("Tools.PaintBucketTool.HoverText");
+            ToggleToolButton.HoverText = LocalizationUtils.GetText("Tools.PaintBucketTool.HoverText");
         }
 
         public override void Draw(SpriteBatch spriteBatch)

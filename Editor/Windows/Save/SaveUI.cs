@@ -60,7 +60,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             TIGWEButton pathSelect = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/OpenFolderButton", AssetRequestMode.ImmediateLoad));
             pathSelect.Left.Set(_pathField.Left.Pixels + _pathField.Width.Pixels + 2, 0);
             pathSelect.Top.Set(_pathField.Top.Pixels, 0);
-            pathSelect.HoverText = LocalizationUtils.GetTextValue("Windows.Save.HoverText.SelectPath");
+            pathSelect.HoverText = LocalizationUtils.GetText("Windows.Save.HoverText.SelectPath");
             pathSelect.OnLeftClick += (_, _) => SelectPath();
             Append(pathSelect);
 
@@ -68,18 +68,18 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             TIGWEButton pathReset = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/RefreshButton", AssetRequestMode.ImmediateLoad));
             pathReset.Left.Set(pathSelect.Left.Pixels + pathSelect.Width.Pixels + 2, 0);
             pathReset.Top.Set(_pathField.Top.Pixels, 0);
-            pathReset.HoverText = LocalizationUtils.GetTextValue("Windows.Save.HoverText.ResetPath");
+            pathReset.HoverText = LocalizationUtils.GetText("Windows.Save.HoverText.ResetPath");
             pathReset.OnLeftClick += (_, _) => ResetPath();
             Append(pathReset);
 
             // save button
             _saveButton = new TIGWEImageButtonResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
-            _saveButton.Text = LocalizationUtils.GetTextValue("Windows.Save.LabelText.Save");
+			_saveButton.SetLocalizedText(LocalizationUtils.GetText("Windows.Save.LabelText.Save"));
             _saveButton.TextureHover = ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/TextureHover");
             _saveButton.Left.Set(6, 0);
             _saveButton.Top.Set(_pathField.Top.Pixels + _pathField.Height.Pixels + 2, 0);
-            _saveButton.Width.Set(64, 0);
-            _saveButton.Height.Set(26, 0);
+			_saveButton.FitWidthToText = true;
+			_saveButton.Height.Set(26, 0);
             _saveButton.OnLeftClick += (_, _) => SaveToFile();
             Append(_saveButton);
 

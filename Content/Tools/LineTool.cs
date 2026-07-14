@@ -44,7 +44,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public LineTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/LineTool", AssetRequestMode.ImmediateLoad));
-            ToggleToolButton.HoverText = LocalizationUtils.GetTextValue("Tools.LineTool.HoverText");
+            ToggleToolButton.HoverText = LocalizationUtils.GetText("Tools.LineTool.HoverText");
 
             // settings
             // mode

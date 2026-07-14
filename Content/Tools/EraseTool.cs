@@ -16,7 +16,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public EraseTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/EraseTool", AssetRequestMode.ImmediateLoad));
-            ToggleToolButton.HoverText = LocalizationUtils.GetTextValue("Tools.EraseTool.HoverText");
+            ToggleToolButton.HoverText = LocalizationUtils.GetText("Tools.EraseTool.HoverText");
 
             // remove mode setting
             Settings.RemoveAt(0);

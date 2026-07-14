@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
@@ -48,23 +49,29 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             string allWords = string.Empty;
             string currentLine = string.Empty;
             string[] words = Name.Split(' ');
-            float maxLineLength = GetDimensions().Width * 0.5f;
+            float maxLineLength = GetDimensions().Width * 0.65f;
             Height.Set(38, 0);
             for (int i = 0; i <= words.Length - 1; i++)
             {
-                currentLine += words[i] + " ";
-                Vector2 size = ChatManager.GetStringSize(FontAssets.MouseText.Value, currentLine, new Vector2(1));
+                Vector2 newSize = ChatManager.GetStringSize(FontAssets.MouseText.Value, currentLine + words[i] + " ", new Vector2(1));
+                
+                
 
                 // insert a new line if needed
-                if (size.X > maxLineLength || i == words.Length - 1)
+                if (newSize.X > maxLineLength)
                 {
                     allWords += currentLine;
-                    currentLine = string.Empty;
-                    if (size.X > maxLineLength && i != words.Length - 1)
-                    {
-                        allWords += "\n";
-                        Height.Set(Height.Pixels + 28, 0);
-                    }
+                    currentLine = words[i] + " ";
+                    allWords += "\n";
+                    Height.Set(Height.Pixels + 28, 0);
+                }
+                else
+                {
+                    currentLine += words[i] + " ";
+                }
+                if (i == words.Length - 1)
+                {
+                    allWords += currentLine;
                 }
             }
             _propertyTextSize = ChatManager.GetStringSize(FontAssets.MouseText.Value, allWords, new Vector2(1));

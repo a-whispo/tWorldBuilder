@@ -110,7 +110,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
 
             // reset button
             TIGWEButton pasteTilesReset = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/ResetMasks", AssetRequestMode.ImmediateLoad));
-            pasteTilesReset.HoverText = LocalizationUtils.GetTextValue("Windows.Masks.HoverText.Reset");
+            pasteTilesReset.HoverText = LocalizationUtils.GetText("Windows.Masks.HoverText.Reset");
             pasteTilesReset.Left.Set(pasteTilesOptions.Width.Pixels - pasteTilesReset.Width.Pixels - 6, 0);
             pasteTilesReset.Top.Set(6, 0);
             pasteTilesReset.OnLeftClick += (_, _) =>
@@ -224,7 +224,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
 
             // reset button
             TIGWEButton pasteOnTilesReset = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/ResetMasks"));
-            pasteOnTilesReset.HoverText = LocalizationUtils.GetTextValue("Windows.Masks.HoverText.Reset");
+            pasteOnTilesReset.HoverText = LocalizationUtils.GetText("Windows.Masks.HoverText.Reset");
             pasteOnTilesReset.Left.Set(pasteOnTilesOptions.Width.Pixels - pasteOnTilesReset.Width.Pixels - 6, 0);
             pasteOnTilesReset.Top.Set(6, 0);
             pasteOnTilesReset.OnLeftClick += (_, _) =>

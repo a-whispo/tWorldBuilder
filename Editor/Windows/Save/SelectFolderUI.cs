@@ -63,7 +63,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             TIGWEButton openFolder = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/OpenFolderButton", AssetRequestMode.ImmediateLoad));
             openFolder.Top.Set(42, 0);
             openFolder.Left.Set(6, 0);
-            openFolder.HoverText = LocalizationUtils.GetTextValue("Windows.SelectFolder.HoverText.OpenFolder");
+            openFolder.HoverText = LocalizationUtils.GetText("Windows.SelectFolder.HoverText.OpenFolder");
             openFolder.OnLeftClick += (_, _) =>
             {
                 Utils.OpenFolder(Path.Combine(Path.GetDirectoryName(ModLoader.ModPath), TerrariaInGameWorldEditor.MODNAME, "saves"));
@@ -74,7 +74,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             TIGWEButton createFolder = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/CreateFolderButton", AssetRequestMode.ImmediateLoad));
             createFolder.Top.Set(42, 0);
             createFolder.Left.Set(openFolder.Left.Pixels + openFolder.Width.Pixels + 2, 0);
-            createFolder.HoverText = LocalizationUtils.GetTextValue("Windows.SelectFolder.HoverText.CreateFolder");
+            createFolder.HoverText = LocalizationUtils.GetText("Windows.SelectFolder.HoverText.CreateFolder");
             createFolder.OnLeftClick += (_, _) => grid.CreateNewDirectory();
             Append(createFolder);
 
@@ -82,7 +82,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             TIGWEButton refresh = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/RefreshButton", AssetRequestMode.ImmediateLoad));
             refresh.Top.Set(42, 0);
             refresh.Left.Set(createFolder.Left.Pixels + createFolder.Width.Pixels + 2, 0);
-            refresh.HoverText = LocalizationUtils.GetTextValue("Windows.SelectFolder.HoverText.Refresh");
+            refresh.HoverText = LocalizationUtils.GetText("Windows.SelectFolder.HoverText.Refresh");
             Append(refresh);
 
             // search bar

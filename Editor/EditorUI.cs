@@ -126,7 +126,7 @@ namespace TerrariaInGameWorldEditor.Editor
             {
                 EditorSystem.Local.ToggleWindow(EditorWindow.Main);
             };
-            closeButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Close");
+            closeButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Close");
             _titleBar.Append(closeButton);
 
             // settings button
@@ -137,7 +137,7 @@ namespace TerrariaInGameWorldEditor.Editor
             {
                 EditorSystem.Local.ToggleWindow(EditorWindow.Settings);
             };
-            settingsButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Settings");
+            settingsButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Settings");
             _titleBar.Append(settingsButton);
 
             // blueprints button
@@ -148,7 +148,7 @@ namespace TerrariaInGameWorldEditor.Editor
             {
                 EditorSystem.Local.ToggleWindow(EditorWindow.Blueprints);
             };
-            blueprintsButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Blueprints");
+            blueprintsButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Blueprints");
             _titleBar.Append(blueprintsButton);
 
             // save button
@@ -159,7 +159,7 @@ namespace TerrariaInGameWorldEditor.Editor
             {
                 EditorSystem.Local.ToggleWindow(EditorWindow.Save);
             };
-            saveButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Save");
+            saveButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Save");
             _titleBar.Append(saveButton);
 
             // mask button
@@ -170,14 +170,14 @@ namespace TerrariaInGameWorldEditor.Editor
             {
                 EditorSystem.Local.ToggleWindow(EditorWindow.Masks);
             };
-            maskButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Masks");
+            maskButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Masks");
             _titleBar.Append(maskButton);
 
             // save tile to palette button
             TIGWEButton saveTileButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/AddButton", AssetRequestMode.ImmediateLoad));
             saveTileButton.Left.Set(0, 0f);
             saveTileButton.Top.Set(2, 0f);
-            saveTileButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Palette");
+            saveTileButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Palette");
             saveTileButton.OnLeftClick += (_, _) =>
             {
                 PaletteItem item = new PaletteItem(EditorSystem.Local.SelectedTile);
@@ -195,7 +195,7 @@ namespace TerrariaInGameWorldEditor.Editor
             _undoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/UndoButton", AssetRequestMode.ImmediateLoad));
             _undoButton.Left.Set(saveTileButton.Left.Pixels + saveTileButton.Width.Pixels + 2, 0f);
             _undoButton.Top.Set(2, 0f);
-            _undoButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Undo");
+            _undoButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Undo");
             _undoButton.OnLeftClick += (_, _) =>
             {
                 EditorSystem.Local.Undo();
@@ -206,7 +206,7 @@ namespace TerrariaInGameWorldEditor.Editor
             _redoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/RedoButton", AssetRequestMode.ImmediateLoad));
             _redoButton.Left.Set(_undoButton.Left.Pixels + _undoButton.Width.Pixels + 2, 0f);
             _redoButton.Top.Set(2, 0f);
-            _redoButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Redo");
+            _redoButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Redo");
             _redoButton.OnLeftClick += (_, _) =>
             {
                 EditorSystem.Local.Redo();
@@ -242,7 +242,7 @@ namespace TerrariaInGameWorldEditor.Editor
             TIGWEButton tileButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/TileButton", AssetRequestMode.ImmediateLoad));
             tileButton.Left.Set(2, 0f);
             tileButton.Top.Set(2, 0f);
-            tileButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.TileBrowser");
+            tileButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.TileBrowser");
             tileButton.OnLeftClick += (_, _) =>
             {
                 EditorSystem.Local.ToggleWindow(EditorWindow.SelectTile);
@@ -307,14 +307,14 @@ namespace TerrariaInGameWorldEditor.Editor
             _right.Append(_palette);
             // buttons for palette
             _paletteDeleteButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/DeleteButton", AssetRequestMode.ImmediateLoad));
-            _paletteDeleteButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Delete");
+            _paletteDeleteButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Delete");
             _paletteDeleteButton.OnLeftClick += (_, _) =>
             {
                 _palette.IsDeletingItems = !_palette.IsDeletingItems;
-                _paletteDeleteButton.HoverText = _palette.IsDeletingItems ? LocalizationUtils.GetTextValue("Editor.UI.HoverText.FinishDelete") : LocalizationUtils.GetTextValue("Editor.UI.HoverText.Delete");
+                _paletteDeleteButton.HoverText = _palette.IsDeletingItems ? LocalizationUtils.GetText("Editor.UI.HoverText.FinishDelete") : LocalizationUtils.GetText("Editor.UI.HoverText.Delete");
             };
             TIGWEButton paletteClearButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Editor/ClearButton", AssetRequestMode.ImmediateLoad));
-            paletteClearButton.HoverText = LocalizationUtils.GetTextValue("Editor.UI.HoverText.Clear");
+            paletteClearButton.HoverText = LocalizationUtils.GetText("Editor.UI.HoverText.Clear");
             paletteClearButton.OnLeftClick += (_, _) =>
             {
                 if (!_palette.IsDeletingItems)

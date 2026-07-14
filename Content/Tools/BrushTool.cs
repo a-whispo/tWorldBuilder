@@ -38,7 +38,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public BrushTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/BrushTool", AssetRequestMode.ImmediateLoad));
-            ToggleToolButton.HoverText = LocalizationUtils.GetTextValue("Tools.BrushTool.HoverText");
+            ToggleToolButton.HoverText = LocalizationUtils.GetText("Tools.BrushTool.HoverText");
 
             // settings
             // mode

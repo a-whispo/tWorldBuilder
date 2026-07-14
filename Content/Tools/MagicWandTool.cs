@@ -21,7 +21,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public MagicWandTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/MagicWandTool", AssetRequestMode.ImmediateLoad));
-            ToggleToolButton.HoverText = LocalizationUtils.GetTextValue("Tools.MagicWandTool.HoverText");
+            ToggleToolButton.HoverText = LocalizationUtils.GetText("Tools.MagicWandTool.HoverText");
             _selection = new TileCollection();
 
             // hold down left mouse to quick select

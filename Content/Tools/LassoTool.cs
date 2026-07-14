@@ -25,7 +25,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public LassoTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/LassoTool", AssetRequestMode.ImmediateLoad));
-            ToggleToolButton.HoverText = LocalizationUtils.GetTextValue("Tools.LassoTool.HoverText");
+            ToggleToolButton.HoverText = LocalizationUtils.GetText("Tools.LassoTool.HoverText");
         }
 
         public override void Draw(SpriteBatch spriteBatch)

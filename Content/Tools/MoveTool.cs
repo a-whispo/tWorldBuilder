@@ -24,7 +24,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public MoveTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/MoveTool", AssetRequestMode.ImmediateLoad));
-            ToggleToolButton.HoverText = LocalizationUtils.GetTextValue("Tools.MoveTool.HoverText");
+            ToggleToolButton.HoverText = LocalizationUtils.GetText("Tools.MoveTool.HoverText");
         }
 
         public override string GetInfoText()
