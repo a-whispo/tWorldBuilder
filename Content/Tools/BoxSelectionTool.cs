@@ -40,7 +40,7 @@ namespace TerrariaInGameWorldEditor.Content.Tools
         public BoxSelectionTool()
         {
             ToggleToolButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/Tools/SelectTool", AssetRequestMode.ImmediateLoad));
-            ToggleToolButton.HoverText = LocalizationUtils.GetTextValue("Tools.BoxSelectionTool.HoverText");
+            ToggleToolButton.HoverText = Language.GetText("Mods.TerrariaInGameWorldEditor.Tools.BoxSelectionTool.HoverText");
             _selection = new TileCollection();
         }
 
