@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
@@ -60,7 +61,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             TIGWEButton pathSelect = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/OpenFolderButton", AssetRequestMode.ImmediateLoad));
             pathSelect.Left.Set(_pathField.Left.Pixels + _pathField.Width.Pixels + 2, 0);
             pathSelect.Top.Set(_pathField.Top.Pixels, 0);
-            pathSelect.HoverText = LocalizationUtils.GetTextValue("Windows.Save.HoverText.SelectPath");
+            pathSelect.HoverText = Language.GetText("Mods.TerrariaInGameWorldEditor.Windows.Save.HoverText.SelectPath");
             pathSelect.OnLeftClick += (_, _) => SelectPath();
             Append(pathSelect);
 
@@ -68,7 +69,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             TIGWEButton pathReset = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/RefreshButton", AssetRequestMode.ImmediateLoad));
             pathReset.Left.Set(pathSelect.Left.Pixels + pathSelect.Width.Pixels + 2, 0);
             pathReset.Top.Set(_pathField.Top.Pixels, 0);
-            pathReset.HoverText = LocalizationUtils.GetTextValue("Windows.Save.HoverText.ResetPath");
+            pathReset.HoverText = Language.GetText("Mods.TerrariaInGameWorldEditor.Windows.Save.HoverText.ResetPath");
             pathReset.OnLeftClick += (_, _) => ResetPath();
             Append(pathReset);
 

@@ -7,6 +7,7 @@ using System.Reflection;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common;
@@ -124,7 +125,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             propertiesScrollbar.Width.Set(20, 0);
             border.Append(propertiesScrollbar);
             TIGWEButton tilePropertiesInfoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButton", AssetRequestMode.ImmediateLoad));
-            tilePropertiesInfoButton.HoverText = LocalizationUtils.GetTextValue("Windows.TileSelector.HoverText.TileProperties");
+            tilePropertiesInfoButton.HoverText = Language.GetText("Mods.TerrariaInGameWorldEditor.Windows.TileSelector.HoverText.TileProperties");
             tilePropertiesInfoButton.SetHoverImage(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButtonHover"));
             tilePropertiesInfoButton.Top.Set(tilePropertiesSearchBar.Top.Pixels, 0);
             tilePropertiesInfoButton.Left.Set(tilePropertiesSearchBar.Left.Pixels + tilePropertiesSearchBar.Width.Pixels + 2, 0);
@@ -175,7 +176,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             tileScrollbar.Width.Set(20, 0);
             border.Append(tileScrollbar);
             TIGWEButton tileInfoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButton", AssetRequestMode.ImmediateLoad));
-            tileInfoButton.HoverText = LocalizationUtils.GetTextValue("Windows.TileSelector.HoverText.TileInfo");
+            tileInfoButton.HoverText = Language.GetText("Mods.TerrariaInGameWorldEditor.Windows.TileSelector.HoverText.TileInfo");
             tileInfoButton.SetHoverImage(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButtonHover"));
             tileInfoButton.Top.Set(tileSearchBar.Top.Pixels, 0);
             tileInfoButton.Left.Set(tileSearchBar.Left.Pixels + tileSearchBar.Width.Pixels + 2, 0);
