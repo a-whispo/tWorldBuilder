@@ -32,7 +32,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         public override void Recalculate()
         {
             base.Recalculate();
-            Height.Set(_currentTop + 10, 0);
+            float height = 0;
+            foreach (SettingsNode node in _nodes)
+            {
+                node.Top.Set(height, 0);
+                height += node.Height.Pixels - 10;
+            }
+            Height.Set(height + 10, 0);
         }
     }
 }
