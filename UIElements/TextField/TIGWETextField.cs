@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using System;
+using System.Text.RegularExpressions;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -113,7 +114,21 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
             base.Update(gameTime);
 
             // set text to placeholder text if we havent written anything
-            string text = _currentText.Length == 0 && !IsFocused ? PlaceholderText : _currentText;
+            string text = _currentText;
+            if (_currentText.Length == 0 && !IsFocused)
+            {
+                if (CanFocus)
+                {
+                    string[] parts = Regex.Split(PlaceholderText, @"(\[[^\]]*\])");
+                    foreach (string part in parts)
+                    {
+                        if (!part.Equals(""))
+                        {
+                            text += !part.StartsWith("[c/") ? $"[c/AAAAAA:{part}]" : part;
+                        }
+                    }
+                }
+            }
             _isPlaceholderTextActive = _currentText.Length == 0 && !IsFocused;
 
             // text blinker thing

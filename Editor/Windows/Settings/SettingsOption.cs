@@ -55,8 +55,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             {
                 Vector2 newSize = ChatManager.GetStringSize(FontAssets.MouseText.Value, currentLine + words[i] + " ", new Vector2(1));
                 
-                
-
                 // insert a new line if needed
                 if (newSize.X > maxLineLength)
                 {

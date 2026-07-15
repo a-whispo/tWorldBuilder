@@ -234,6 +234,10 @@ namespace TerrariaInGameWorldEditor.Editor
                 {
                     selectionActiveText.SetText(EditorSystem.Local.CurrentSelection?.Count > 0 ? LocalizationUtils.GetTextValue("Editor.UI.Notes.SelectionActive") : "");
                 }
+                else
+                {
+                    selectionActiveText.SetText("");
+                }
                 selectionActiveText.Recalculate();
             };
             _top.Append(selectionActiveText);
