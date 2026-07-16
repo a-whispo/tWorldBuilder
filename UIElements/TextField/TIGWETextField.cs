@@ -14,6 +14,7 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
+using TerrariaInGameWorldEditor.UIElements.ScrollText;
 
 namespace TerrariaInGameWorldEditor.UIElements.TextField
 {
@@ -25,28 +26,14 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
         public bool CanFocus { get; set; } = true;
         public bool ShowSearchIcon { get; set; } = false;
         public string PlaceholderText { get; set; }
-        public int TextOffsetLeft 
-        { 
-            get => (int)_tfText.Left.Pixels; 
-            set => _tfText.PaddingLeft = value; 
-        }
-        public int TextOffsetTop 
-        { 
-            get => (int)_tfText.Top.Pixels; 
-            set => _tfText.PaddingTop = value;
-        }
 
         private bool _isPlaceholderTextActive;
         private int _maxTextLength;
-        private UIText _tfText;
-        private UIElement _clipContainer;
+        private TIGWEScrollText _tfText;
         private TIGWEImageResizeable _background;
         private int _textBlink;
         private string _currentText = "";
         private Asset<Texture2D> _searchIcon;
-        private int _textWidth = 0;
-        private float _textScroll = 0;
-        private bool _scrollRight = false;
 
         public TIGWETextField(string placeholderText = null, int maxTextLength = 30)
         {
@@ -67,17 +54,9 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
             Append(_background);
 
             // actual text
-            _clipContainer = new UIElement();
-            _clipContainer.OverflowHidden = true;
-            _clipContainer.IgnoresMouseInteraction = true;
-            _tfText = new UIText("");
-            _tfText.IgnoresMouseInteraction = true;
-            _clipContainer.Append(_tfText);
-            Append(_clipContainer);
-
-            // default offsets
-            TextOffsetLeft = 10;
-            TextOffsetTop = 5;
+            _tfText = new TIGWEScrollText("");
+            _tfText.TextOffsetTop = 5;
+            Append(_tfText);
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
@@ -113,6 +92,8 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
         {
             base.Update(gameTime);
 
+            _tfText.ShouldScroll = !IsFocused;
+
             // set text to placeholder text if we havent written anything
             string text = _currentText;
             if (_currentText.Length == 0 && !IsFocused)
@@ -137,33 +118,6 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
                 text += "|";
             }
             _tfText.SetText(text);
-
-            // text scroll thing
-            if (_textWidth > Width.Pixels && !IsFocused)
-            {
-                _textScroll += _scrollRight ? 0.3f : -0.3f;
-                if (_textWidth + _textScroll < _clipContainer.Width.Pixels - 20)
-                {
-                    _scrollRight = true;
-                }
-                if (_textScroll >= 0)
-                {
-                    _scrollRight = false;
-                }
-                _tfText.Left.Set(_textScroll, 0);
-            }
-            else
-            {
-                _textScroll = 0;
-                if (IsFocused)
-                {
-                    _tfText.Left.Set(Math.Clamp(_clipContainer.Width.Pixels - _textWidth - 20, int.MinValue, -6), 0);
-                }
-                else
-                {
-                    _tfText.Left.Set(-6, 0);
-                }
-            }
 
             if (IsFocused)
             {
@@ -202,9 +156,9 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
             // update offset
             _background.Width.Set(Width.Pixels, 0);
             _background.Height.Set(Height.Pixels, 0);
-            _clipContainer.Left.Set(6, 0);
-            _clipContainer.Width.Set(Width.Pixels - 12 - (ShowSearchIcon ? 18 : 0), 0);
-            _clipContainer.Height.Set(Height.Pixels, 0);
+            _tfText.Left.Set(4, 0);
+            _tfText.Width.Set(Width.Pixels - 8 - (ShowSearchIcon ? 18 : 0), 0);
+            _tfText.Height.Set(Height.Pixels, 0);
         }
 
         public override void MouseOver(UIMouseEvent evt)
@@ -222,7 +176,6 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
         void TextChanged(string text)
         {
             OnTextChanged?.Invoke(text);
-            _textWidth = (int)ChatManager.GetStringSize(FontAssets.MouseText.Value, _currentText, new Vector2(1)).X;
         }
 
         public virtual string GetText()
@@ -235,11 +188,11 @@ namespace TerrariaInGameWorldEditor.UIElements.TextField
             {
                 if (_textBlink / 30 % 2 == 0 && IsFocused) // remove the blinker if its there
                 {
-                    return _tfText.Text.Substring(0, _tfText.Text.Length - 1);
+                    return _tfText.GetText().Substring(0, _tfText.GetText().Length - 1);
                 }
                 else
                 {
-                    return _tfText.Text;
+                    return _tfText.GetText();
                 }
             }
         }

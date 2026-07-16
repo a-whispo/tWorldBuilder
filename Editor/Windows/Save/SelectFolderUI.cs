@@ -25,7 +25,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             // main area
             Width.Set(700, 0);
             Height.Set(440, 0);
-            _defaultTitle = LocalizationUtils.GetTextValue("Windows.SelectFolder.Title");
+            SetTitle(LocalizationUtils.GetText("Windows.SelectFolder.Title"));
 
             // grid
             TIGWEDirectoryGrid grid = new TIGWEDirectoryGrid();

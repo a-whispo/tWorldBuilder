@@ -35,7 +35,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             base.OnInitialize();
             Width.Set(700, 0);
             Height.Set(440, 0);
-            _defaultTitle = LocalizationUtils.GetTextValue("Windows.TileSelector.Title");
+            SetTitle(LocalizationUtils.GetText("Windows.TileSelector.Title"));
 
             UIText preview = new UIText(LocalizationUtils.GetTextValue("Windows.TileSelector.LabelText.Preview"));
             preview.Top.Set(45, 0);
@@ -49,7 +49,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
                 OnTileConfirmed?.Invoke(this, _currentTileCopy);
                 Visible = false;
             };
-            confirmBtn.SetLocalizedText(LocalizationUtils.GetText("Windows.TileSelector.LabelText.Confirm"));
+            confirmBtn.SetText(LocalizationUtils.GetText("Windows.TileSelector.LabelText.Confirm"));
             confirmBtn.Left.Set(6, 0);
             confirmBtn.Top.Set(64, 0);
             confirmBtn.Height.Set(26, 0);

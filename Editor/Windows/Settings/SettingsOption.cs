@@ -2,6 +2,7 @@
 using System;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
@@ -9,7 +10,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
 {
     internal class SettingsOption<T> : SettingsNode where T : UIElement
     {
-        public string Name { get; private set; }
+        public LocalizedText Name { get; private set; }
         public T OptionElement { get; private set; }
         public bool Enabled
         {
@@ -27,7 +28,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         private UIText _propertyText;
         private Vector2 _propertyTextSize;
 
-        public SettingsOption(string name, T element, bool shouldFit = false)
+        public SettingsOption(LocalizedText name, T element, bool shouldFit = false)
         {
             Name = name;
             OptionElement = element;
@@ -48,7 +49,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         {
             string allWords = string.Empty;
             string currentLine = string.Empty;
-            string[] words = Name.Split(' ');
+            string[] words = Name.Value.Split(' ');
             float maxLineLength = GetDimensions().Width * 0.65f;
             Height.Set(38, 0);
             for (int i = 0; i <= words.Length - 1; i++)

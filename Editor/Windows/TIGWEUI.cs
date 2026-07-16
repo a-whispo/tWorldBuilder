@@ -1,15 +1,18 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json.Linq;
 using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
+using TerrariaInGameWorldEditor.UIElements.ScrollText;
 
 namespace TerrariaInGameWorldEditor.Editor.Windows
 {
@@ -42,27 +45,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
             }
         }
         public bool IsDragging { get; private set; } = false;
-        public string Title 
-        { 
-            get => _titleText.Text; 
-            set => _titleText.SetText(value);
-        }
         public TIGWEImageResizeable Body;
 
-        protected string _defaultTitle 
-        { 
-            set
-            { 
-                if (Title.Equals("")) 
-                { 
-                    Title = value; 
-                } 
-            } 
-        }
         private bool _visible = false;
         private UserInterface _UI;
         private TIGWEButton _xButton;
-        private UIText _titleText = new UIText("");
+        private TIGWEScrollText _titleText = new TIGWEScrollText("");
         private (int Left, int Top) _offset;
 
         public override void OnInitialize()
@@ -95,6 +83,21 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
                 SoundEngine.PlaySound(Terraria.ID.SoundID.MenuClose);
             };
             Append(_xButton);
+        }
+
+        public string GetTitle()
+        {
+            return _titleText.GetText();
+        }
+
+        protected void SetTitle(LocalizedText title)
+        {
+            _titleText.SetText(title);
+        }
+
+        protected void SetTitle(string title)
+        {
+            _titleText.SetText(title);
         }
 
         public void StartDrag()

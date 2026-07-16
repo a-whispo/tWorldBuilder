@@ -26,7 +26,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Blueprints
             // main area
             Width.Set(700, 0);
             Height.Set(440, 0);
-            _defaultTitle = LocalizationUtils.GetTextValue("Windows.Blueprints.Title");
+            SetTitle(LocalizationUtils.GetText("Windows.Blueprints.Title"));
 
             // grid
             TIGWEDirectoryGrid grid = new TIGWEDirectoryGrid();

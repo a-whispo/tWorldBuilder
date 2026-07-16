@@ -28,7 +28,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
             // main area
             Height.Set(168, 0);
             Width.Set(330, 0);
-            _defaultTitle = LocalizationUtils.GetTextValue("Windows.Save.Title");
+            SetTitle(LocalizationUtils.GetText("Windows.Save.Title"));
 
             // save as
             UIText saveAsText = new UIText(LocalizationUtils.GetTextValue("Windows.Save.LabelText.SaveAs"));
@@ -74,7 +74,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Save
 
             // save button
             _saveButton = new TIGWEImageButtonResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
-			_saveButton.SetLocalizedText(LocalizationUtils.GetText("Windows.Save.LabelText.Save"));
+			_saveButton.SetText(LocalizationUtils.GetText("Windows.Save.LabelText.Save"));
             _saveButton.TextureHover = ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/TextureHover");
             _saveButton.Left.Set(6, 0);
             _saveButton.Top.Set(_pathField.Top.Pixels + _pathField.Height.Pixels + 2, 0);

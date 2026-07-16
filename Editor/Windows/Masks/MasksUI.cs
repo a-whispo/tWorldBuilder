@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using TerrariaInGameWorldEditor.Common;
 using TerrariaInGameWorldEditor.Common.Utils;
@@ -8,6 +7,7 @@ using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.CheckBox;
 using TerrariaInGameWorldEditor.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
+using TerrariaInGameWorldEditor.UIElements.ScrollText;
 
 namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
 {
@@ -20,7 +20,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             // main area
             Height.Set(224, 0);
             Width.Set(424, 0);
-            _defaultTitle = LocalizationUtils.GetTextValue("Windows.Masks.Title");
+            SetTitle(LocalizationUtils.GetText("Windows.Masks.Title"));
 
             // what tiles to draw/paste
             TIGWEImageResizeable pasteTilesOptions = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
@@ -29,7 +29,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteTilesOptions.Width.Set(180, 0);
             pasteTilesOptions.Height.Set(150, 0);
             Append(pasteTilesOptions);
-            UIText modifyTilesText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.Sections.Modify"));
+            TIGWEScrollText modifyTilesText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.Sections.Modify"));
             modifyTilesText.Top.Set(-22, 0);
             pasteTilesOptions.Append(modifyTilesText);
 
@@ -43,7 +43,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteTilesCheckBox.Left.Set(6, 0);
             pasteTilesCheckBox.Top.Set(6, 0);
             pasteTilesOptions.Append(pasteTilesCheckBox);
-            UIText drawTilesText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Tiles"));
+            TIGWEScrollText drawTilesText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Tiles"));
             drawTilesText.Left.Set(pasteTilesCheckBox.Left.Pixels + pasteTilesCheckBox.Width.Pixels + 4, 0);
             drawTilesText.Top.Set(pasteTilesCheckBox.Top.Pixels + 4, 0);
             pasteTilesOptions.Append(drawTilesText);
@@ -58,7 +58,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteWallsCheckBox.Left.Set(6, 0);
             pasteWallsCheckBox.Top.Set(34, 0);
             pasteTilesOptions.Append(pasteWallsCheckBox);
-            UIText drawWallsText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Walls"));
+            TIGWEScrollText drawWallsText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Walls"));
             drawWallsText.Left.Set(pasteWallsCheckBox.Left.Pixels + pasteWallsCheckBox.Width.Pixels + 4, 0);
             drawWallsText.Top.Set(pasteWallsCheckBox.Top.Pixels + 4, 0);
             pasteTilesOptions.Append(drawWallsText);
@@ -73,7 +73,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteLiquidCheckBox.Left.Set(6, 0);
             pasteLiquidCheckBox.Top.Set(62, 0);
             pasteTilesOptions.Append(pasteLiquidCheckBox);
-            UIText pasteLiquidText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Liquid"));
+            TIGWEScrollText pasteLiquidText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Liquid"));
             pasteLiquidText.Left.Set(pasteLiquidCheckBox.Left.Pixels + pasteLiquidCheckBox.Width.Pixels + 4, 0);
             pasteLiquidText.Top.Set(pasteLiquidCheckBox.Top.Pixels + 4, 0);
             pasteTilesOptions.Append(pasteLiquidText);
@@ -88,7 +88,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteWireCheckBox.Left.Set(6, 0);
             pasteWireCheckBox.Top.Set(90, 0);
             pasteTilesOptions.Append(pasteWireCheckBox);
-            UIText pasteWireText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Wires"));
+            TIGWEScrollText pasteWireText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Wires"));
             pasteWireText.Left.Set(pasteWireCheckBox.Left.Pixels + pasteWireCheckBox.Width.Pixels + 4, 0);
             pasteWireText.Top.Set(pasteWireCheckBox.Top.Pixels + 4, 0);
             pasteTilesOptions.Append(pasteWireText);
@@ -103,7 +103,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteAirCheckBox.Left.Set(6, 0);
             pasteAirCheckBox.Top.Set(118, 0);
             pasteTilesOptions.Append(pasteAirCheckBox);
-            UIText pasteAirText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Empty"));
+            TIGWEScrollText pasteAirText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Empty"));
             pasteAirText.Left.Set(pasteAirCheckBox.Left.Pixels + pasteAirCheckBox.Width.Pixels + 4, 0);
             pasteAirText.Top.Set(pasteAirCheckBox.Top.Pixels + 4, 0);
             pasteTilesOptions.Append(pasteAirText);
@@ -130,7 +130,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnTilesOptions.Width.Set(230, 0);
             pasteOnTilesOptions.Height.Set(150, 0);
             Append(pasteOnTilesOptions);
-            UIText modifyTilesOnText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.Sections.ModifyOn"));
+            TIGWEScrollText modifyTilesOnText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.Sections.ModifyOn"));
             modifyTilesOnText.Top.Set(-22, 0);
             pasteOnTilesOptions.Append(modifyTilesOnText);
 
@@ -154,7 +154,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnTilesDropDown.Top.Set(6, 0);
             pasteOnTilesDropDown.Left.Set(6, 0);
             pasteOnTilesOptions.Append(pasteOnTilesDropDown);
-            UIText pasteOnTilesText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Tiles"));
+            TIGWEScrollText pasteOnTilesText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Tiles"));
             pasteOnTilesText.Left.Set(pasteOnTilesDropDown.Left.Pixels + pasteOnTilesDropDown.Width.Pixels + 4, 0);
             pasteOnTilesText.Top.Set(pasteOnTilesDropDown.Top.Pixels + 4, 0);
             pasteOnTilesOptions.Append(pasteOnTilesText);
@@ -175,7 +175,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnWallsDropDown.Top.Set(34, 0);
             pasteOnWallsDropDown.Left.Set(6, 0);
             pasteOnTilesOptions.Append(pasteOnWallsDropDown);
-            UIText pasteOnWallsText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Walls"));
+            TIGWEScrollText pasteOnWallsText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Walls"));
             pasteOnWallsText.Left.Set(pasteOnWallsDropDown.Left.Pixels + pasteOnWallsDropDown.Width.Pixels + 4, 0);
             pasteOnWallsText.Top.Set(pasteOnWallsDropDown.Top.Pixels + 4, 0);
             pasteOnTilesOptions.Append(pasteOnWallsText);
@@ -196,7 +196,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnLiquidDropDown.Top.Set(62, 0);
             pasteOnLiquidDropDown.Left.Set(6, 0);
             pasteOnTilesOptions.Append(pasteOnLiquidDropDown);
-            UIText pasteOnLiquidText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Liquid"));
+            TIGWEScrollText pasteOnLiquidText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Liquid"));
             pasteOnLiquidText.Left.Set(pasteOnLiquidDropDown.Left.Pixels + pasteOnLiquidDropDown.Width.Pixels + 4, 0);
             pasteOnLiquidText.Top.Set(pasteOnLiquidDropDown.Top.Pixels + 4, 0);
             pasteOnTilesOptions.Append(pasteOnLiquidText);
@@ -217,7 +217,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Masks
             pasteOnWireDropDown.Top.Set(90, 0);
             pasteOnWireDropDown.Left.Set(6, 0);
             pasteOnTilesOptions.Append(pasteOnWireDropDown);
-            UIText pasteOnWireText = new UIText(LocalizationUtils.GetTextValue("Windows.Masks.LabelText.Wires"));
+            TIGWEScrollText pasteOnWireText = new TIGWEScrollText(LocalizationUtils.GetText("Windows.Masks.LabelText.Wires"));
             pasteOnWireText.Left.Set(pasteOnWireDropDown.Left.Pixels + pasteOnWireDropDown.Width.Pixels + 4, 0);
             pasteOnWireText.Top.Set(pasteOnWireDropDown.Top.Pixels + 4, 0);
             pasteOnTilesOptions.Append(pasteOnWireText);

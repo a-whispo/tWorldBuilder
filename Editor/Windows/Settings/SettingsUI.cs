@@ -25,7 +25,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             // main area
             Width.Set(700, 0);
             Height.Set(368, 0);
-            _defaultTitle = LocalizationUtils.GetTextValue("Windows.Settings.Title");
+            SetTitle(LocalizationUtils.GetText("Windows.Settings.Title"));
             
             // categories
             TIGWEImageResizeable categoriesBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Border"), 6, 4);
@@ -90,8 +90,8 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             SettingsCategory editorSettings = new SettingsCategory(LocalizationUtils.GetText("Windows.Settings.Categories.EditorSettings"));
             editorSettings.SetOptionsGrid(optionsGrid);
             SettingsGroup uiScaleOptions = new SettingsGroup();
-            SettingsOption<TIGWECheckBox> shouldForceScale = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.ForceScale"), new TIGWECheckBox());
-            SettingsOption<TIGWEDropDown<float>> forceScale = new SettingsOption<TIGWEDropDown<float>>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.Scale"), new TIGWEDropDown<float>());
+            SettingsOption<TIGWECheckBox> shouldForceScale = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.ForceScale"), new TIGWECheckBox());
+            SettingsOption<TIGWEDropDown<float>> forceScale = new SettingsOption<TIGWEDropDown<float>>(LocalizationUtils.GetText("Windows.Settings.Settings.Scale"), new TIGWEDropDown<float>());
             uiScaleOptions.AddNode(shouldForceScale);
             uiScaleOptions.AddNode(forceScale);
             shouldForceScale.OptionElement.OnCheckedChanged += (check) =>
@@ -114,9 +114,9 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             forceScale.OptionElement.Width.Set(150, 0);
             editorSettings.AddOption(uiScaleOptions);
             SettingsGroup themeOptions = new SettingsGroup();
-            SettingsOption<TIGWEDropDown<Theme>> theme = new SettingsOption<TIGWEDropDown<Theme>>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.Theme"), new TIGWEDropDown<Theme>());
-            SettingsOption<TIGWEColorPicker> primaryColor = new SettingsOption<TIGWEColorPicker>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.PrimaryColor"), new TIGWEColorPicker());
-            SettingsOption<TIGWEColorPicker> secondaryColor = new SettingsOption<TIGWEColorPicker>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.SecondaryColor"), new TIGWEColorPicker());
+            SettingsOption<TIGWEDropDown<Theme>> theme = new SettingsOption<TIGWEDropDown<Theme>>(LocalizationUtils.GetText("Windows.Settings.Settings.Theme"), new TIGWEDropDown<Theme>());
+            SettingsOption<TIGWEColorPicker> primaryColor = new SettingsOption<TIGWEColorPicker>(LocalizationUtils.GetText("Windows.Settings.Settings.PrimaryColor"), new TIGWEColorPicker());
+            SettingsOption<TIGWEColorPicker> secondaryColor = new SettingsOption<TIGWEColorPicker>(LocalizationUtils.GetText("Windows.Settings.Settings.SecondaryColor"), new TIGWEColorPicker());
             themeOptions.AddNode(theme);
             themeOptions.AddNode(primaryColor);
             themeOptions.AddNode(secondaryColor);
@@ -146,25 +146,25 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             theme.OptionElement.Height.Set(26, 0);
             theme.OptionElement.Width.Set(150, 0);
             editorSettings.AddOption(themeOptions);
-            SettingsOption<TIGWECheckBox> godMode = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.GodMode"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> godMode = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.GodMode"), new TIGWECheckBox());
             editorSettings.AddOption(godMode);
             godMode.OptionElement.OnCheckedChanged += (check) =>
             {
                 EditorSystem.Local.Settings.ShouldEnableGodMode = check;
             };
-            SettingsOption<TIGWECheckBox> teleport = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.TeleportToEditor"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> teleport = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.TeleportToEditor"), new TIGWECheckBox());
             editorSettings.AddOption(teleport);
             teleport.OptionElement.OnCheckedChanged += (check) =>
             {
                 EditorSystem.Local.Settings.ShouldTeleportOnEditorClosed = check;
             };
-            SettingsOption<TIGWECheckBox> fullbright = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.Fullbright"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> fullbright = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.Fullbright"), new TIGWECheckBox());
             editorSettings.AddOption(fullbright);
             fullbright.OptionElement.OnCheckedChanged += (check) =>
             {
                 EditorSystem.Local.Settings.FullbrightEnabled = check;
             };
-            SettingsOption<TIGWENumberField> editorBaseSpeed = new SettingsOption<TIGWENumberField>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.EditorBaseSpeed"), new TIGWENumberField(10, 100, 0));
+            SettingsOption<TIGWENumberField> editorBaseSpeed = new SettingsOption<TIGWENumberField>(LocalizationUtils.GetText("Windows.Settings.Settings.EditorBaseSpeed"), new TIGWENumberField(10, 100, 0));
             editorSettings.AddOption(editorBaseSpeed);
             editorBaseSpeed.OptionElement.OnValueChanged += (newValue) =>
             {
@@ -172,13 +172,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             };
             editorBaseSpeed.OptionElement.Width.Set(100, 0);
             editorBaseSpeed.OptionElement.Height.Set(26, 0);
-            SettingsOption<TIGWECheckBox> selectionActiveText = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.SelectionActiveText"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> selectionActiveText = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.SelectionActiveText"), new TIGWECheckBox());
             editorSettings.AddOption(selectionActiveText);
             selectionActiveText.OptionElement.OnCheckedChanged += (check) =>
             {
                 EditorSystem.Local.Settings.ShouldShowActiveSelectionText = check;
             };
-            SettingsOption<TIGWENumberField> historyLimit = new SettingsOption<TIGWENumberField>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.MaxUndoRedo"), new TIGWENumberField(1000, ushort.MaxValue, 0));
+            SettingsOption<TIGWENumberField> historyLimit = new SettingsOption<TIGWENumberField>(LocalizationUtils.GetText("Windows.Settings.Settings.MaxUndoRedo"), new TIGWENumberField(1000, ushort.MaxValue, 0));
             editorSettings.AddOption(historyLimit);
             historyLimit.OptionElement.OnValueChanged += (newValue) =>
             {
@@ -191,13 +191,13 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             // tool settings
             SettingsCategory toolSettings = new SettingsCategory(LocalizationUtils.GetText("Windows.Settings.Categories.ToolSettings"));
             toolSettings.SetOptionsGrid(optionsGrid);
-            SettingsOption<TIGWECheckBox> updateDraw = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.UpdateTiles"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> updateDraw = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.UpdateTiles"), new TIGWECheckBox());
             toolSettings.AddOption(updateDraw);
             updateDraw.OptionElement.OnCheckedChanged += (check) =>
             {
                 EditorSystem.Local.Settings.ShouldUpdateDrawnTiles = check;
             };
-            SettingsOption<TIGWEDropDown<ToolInputMode>> inputMode = new SettingsOption<TIGWEDropDown<ToolInputMode>>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.InputMode"), new TIGWEDropDown<ToolInputMode>());
+            SettingsOption<TIGWEDropDown<ToolInputMode>> inputMode = new SettingsOption<TIGWEDropDown<ToolInputMode>>(LocalizationUtils.GetText("Windows.Settings.Settings.InputMode"), new TIGWEDropDown<ToolInputMode>());
             toolSettings.AddOption(inputMode);
             inputMode.OptionElement.AddOption(ToolInputMode.Click, LocalizationUtils.GetTextValue("Windows.Settings.Options.InputModes.Click"));
             inputMode.OptionElement.AddOption(ToolInputMode.Drag, LocalizationUtils.GetTextValue("Windows.Settings.Options.InputModes.Drag"));
@@ -207,19 +207,19 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             {
                 EditorSystem.Local.Settings.InputMode = option.Value;
             };
-            SettingsOption<TIGWEColorPicker> toolColor = new SettingsOption<TIGWEColorPicker>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.ToolColor"), new TIGWEColorPicker());
+            SettingsOption<TIGWEColorPicker> toolColor = new SettingsOption<TIGWEColorPicker>(LocalizationUtils.GetText("Windows.Settings.Settings.ToolColor"), new TIGWEColorPicker());
             toolSettings.AddOption(toolColor);
             toolColor.OptionElement.OnColorChanged += (color) =>
             {
                 EditorSystem.Local.Settings.ToolColor = color;
             };
-            SettingsOption<TIGWECheckBox> centerLines = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.CenterLines"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> centerLines = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.CenterLines"), new TIGWECheckBox());
             toolSettings.AddOption(centerLines);
             centerLines.OptionElement.OnCheckedChanged += (check) =>
             {
                 EditorSystem.Local.Settings.ShowCenterLines = check;
             };
-            SettingsOption<TIGWECheckBox> measuringLines = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.MeasuringLines"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> measuringLines = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.MeasuringLines"), new TIGWECheckBox());
             toolSettings.AddOption(measuringLines);
             measuringLines.OptionElement.OnCheckedChanged += (check) =>
             {
@@ -230,19 +230,19 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
             // messages
             SettingsCategory messages = new SettingsCategory(LocalizationUtils.GetText("Windows.Settings.Categories.Messages"));
             messages.SetOptionsGrid(optionsGrid);
-            SettingsOption<TIGWECheckBox> showMessages = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.EditorMessages"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> showMessages = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.EditorMessages"), new TIGWECheckBox());
             messages.AddOption(showMessages);
             showMessages.OptionElement.OnCheckedChanged += (check) =>
             {
                 EditorSystem.Local.Settings.ShouldShowMessages = check;
             };
-            SettingsOption<TIGWECheckBox> showErrorMessages = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.WarnMessages"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> showErrorMessages = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.WarnMessages"), new TIGWECheckBox());
             messages.AddOption(showErrorMessages);
             showErrorMessages.OptionElement.OnCheckedChanged += (check) =>
             {
                 EditorSystem.Local.Settings.ShouldShowErrors = check;
             };
-            SettingsOption<TIGWECheckBox> showFatalErrorMessages = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetTextValue("Windows.Settings.Settings.ErrorMessages"), new TIGWECheckBox());
+            SettingsOption<TIGWECheckBox> showFatalErrorMessages = new SettingsOption<TIGWECheckBox>(LocalizationUtils.GetText("Windows.Settings.Settings.ErrorMessages"), new TIGWECheckBox());
             messages.AddOption(showFatalErrorMessages);
             showFatalErrorMessages.OptionElement.OnCheckedChanged += (check) =>
             {

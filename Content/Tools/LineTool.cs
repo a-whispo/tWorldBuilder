@@ -102,7 +102,14 @@ namespace TerrariaInGameWorldEditor.Content.Tools
                     break;
 
                 case LineMode.Clipboard:
-                    _brush = EditorSystem.Local.Clipboard;
+                    if (EditorSystem.Local.Clipboard != null)
+                    {
+                        _brush = EditorSystem.Local.Clipboard;
+                    }
+                    else
+                    {
+                        _brush = new TileCollection();
+                    }
                     break;
             }
         }

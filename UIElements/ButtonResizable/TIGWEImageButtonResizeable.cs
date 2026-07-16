@@ -16,11 +16,6 @@ namespace TerrariaInGameWorldEditor.UIElements.ButtonResizable
     internal class TIGWEImageButtonResizeable : TIGWEImageResizeable
     {
         public string HoverText { get; set; }
-        public string Text
-        {
-            get => _btnText.Text;
-            set => _btnText.SetText(value);
-        }
         public int TextOffsetLeft 
         { 
             get => (int)_btnText.Left.Pixels;
@@ -57,7 +52,17 @@ namespace TerrariaInGameWorldEditor.UIElements.ButtonResizable
             TextOffsetTop = 5;
         }
 
-        public void SetLocalizedText(LocalizedText text)
+        public string GetText()
+        {
+            return _btnText.Text;
+        }
+
+        public void SetText(string text)
+        {
+            _btnText.SetText(text);
+        }
+
+        public void SetText(LocalizedText text)
         {
             _btnText.SetText(text);
         }
@@ -79,7 +84,7 @@ namespace TerrariaInGameWorldEditor.UIElements.ButtonResizable
 
         public void FitWidth()
         {
-            Vector2 size = ChatManager.GetStringSize(FontAssets.MouseText.Value, Text, new Vector2(1));
+            Vector2 size = ChatManager.GetStringSize(FontAssets.MouseText.Value, GetText(), new Vector2(1));
             if (Width.Pixels != size.X + TextOffsetLeft * 2 + 20)
             {
                 Width.Set(size.X + TextOffsetLeft * 2 + 20, 0);

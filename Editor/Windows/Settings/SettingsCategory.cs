@@ -18,7 +18,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.Settings
         public SettingsCategory(LocalizedText category)
         {
             _body = new TIGWEImageButtonResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
-            _body.SetLocalizedText(category);
+            _body.SetText(category);
             _body.TextOffsetTop = 10;
             _body.IgnoresMouseInteraction = true;
             _body.Width.Set(0, 1);
