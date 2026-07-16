@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -14,6 +13,7 @@ using TerrariaInGameWorldEditor.Common.Utils;
 using TerrariaInGameWorldEditor.UIElements.Button;
 using TerrariaInGameWorldEditor.UIElements.ButtonResizable;
 using TerrariaInGameWorldEditor.UIElements.CheckBox;
+using TerrariaInGameWorldEditor.UIElements.DropDown;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
 using TerrariaInGameWorldEditor.UIElements.Scrollbar;
 using TerrariaInGameWorldEditor.UIElements.SearchGrid;
@@ -33,57 +33,52 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
         public override void OnInitialize()
         {
             base.OnInitialize();
-            Width.Set(700, 0);
-            Height.Set(440, 0);
+            Width.Set(710, 0);
+            Height.Set(460, 0);
             SetTitle(LocalizationUtils.GetText("Windows.TileSelector.Title"));
 
-            UIText preview = new UIText(LocalizationUtils.GetTextValue("Windows.TileSelector.LabelText.Preview"));
-            preview.Top.Set(45, 0);
-            preview.Left.Set(6, 0);
-            Append(preview);
+            TIGWEImageResizeable previewBox = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"), 8, 16);
+            previewBox.Width.Set(74, 0);
+            previewBox.Height.Set(74, 0);
+            previewBox.Top.Set(42, 0);
+            previewBox.Left.Set(6, 0);
+            UIElement tileCopy = new UIElement();
+            previewBox.Append(tileCopy);
+            tileCopy.OnDraw += (_) =>
+            {
+                CalculatedStyle previewBoxDimensions = previewBox.GetDimensions();
+                Rectangle dimensions = new Rectangle((int)(previewBoxDimensions.X + previewBoxDimensions.Width / 2 - 54 / 2), (int)(previewBoxDimensions.Y + previewBoxDimensions.Height / 2 - 54 / 2), 54, 54);
+                DrawUtils.DrawTileCopyInUI(_currentTileCopy, dimensions);
+            };
+            Append(previewBox);
             TIGWEImageButtonResizeable confirmBtn = new TIGWEImageButtonResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"));
-            
-			confirmBtn.TextureHover = ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/TextureHover");
+            confirmBtn.TextureHover = ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/TextureHover");
             confirmBtn.OnLeftClick += (_, _) =>
             {
                 OnTileConfirmed?.Invoke(this, _currentTileCopy);
                 Visible = false;
             };
             confirmBtn.SetText(LocalizationUtils.GetText("Windows.TileSelector.LabelText.Confirm"));
-            confirmBtn.Left.Set(6, 0);
-            confirmBtn.Top.Set(64, 0);
+            confirmBtn.Left.Set(previewBox.Width.Pixels + previewBox.Left.Pixels + 2, 0);
+            confirmBtn.Top.Set(90, 0);
             confirmBtn.Height.Set(26, 0);
-			confirmBtn.FitWidthToText = true;
-			Append(confirmBtn);
-            TIGWEImageResizeable previewBox = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"), 8, 16);
-            previewBox.Width.Set(48, 0);
-            previewBox.Height.Set(48, 0);
-            previewBox.Top.Set(42, 0);
-            previewBox.Left.Set(confirmBtn.Left.Pixels + confirmBtn.Width.Pixels + 2, 0);
-            UIElement tileCopy = new UIElement();
-            previewBox.Append(tileCopy);
-            tileCopy.OnDraw += (_) =>
-            {
-                CalculatedStyle previewBoxDimensions = previewBox.GetDimensions();
-                Rectangle dimensions = new Rectangle((int)(previewBoxDimensions.X + previewBoxDimensions.Width / 2 - 32 / 2), (int)(previewBoxDimensions.Y + previewBoxDimensions.Height / 2 - 32 / 2), 32, 32);
-                DrawUtils.DrawTileCopyInUI(_currentTileCopy, dimensions);
-            };
-            Append(previewBox);
-            TIGWEImageResizeable border = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"), 8, 16);
-            border.Top.Set(confirmBtn.Top.Pixels + confirmBtn.Height.Pixels + 2, 0);
-            border.Left.Set(6, 0);
-            border.Height.Set(Height.Pixels - border.Top.Pixels - 6, 0);
-            border.Width.Set(Width.Pixels - 12, 0);
-            Append(border);
+            confirmBtn.FitWidthToText = true;
+            Append(confirmBtn);
 
             // tile properties grid
+            TIGWEImageResizeable propertiesBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"), 8, 16);
+            propertiesBorder.Top.Set(confirmBtn.Top.Pixels + confirmBtn.Height.Pixels + 2, 0);
+            propertiesBorder.Left.Set(6, 0);
+            propertiesBorder.Height.Set(Height.Pixels - propertiesBorder.Top.Pixels - 6, 0);
+            propertiesBorder.Width.Set(282, 0);
+            Append(propertiesBorder);
             TIGWEImageResizeable propertiesGridBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Border"), 6, 4);
             propertiesGridBorder.IgnoresMouseInteraction = true;
             propertiesGridBorder.Left.Set(6, 0);
             propertiesGridBorder.Top.Set(34, 0);
-            propertiesGridBorder.Height.Set(300, 0);
+            propertiesGridBorder.Height.Set(propertiesBorder.Height.Pixels - 40, 0);
             propertiesGridBorder.Width.Set(248, 0);
-            border.Append(propertiesGridBorder);
+            propertiesBorder.Append(propertiesGridBorder);
             propertiesGrid = new TIGWESearchGrid((item, searchTerm) =>
             {
                 return ((TileSelectorProperty)item).Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
@@ -110,37 +105,43 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             propertiesGrid.Top.Set(propertiesGridBorder.Top.Pixels + 6, 0);
             propertiesGrid.Width.Set(propertiesGridBorder.Width.Pixels - 12, 0);
             propertiesGrid.Height.Set(propertiesGridBorder.Height.Pixels - 12, 0);
-            border.Append(propertiesGrid);
+            propertiesBorder.Append(propertiesGrid);
             TIGWETextField tilePropertiesSearchBar = new TIGWETextField(LocalizationUtils.GetTextValue("Windows.TileSelector.FieldText.Properties"), 100);
             tilePropertiesSearchBar.ShowSearchIcon = true;
             tilePropertiesSearchBar.Width.Set(propertiesGridBorder.Width.Pixels - 28, 0);
             tilePropertiesSearchBar.Height.Set(26, 0);
             tilePropertiesSearchBar.Top.Set(propertiesGridBorder.Top.Pixels - tilePropertiesSearchBar.Height.Pixels - 2, 0);
             tilePropertiesSearchBar.Left.Set(propertiesGridBorder.Left.Pixels, 0);
-            border.Append(tilePropertiesSearchBar);
+            propertiesBorder.Append(tilePropertiesSearchBar);
             TIGWEScrollbar propertiesScrollbar = new TIGWEScrollbar();
             propertiesScrollbar.Left.Set(propertiesGridBorder.Left.Pixels + propertiesGridBorder.Width.Pixels + 2, 0);
             propertiesScrollbar.Top.Set(propertiesGridBorder.Top.Pixels, 0);
             propertiesScrollbar.Height.Set(propertiesGridBorder.Height.Pixels, 0);
             propertiesScrollbar.Width.Set(20, 0);
-            border.Append(propertiesScrollbar);
+            propertiesBorder.Append(propertiesScrollbar);
             TIGWEButton tilePropertiesInfoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButton", AssetRequestMode.ImmediateLoad));
             tilePropertiesInfoButton.HoverText = LocalizationUtils.GetText("Windows.TileSelector.HoverText.TileProperties");
             tilePropertiesInfoButton.SetHoverImage(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButtonHover"));
             tilePropertiesInfoButton.Top.Set(tilePropertiesSearchBar.Top.Pixels, 0);
             tilePropertiesInfoButton.Left.Set(tilePropertiesSearchBar.Left.Pixels + tilePropertiesSearchBar.Width.Pixels + 2, 0);
-            border.Append(tilePropertiesInfoButton);
+            propertiesBorder.Append(tilePropertiesInfoButton);
             propertiesGrid.SetScrollbar(propertiesScrollbar);
             propertiesGrid.SetSearchBar(tilePropertiesSearchBar);
 
             // select tile grid
+            TIGWEImageResizeable tilesBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Texture"), 8, 16);
+            tilesBorder.Top.Set(42, 0);
+            tilesBorder.Left.Set(propertiesBorder.Left.Pixels + propertiesBorder.Width.Pixels + 2, 0);
+            tilesBorder.Height.Set(Height.Pixels - tilesBorder.Top.Pixels - 6, 0);
+            tilesBorder.Width.Set(Width.Pixels - tilesBorder.Left.Pixels - 6, 0);
+            Append(tilesBorder);
             TIGWEImageResizeable tileGridBorder = new TIGWEImageResizeable(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/General/Border"), 6, 4);
             tileGridBorder.IgnoresMouseInteraction = true;
-            tileGridBorder.Left.Set(propertiesScrollbar.Left.Pixels + propertiesScrollbar.Width.Pixels + 2, 0);
+            tileGridBorder.Left.Set(6, 0);
             tileGridBorder.Top.Set(34, 0);
-            tileGridBorder.Height.Set(300, 0);
-            tileGridBorder.Width.Set(border.Width.Pixels - tileGridBorder.Left.Pixels - 28, 0);
-            border.Append(tileGridBorder);
+            tileGridBorder.Height.Set(tilesBorder.Height.Pixels - 40, 0);
+            tileGridBorder.Width.Set(tilesBorder.Width.Pixels - 34, 0);
+            tilesBorder.Append(tileGridBorder);
             TIGWESearchGrid tileGrid = new TIGWESearchGrid((item, searchTerm) => 
             {
                 return ((TileSelectorItem)item).Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
@@ -161,26 +162,54 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             tileGrid.Top.Set(tileGridBorder.Top.Pixels + 6, 0);
             tileGrid.Width.Set(tileGridBorder.Width.Pixels - 12, 0);
             tileGrid.Height.Set(tileGridBorder.Height.Pixels - 12, 0);
-            border.Append(tileGrid);
+            tilesBorder.Append(tileGrid);
             TIGWETextField tileSearchBar = new TIGWETextField(LocalizationUtils.GetTextValue("Windows.TileSelector.FieldText.Tiles"), 100);
             tileSearchBar.ShowSearchIcon = true;
-            tileSearchBar.Width.Set(tileGridBorder.Width.Pixels - 28, 0);
+            tileSearchBar.Width.Set(tileGridBorder.Width.Pixels - 142, 0);
             tileSearchBar.Height.Set(26, 0);
             tileSearchBar.Top.Set(tileGridBorder.Top.Pixels - tileSearchBar.Height.Pixels - 2, 0);
             tileSearchBar.Left.Set(tileGridBorder.Left.Pixels, 0);
-            border.Append(tileSearchBar);
+            tilesBorder.Append(tileSearchBar);
+            TIGWEDropDown<string> modFilterDropDown = new TIGWEDropDown<string>();
+            modFilterDropDown.Width.Set(110, 0);
+            modFilterDropDown.Height.Set(26, 0);
+            modFilterDropDown.Top.Set(tileGridBorder.Top.Pixels - tileSearchBar.Height.Pixels - 2, 0);
+            modFilterDropDown.Left.Set(tileSearchBar.Left.Pixels + tileSearchBar.Width.Pixels + 2, 0);
+            modFilterDropDown.AddOption("", LocalizationUtils.GetTextValue("Windows.TileSelector.DropDownText.AllMods"));
+            modFilterDropDown.AddOption("Terraria", "Terraria");
+            foreach (Mod mod in ModLoader.Mods)
+            {
+                modFilterDropDown.AddOption(mod.Name, mod.DisplayName);
+            }
+            modFilterDropDown.OnOptionChanged += (option) =>
+            {
+                tileGrid.SetFilter((item) =>
+                {
+                    if (option.Value.Equals(""))
+                    {
+                        return true;
+                    }
+                    string name = (item as TileSelectorItem).CreateTile != -1 ? TileID.Search.GetName((item as TileSelectorItem).CreateTile) : WallID.Search.GetName((item as TileSelectorItem).CreateWall);
+                    if (option.Value.Equals("Terraria") && name.Split('/').Length == 1)
+                    {
+                        return true;
+                    }
+                    return name.Split('/')[0].Equals(option.Value);
+                });
+            };
+            tilesBorder.Append(modFilterDropDown);
             TIGWEScrollbar tileScrollbar = new TIGWEScrollbar();
             tileScrollbar.Left.Set(tileGridBorder.Left.Pixels + tileGridBorder.Width.Pixels + 2, 0);
             tileScrollbar.Top.Set(tileGridBorder.Top.Pixels, 0);
             tileScrollbar.Height.Set(tileGridBorder.Height.Pixels, 0);
             tileScrollbar.Width.Set(20, 0);
-            border.Append(tileScrollbar);
+            tilesBorder.Append(tileScrollbar);
             TIGWEButton tileInfoButton = new TIGWEButton(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButton", AssetRequestMode.ImmediateLoad));
             tileInfoButton.HoverText = LocalizationUtils.GetText("Windows.TileSelector.HoverText.TileInfo");
             tileInfoButton.SetHoverImage(ModContent.Request<Texture2D>($"{TerrariaInGameWorldEditor.ASSET_PATH}/Assets/EditorWindows/InfoButtonHover"));
-            tileInfoButton.Top.Set(tileSearchBar.Top.Pixels, 0);
-            tileInfoButton.Left.Set(tileSearchBar.Left.Pixels + tileSearchBar.Width.Pixels + 2, 0);
-            border.Append(tileInfoButton);
+            tileInfoButton.Top.Set(modFilterDropDown.Top.Pixels, 0);
+            tileInfoButton.Left.Set(modFilterDropDown.Left.Pixels + modFilterDropDown.Width.Pixels + 2, 0);
+            tilesBorder.Append(tileInfoButton);
             tileGrid.SetScrollbar(tileScrollbar);
             tileGrid.SetSearchBar(tileSearchBar);
 

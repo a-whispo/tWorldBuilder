@@ -18,9 +18,9 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
         public string Name { get; set; }
         public int ItemId { get; set; }
         public string HoverText { get; set; }
+        public int CreateTile { get; set; }
+        public int CreateWall { get; set; }
 
-        private int _createTile;
-        private int _createWall;
         private int _placeStyle;
 
         public TileSelectorItem(int itemId)
@@ -30,8 +30,8 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             string[] name = ItemID.Search.GetName(itemId).Split('/');
             Name = name.Length > 1 ? name[1] : name[0];
             ItemId = itemId;
-            _createTile = item.createTile;
-            _createWall = item.createWall;
+            CreateTile = item.createTile;
+            CreateWall = item.createWall;
             _placeStyle = item.placeStyle;
 
             // ui and events
@@ -71,9 +71,9 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
         public TileCopy GetAsTileCopy()
         {
             Tile tile = new Tile();
-            if (_createTile != -1)
+            if (CreateTile != -1)
             {
-                tile.TileType = (ushort)_createTile;
+                tile.TileType = (ushort)CreateTile;
                 tile.HasTile = true;
                 tile.WallType = WallID.None;
                 tile.Slope = 0;
@@ -94,7 +94,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
                 tile.LiquidAmount = 0;
                 tile.IsTileFullbright = false;
 
-                TileObjectData tileObjectData = TileObjectData.GetTileData(_createTile, _placeStyle, 0) ?? TileObjectData.GetTileData(_createTile, 0, 0);
+                TileObjectData tileObjectData = TileObjectData.GetTileData(CreateTile, _placeStyle, 0) ?? TileObjectData.GetTileData(CreateTile, 0, 0);
                 if (tileObjectData != null)
                 {
                     // calculate TileFrameX and TileFrameY
@@ -152,7 +152,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
                     WorldGen.KillTile(tempX - 1, tempY, false, false, true);
                     WorldGen.KillTile(tempX, tempY + 1, false, false, true);
                     WorldGen.KillTile(tempX, tempY - 1, false, false, true);
-                    WorldGen.PlaceTile(tempX, tempY, _createTile, true, false, -1, _placeStyle);
+                    WorldGen.PlaceTile(tempX, tempY, CreateTile, true, false, -1, _placeStyle);
 
                     // get TileFrameY and TileFrameX
                     tile.TileFrameX = Main.tile[tempX, tempY].TileFrameX;
@@ -166,7 +166,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             }
             else
             {
-                tile.WallType = (ushort)_createWall;
+                tile.WallType = (ushort)CreateWall;
                 Main.instance.LoadWall(tile.WallType);
                 tile.WallColor = PaintID.None;
                 tile.TileType = TileID.Dirt;

@@ -175,6 +175,8 @@ Windows: {
 			Tiles: Search for tiles...
 			Search: Search for tiles... [c/60ABE7:({0})]
 		}
+
+		DropDownText.AllMods: All Mods
 	}
 
 	General.HoverText.Close: Close

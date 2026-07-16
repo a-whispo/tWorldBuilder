@@ -1,15 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
-using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.UI;
 using Terraria.UI.Chat;
 using TerrariaInGameWorldEditor.UIElements.ImageResizeable;
+using TerrariaInGameWorldEditor.UIElements.ScrollText;
 
 namespace TerrariaInGameWorldEditor.UIElements.ButtonResizable
 {
@@ -17,14 +16,14 @@ namespace TerrariaInGameWorldEditor.UIElements.ButtonResizable
     {
         public string HoverText { get; set; }
         public int TextOffsetLeft 
-        { 
-            get => (int)_btnText.Left.Pixels;
-            set => _btnText.PaddingLeft = value;
+        {
+            get => _btnText.TextOffsetLeft;
+            set => _btnText.TextOffsetLeft = value;
         }
         public int TextOffsetTop 
-        { 
-            get => (int)_btnText.Top.Pixels;
-            set => _btnText.PaddingTop = value;
+        {
+            get => _btnText.TextOffsetTop;
+            set => _btnText.TextOffsetTop = value;
         }
         public bool FitWidthToText {
             get => _fitWidthToText;
@@ -39,22 +38,21 @@ namespace TerrariaInGameWorldEditor.UIElements.ButtonResizable
         }
 
         private bool _fitWidthToText = false;
-        private UIText _btnText;
+        private TIGWEScrollText _btnText;
         private float _visibilityActive = 1f;
         private float _visibilityInactive = 1f;
 
         public TIGWEImageButtonResizeable(Asset<Texture2D> texture) : base(texture)
         {
-            _btnText = new UIText("");
-            _btnText.IgnoresMouseInteraction = true;
+            _btnText = new TIGWEScrollText("");
+            _btnText.Left.Set(6, 0);
+            _btnText.TextOffsetTop = 5;
             Append(_btnText);
-            TextOffsetLeft = 10;
-            TextOffsetTop = 5;
         }
 
         public string GetText()
         {
-            return _btnText.Text;
+            return _btnText.GetText();
         }
 
         public void SetText(string text)
@@ -79,6 +77,10 @@ namespace TerrariaInGameWorldEditor.UIElements.ButtonResizable
             if (FitWidthToText)
             {
                 FitWidth();
+            }
+            else
+            {
+                _btnText.Width.Set(GetDimensions().Width, 0);
             }
         }
 

@@ -13,11 +13,38 @@ namespace TerrariaInGameWorldEditor.UIElements.SearchGrid
         public List<UIElement> ShownItems => _items;
         public List<UIElement> AllItems { get; private set; } = new List<UIElement>();
 
+        private Func<UIElement, bool> _filter;
         private Func<UIElement, string, bool> _searchFunc;
+        private TIGWETextField _searchBar;
 
         public TIGWESearchGrid(Func<UIElement, string, bool> search)
         {
             _searchFunc = search;
+            ClearFilter();
+        }
+
+        public void ClearFilter()
+        {
+            _filter = (_) => { return true; };
+        }
+
+        public void SetFilter(Func<UIElement, bool> filter)
+        {
+            _filter = filter;
+            SearchFor(_searchBar == null ? "" : _searchBar.GetText());
+        }
+
+        private List<UIElement> ApplyFilter(List<UIElement> items)
+        {
+            List<UIElement> filteredItems = new List<UIElement>();
+            foreach (UIElement item in items)
+            {
+                if (_filter(item))
+                {
+                    filteredItems.Add(item);
+                }
+            }
+            return filteredItems;
         }
 
         public override void Clear()
@@ -52,11 +79,13 @@ namespace TerrariaInGameWorldEditor.UIElements.SearchGrid
         {
             searchBar.OnTextChanged -= SearchFor;
             searchBar.OnTextChanged += SearchFor;
+            _searchBar = searchBar;
         }
 
         public void RemoveSearchBar(TIGWETextField searchBar)
         {
             searchBar.OnTextChanged -= SearchFor;
+            _searchBar = null;
         }
 
         public void SearchFor(string searchTerm)
@@ -65,13 +94,13 @@ namespace TerrariaInGameWorldEditor.UIElements.SearchGrid
             {
                 base.Clear();
                 IsSearching = false;
-                base.AddRange(AllItems);
+                base.AddRange(ApplyFilter(AllItems));
             }
             else
             {
                 IsSearching = true;
                 List<UIElement> matchingItems = new List<UIElement>();
-                foreach (UIElement item in AllItems)
+                foreach (UIElement item in ApplyFilter(AllItems))
                 {
                     if (_searchFunc.Invoke(item, searchTerm))
                     {

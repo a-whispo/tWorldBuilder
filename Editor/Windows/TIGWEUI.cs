@@ -1,11 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Newtonsoft.Json.Linq;
 using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -69,7 +67,6 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
             // title text
             _titleText.Left.Set(12, 0);
             _titleText.Top.Set(12, 0);
-            _titleText.IgnoresMouseInteraction = true;
             Append(_titleText);
 
             // x button
