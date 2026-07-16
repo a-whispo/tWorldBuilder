@@ -1,0 +1,431 @@
+Keybinds: {
+	OpenEditor.DisplayName: Открыть редактор
+	Delete.DisplayName: Удалить
+	Copy.DisplayName: Копировать (Ctrl + Клавиша)
+	Paste.DisplayName: Вставить (Ctrl + Клавиша)
+	ChangeCorner.DisplayName: Изменить угол вставки (Ctrl + Клавиша)
+	RotateSelection.DisplayName: Перевернуть выделение (Ctrl + Клавиша)
+	MirrorSelection.DisplayName: Отразить выделение (Ctrl + Клавиша)
+	Cut.DisplayName: Вырезать (Ctrl + Клавиша)
+	Undo.DisplayName: Отменить (Ctrl + Клавиша)
+	Redo.DisplayName: Повторить (Ctrl + Клавиша)
+	Save.DisplayName: Сохранить (Ctrl + Клавиша)
+	MoveFaster.DisplayName: Быстрое движение в редакторе
+}
+
+Windows: {
+	Blueprints: {
+		Title: Схематики
+
+		HoverText: {
+			OpenFolder: Открыть папку сохранения
+			CreateFolder: Создать новую папку
+			Refresh: Обновить
+		}
+
+		FieldText.Search: Найти файл... [c/60ABE7:({0})]
+		Messages.Loaded: Схематика "{0}" загружена в буфер обмена
+
+		Exceptions: {
+			MissingMods: Отсутствуют моды, необходимые для загрузки файла:
+			LoadFailed: Не удалось загрузить выбранный файл.
+		}
+	}
+
+	Masks: {
+		Title: Маски
+
+		Sections: {
+			Modify: Можно ставить:
+			ModifyOn: На блоках с:
+		}
+
+		HoverText.Reset: Сбросить
+
+		LabelText: {
+			Tiles: Блоки
+			Walls: Стены
+			Liquid: Жидкость
+			Wires: Провода
+			Empty: Пустые блоки
+		}
+
+		Options: {
+			Yes: Да
+			Any: Везде
+			No: Нет
+		}
+	}
+
+	Save: {
+		Title: Сохранить
+
+		HoverText: {
+			SelectPath: Выбрать папку
+			ResetPath: Сбросить
+		}
+
+		LabelText: {
+			SaveAs: Сохранить выделение как:
+			Save: Сохранить
+			Path: Путь:
+		}
+
+		FieldText: {
+			SaveAs: Введите имя файла...
+			CustomPath: ...\{0} [c/F3CD5A:(перс.)]
+			DefaultPath: ...\saves [c/60ABE7:(по умолчанию)]
+		}
+
+		Exceptions: {
+			FolderMissing: Папка, в которую вы пытаетесь сохранить, больше не существует. Возможно вы её переименовали или удалили?
+			FileExists: Не удалось сохранить, файл с таким же именем уже существует.
+			SaveFailed: Не удалось сохранить текущее выделение.
+		}
+	}
+
+	SelectFolder: {
+		Title: (Сохранить) Выбрать папку
+
+		HoverText: {
+			OpenFolder: Открыть папку сохранения
+			CreateFolder: Создать новую папку
+			Refresh: Обновить
+		}
+
+		FieldText.Search: Найти папку... [c/60ABE7:({0})]
+	}
+
+	Settings: {
+		Title: Настройки
+
+		Categories: {
+			EditorSettings: Редактор
+			ToolSettings: Инструменты
+			Messages: Сообщения
+		}
+
+		Settings: {
+			// editor settings
+			ForceScale: Фиксированный масштаб интерфейса:
+			Scale: Размер:
+			Theme: Тема:
+			PrimaryColor: Первичный цвет
+			SecondaryColor: Вторичный цвет
+			GodMode: Включать режим бога при активном редакторе:
+			TeleportToEditor: Телепортировать в область редактора при его закрытии:
+			EditorBaseSpeed: Базовая скорость передвижения редактора:
+			Fullbright: Глобальный свет включён:
+			SelectionActiveText: Показывать подсказку об активном выделении:
+			MaxUndoRedo: Макс. действий повторов/отмен:
+			// tool settings
+			UpdateTiles: Обновлять установленные блоки:
+			InputMode: Режим ввода:
+			ToolColor: Цвет инструментов:
+			CenterLines: Добавить линии по центру выделения:
+			MeasuringLines: Отображать измерительные линии:
+			// message settings
+			EditorMessages: Редактор должен отправлять сообщения в чат
+			WarnMessages: Выводить предупреждения в чат
+			ErrorMessages: Выводить ошибки в чат
+		}
+
+		Options: {
+			Themes: {
+				Default: По умолчанию
+				Custom: Персональная
+			}
+
+			InputModes: {
+				Click: Нажатие
+				Drag: Удержание
+			}
+		}
+	}
+
+	TileSelector: {
+		Title: Выбор блоков
+
+		HoverText: {
+			TileProperties:
+				'''
+				[c/EAD87A:Примечание:] Модификация параметров блоков 
+				может привести к ошибкам. Будьте осторожны.
+				'''
+			TileInfo:
+				'''
+				[c/EAD87A:Примечание:] При размере блока больше 1x1 по умолчанию будет 
+				выбираться левая верхняя часть. Иногда может не сработать.
+				'''
+			TileItem:
+				'''
+				{0}
+				[c/EAD87A:ЛКМ] чтобы обновить или сбросить параметры.
+				[c/EAD87A:ПКМ] чтобы обновить только тип блока/стены.
+				'''
+		}
+
+		LabelText: {
+			Preview: Предпросмотр:
+			Confirm: Подтвердить
+		}
+
+		FieldText: {
+			Properties: Найти параметры...
+			Tiles: Найти блоки...
+			Search: Найти блоки... [c/60ABE7:({0})]
+		}
+
+		DropDownText.AllMods: Все моды
+	}
+
+	General.HoverText.Close: Закрыть
+}
+
+Editor: {
+	UI: {
+		HoverText: {
+			Close: Закрыть
+			Settings: Настройки
+			Blueprints: Схематики
+			Save: Сохранить
+			Masks: Маски
+			Palette: Добавить в текущую палитру
+			Undo: Отменить
+			Redo: Повторить
+			TileBrowser: Выбор блоков
+			Delete: Удалить
+			FinishDelete: Прекратить удаление
+			Clear: Очистить
+		}
+
+		Notes.SelectionActive:
+			'''
+			[c/EAD87A:Примечание:] Выделение активно 
+			Рисование/Вставка/Модификация блоков ограничена выделенной областью
+			'''
+	}
+
+	System: {
+		Messages: {
+			LanguageChange: Перезагрузите мод для применения изменений языка
+			Undo: Отменено
+			UndoEmpty: Не к чему отменить
+			Redo: Повторено
+			RedoEmpty: Не к чему повторить
+			Copy: Скопировано
+			PasteStart: Открыт инструмент вставки. Нажмите снова Ctrl + {0} для вставки
+			PasteEmpty: В буфере пусто
+			PasteCant: Нельзя вставить
+			Cut: Вырезано
+			Delete: Удалено
+		}
+
+		Notes.OutsideWorld: "[c/EAD87A:Примечание:] Вы редактируете блоки за границей мира"
+
+		Exceptions: {
+			ILDrawPlayerChat: Ошибка при редактировании IL-кода метода DrawPlayerChat.
+			ILDrawChat: Ошибка при редактировании IL-кода метода DrawChat.
+		}
+	}
+}
+
+ModPlayer.Messages.NoKeybindSet: Кажется, вы забыли назначить клавиши для tWorldBuilder. Сделайте это перед началом использования мода.
+
+UIElements: {
+	DirectoryFolder.HoverText: Создать новую папку
+
+	DirectoryItem: {
+		HoverText: {
+			Delete: Удалить
+			ConfirmDelete: Подтвердить удаление
+			Rename: Переименовать
+			ConfirmRename: Подтвердить переименование
+			Select: Выбрать
+		}
+
+		Exceptions: {
+			RenameFail: Не удалось переименовать, файл или папка с таким же именем уже существует.
+			DeleteFail: Не удалось удалить, файл или папка с этим именем не существует. Возможно вы её переименовали или удалили?
+		}
+	}
+
+	TextField.PlaceholderText: Введите текст...
+
+	Utils: {
+		Exceptions: {
+			SetThemeFail: Не удалось применить пакет спрайтов для темы.
+			SetNormalFail: Не удалось вернуть пакет спрайтов в обычный режим.
+		}
+	}
+}
+
+Mod: {
+	Warning: Предупреждение
+	Error: Ошибка
+}
+
+Tools: {
+	MagicWandTool: {
+		HoverText:
+			'''
+			Волшебная палочка
+			[c/EAD87A:ПКМ:] Отменить выделение
+			[c/EAD87A:ЛКМ:] Новое выделение
+			[c/EAD87A:Ctrl + ЛКМ:] Добавить к выделению
+			[c/EAD87A:Shift + ЛКМ:] Убрать из выделения
+			'''
+		InfoText: "[c/EAD87A:Количество блоков:] {0}"
+		Messages.AreaTooBig: Область выделения слишком большая.
+		Settings.QuickSelect: Быстрое выделение:
+	}
+
+	BoxSelectionTool: {
+		HoverText:
+			'''
+			Прямоугольное выделение
+			[c/EAD87A:ПКМ:] Отменить выделение
+			[c/EAD87A:ЛКМ:] Новое выделение
+			[c/EAD87A:Ctrl + ЛКМ:] Добавить к выделению
+			[c/EAD87A:Shift + ЛКМ:] Удалить из выделения
+			'''
+		InfoText: "[c/EAD87A:Ширина:] {0}, [c/EAD87A:Высота:] {1}"
+	}
+
+	BrushTool: {
+		HoverText:
+			'''
+			Кисть
+			[c/EAD87A:Ctrl + Прокрутка:] Однократное увеличение
+			[c/EAD87A:Ctrl + Shift + Прокрутка:] Десятикратное увеличение
+			'''
+
+		Settings: {
+			Size: Размер:
+			Mode: Режим:
+		}
+
+		Options: {
+			Modes: {
+				SelectedTile: Выбранные блоки
+				Clipboard: Буфер обмена
+			}
+		}
+	}
+
+	EraseTool.HoverText:
+		'''
+		Ластик
+		[c/EAD87A:Ctrl + Прокрутка:] Однократное увеличение
+		[c/EAD87A:Ctrl + Shift + Прокрутка:] Десятикратное увеличение
+		'''
+
+	FillTool: {
+		Settings: {
+			TileCap: Ограничение блоков:
+			CornerConnect: Включить блоки, соединяющиеся диагонально:
+			Target: Выборка:
+		}
+
+		Options: {
+			Targets: {
+				Auto: Авто
+				Tiles: Блоки/воздух
+				Walls: Стены
+				Liquid: Жидкость
+			}
+		}
+	}
+
+	LassoTool: {
+		HoverText:
+			'''
+			Лассо
+			[c/EAD87A:ПКМ:] Отменить выделение
+			[c/EAD87A:ЛКМ:] Новое выделение
+			[c/EAD87A:Ctrl + ЛКМ:] Добавить к выделению
+			[c/EAD87A:Shift + ЛКМ:] Убрать из выделения
+			'''
+		InfoText: "[c/EAD87A:Выделено блоков:] {0}"
+	}
+
+	LineTool: {
+		HoverText:
+			'''
+			Линия 
+			[c/EAD87A:Ctrl + Прокрутка:] Однократное увеличение
+			[c/EAD87A:Ctrl + Shift + Прокрутка:] Десятикратное увеличение
+			'''
+		InfoText: "[c/EAD87A:Разница по Y:] {0}, [c/EAD87A:Разница по X:] {1}"
+
+		Settings: {
+			Size: Размер:
+			Mode: Режим:
+		}
+
+		Options: {
+			Modes: {
+				SelectedTile: Выбранный блок
+				Clipboard: Буфер обмена
+			}
+		}
+	}
+
+	PaintBucketTool: {
+		HoverText:
+			'''
+			Заливка
+			[c/EAD87A:ЛКМ:] Залить область
+			'''
+		Messages.AreaTooBig: Область слишком большая для заливки
+	}
+
+	PasteTool: {
+		InfoText: "[c/EAD87A:Количество блоков:] {0}"
+		Messages.Pasted: Вставлено
+	}
+
+	ShapesTool: {
+		HoverText:
+			'''
+			Фигуры
+			[c/EAD87A:Ctrl + Прокрутка:] Однократное увеличение
+			[c/EAD87A:Ctrl + Shift + Прокрутка:] Десятикратное увеличение
+			'''
+		InfoText: "[c/EAD87A:Ширина:] {0}, [c/EAD87A:Высота:] {1}"
+
+		Settings: {
+			Size: Размер:
+			Type: Вид фигуры:
+		}
+
+		Options: {
+			ShapeTypes: {
+				Rectangle: Прямоугольник
+				FilledRectangle: Заполненный прямоугольник
+				Circle: Эллипс
+				FilledCircle: Заполненный эллипс
+			}
+		}
+	}
+
+	TilePickerTool: {
+		HoverText:
+			'''
+			Пипетка
+			[c/EAD87A:ЛКМ:] Выбор блока
+			'''
+		InfoText: "[c/EAD87A:Выбранный блок:] {0} ([c/EAD87A:ID:] {1}), [c/EAD87A:Выбранная стена:] {2} ([c/EAD87A:ID:] {3})"
+	}
+
+	MoveTool: {
+		HoverText:
+			'''
+			Перемещение
+			[c/EAD87A:ЛКМ:] Переместить выделенные блоки
+			[c/EAD87A:ПКМ:] Переместить область выделения
+			'''
+		InfoText: "[c/EAD87A:Кол-во блоков:] {0}"
+		Messages.NoSelection: Вам нужно выделить область, чтобы использовать инструмент
+	}
+}
