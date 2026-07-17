@@ -48,7 +48,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
         private bool _visible = false;
         private UserInterface _UI;
         private TIGWEButton _xButton;
-        private TIGWEScrollText _titleText = new TIGWEScrollText("");
+        private TIGWEScrollText _titleText;
         private (int Left, int Top) _offset;
 
         public override void OnInitialize()
@@ -65,8 +65,10 @@ namespace TerrariaInGameWorldEditor.Editor.Windows
             Append(Body);
 
             // title text
+            _titleText  = new TIGWEScrollText("");
             _titleText.Left.Set(12, 0);
-            _titleText.Top.Set(12, 0);
+            _titleText.Top.Set(8, 0);
+            _titleText.TextOffsetTop = 4;
             Append(_titleText);
 
             // x button

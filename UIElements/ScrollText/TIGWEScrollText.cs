@@ -51,7 +51,7 @@ namespace TerrariaInGameWorldEditor.UIElements.ScrollText
             _text = uiText;
             _clipContainer.Append(_text);
             Append(_clipContainer);
-            Height.Set(30, 0);
+            Height.Set(40, 0);
             TextOffsetLeft = 10;
         }
 

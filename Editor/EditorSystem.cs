@@ -438,8 +438,8 @@ namespace TerrariaInGameWorldEditor.Editor
                 Local.CurrentTool?.PostUpdateInput();
             }
 
-            // remove current selection if escape is pressed
-            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape))
+            // remove current selection if escape or ctrl + d is pressed
+            if (Keyboard.GetState().GetPressedKeys().Contains(Keys.Escape) || (PlayerInput.GetPressedKeys().Contains(Keys.LeftControl) && PlayerInput.GetPressedKeys().Contains(Keys.D)))
             {
                 CurrentSelection?.Clear();
                 if (CurrentTool is ISelectionTool selectionTool)
