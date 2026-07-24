@@ -624,7 +624,6 @@ namespace TerrariaInGameWorldEditor.Editor
                 {
                     Main.UIScale = _actualScale;
                 }
-                CurrentTool = null;
                 if (Local.Settings.ShouldTeleportOnEditorClosed)
                 {
                     Vector2 screenPos = new Vector2(Main.screenPosition.X + Main.screenWidth / 2f - Main.LocalPlayer.width / 2f, Main.screenPosition.Y + Main.screenHeight / 2f - Main.LocalPlayer.height / 2f);

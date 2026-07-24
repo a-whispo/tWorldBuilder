@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -90,8 +91,11 @@ namespace TerrariaInGameWorldEditor.Common.Utils
                         Main.tile[x, y].CopyTileData(tile);
                         ((Tile)(Main.tile[x, y])).LiquidType = liquidType;
                         Main.tile[x, y].LiquidAmount = liquidAmount;
-                        tile.Entity?.Place(x, y);
-                        tile.Container?.Place(x, y);
+                        if (!TileID.Sets.CountsAsPylon.Contains(tile.TileType))
+                        {
+                            tile.Entity?.Place(x, y);
+                            tile.Container?.Place(x, y);
+                        }
                     }
 
                     // paste wire stuff

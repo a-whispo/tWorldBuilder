@@ -44,7 +44,7 @@ namespace TerrariaInGameWorldEditor.Common
 
         // tree variables
         public bool IsTreeTop { get; set; }
-        public bool IsTreeBranch => (TileFrameX == 66 || TileFrameX == 44) && TileFrameY >= 198;
+        public bool IsTreeBranch => ((TileFrameX == 66 || TileFrameX == 44) && TileFrameY >= 198 && TileID.Sets.IsATreeTrunk[TileType]);
         public bool IsTreeTrunk => TileID.Sets.IsATreeTrunk[TileType];
         public bool IsFlipped { get; set; } = false;
         public short TreeVariant { get; set; }
