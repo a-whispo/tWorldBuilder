@@ -51,7 +51,7 @@ namespace TerrariaInGameWorldEditor.Editor
             get => _useCustomScale;
             set
             {
-                if (_useCustomScale != value)
+                if (_useCustomScale != value && IsEditorVisible)
                 {
                     if (!_useCustomScale)
                     {
