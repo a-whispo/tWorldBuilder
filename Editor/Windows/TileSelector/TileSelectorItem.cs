@@ -50,6 +50,12 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             return string.IsNullOrEmpty(localized) ? Name : localized;
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            HoverText = LocalizationUtils.GetTextValue("Windows.TileSelector.HoverText.TileItem", GetResolvedName());
+        }
+
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
@@ -64,7 +70,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             spriteBatch.Draw(tex, new Rectangle((int)(dimensions.X + dimensions.Width / 2 - tex.Width * scale / 2), (int)(dimensions.Y + dimensions.Height / 2 - tex.Height * scale / 2), (int)(tex.Width * scale), (int)(tex.Height * scale)), Color.White);
             if (IsMouseHovering)
             {
-                Main.instance.MouseText(LocalizationUtils.GetTextValue("Windows.TileSelector.HoverText.TileItem", GetResolvedName()));
+                Main.instance.MouseText(HoverText);
             }
         }
 

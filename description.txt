@@ -1,3 +1,1 @@
 A mod for helping with in-game building at a larger scale with the ability to save/load builds, modify tiles and more. Modifying worlds can be weird at times so use at your own risk. Should somewhat work for multiplayer.
-
-Github: https://github.com/a-whispo/tWorldBuilder

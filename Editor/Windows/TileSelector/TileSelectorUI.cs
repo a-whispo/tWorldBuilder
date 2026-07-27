@@ -144,7 +144,7 @@ namespace TerrariaInGameWorldEditor.Editor.Windows.TileSelector
             tilesBorder.Append(tileGridBorder);
             TIGWESearchGrid tileGrid = new TIGWESearchGrid((item, searchTerm) => 
             {
-                return ((TileSelectorItem)item).Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
+                return ((TileSelectorItem)item).HoverText.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
             });
             tileGrid.ListPadding = 2;
             tileGrid.MarginLeft = 2;

@@ -1,3 +1,4 @@
-A mod for helping with in-game building at a larger scale with the ability to save/load builds, modify tiles and more. Modifying worlds can be weird at times so [b]use at your own risk[/b]. Should somewhat work for multiplayer.
+A mod for helping with in-game building at a larger scale with the ability to save/load builds, modify tiles and more. Modifying worlds can be weird at times so use at your own risk. Should somewhat work for multiplayer.
 
-Github: https://github.com/a-whispo/tWorldBuilder
+[img]https://i.imgur.com/m8YVpSp.png[/img]  [b][url=https://github.com/a-whispo/tWorldBuilder]Source Code[/url][/b]
+[img]https://i.imgur.com/mxDesnm.png[/img]  [b][url=https://discord.gg/DH45XEMFM7](New!) Discord Server[/url][/b]
